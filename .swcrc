@@ -1,0 +1,12 @@
+{
+  "$schema": "https://swc.rs/schema.json",
+  "minify": true,
+  "jsc": {
+    "minify": {
+      "keep_classnames": true,
+      "keep_fnames": true,
+      "mangle": true
+    },
+    "externalHelpers": true
+  }
+}
