@@ -1,9 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { CustomerRepository } from '../../database/main/repositories/customer.repository';
-import { CustomerUpdateBodyDto } from './dto/customer-update.dto';
+import { UpdateCustomerDto } from './dto/input/update-customer.request';
 import { CreateCustomerDto } from './dto/input/create-customer.request';
 
 import { CustomerResponseDto } from './dto/output/create-customer.response';
+import { FilterCustomerDto } from './dto/input/list-customer.request';
 
 @Injectable()
 export class CustomerService {
@@ -27,7 +28,11 @@ export class CustomerService {
     };
   }
 
-  async update(id: number, dto: CustomerUpdateBodyDto) {
+  async update(id: number, dto: UpdateCustomerDto) {
     await this.customerRepository.update(id, dto);
+  }
+
+  async listPaginated(dto: FilterCustomerDto) {
+    return this.customerRepository.listPaginated(dto);
   }
 }

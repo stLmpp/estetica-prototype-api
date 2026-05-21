@@ -1,15 +1,20 @@
 import {
   Body,
   Controller,
+  Get,
   Param,
   ParseIntPipe,
   Patch,
   Post,
+  Query,
 } from '@nestjs/common';
 import { CustomerService } from './customer.service';
-import { CustomerUpdateBodyDto } from './dto/customer-update.dto';
+import { UpdateCustomerRequest } from './dto/input/update-customer.request';
 import { CustomerCreateRequest } from './dto/input/create-customer.request';
 import { CustomerCreateResponseModel } from './dto/output/create-customer.response';
+import { FilterCustomerDto } from './dto/input/list-customer.request';
+import { ListCustomerResponseModel } from './dto/output/list-customer.response';
+import { PaginationMetadataModel } from '../../shared/model/response.model';
 
 @Controller({
   path: 'customer',
@@ -33,8 +38,25 @@ export class CustomerController {
   @Patch(':customerId')
   async update(
     @Param('customerId', ParseIntPipe) customerId: number,
-    @Body() updateCustomerDto: CustomerUpdateBodyDto,
+    @Body() body: UpdateCustomerRequest,
   ): Promise<void> {
-    return this.customerService.update(customerId, updateCustomerDto);
+    await this.customerService.update(customerId, body.customer);
+  }
+
+  @Get()
+  async listPaginated(
+    @Query() dto: FilterCustomerDto,
+  ): Promise<ListCustomerResponseModel> {
+    const { customers, count } = await this.customerService.listPaginated(dto);
+    return {
+      data: {
+        items: customers,
+      },
+      meta: PaginationMetadataModel.from({
+        total: count,
+        limit: dto.limit,
+        page: dto.page,
+      }),
+    };
   }
 }

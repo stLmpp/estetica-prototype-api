@@ -22,11 +22,11 @@ export function ResponsePaginatedModel<T extends Class<any>>(clazz: T) {
     @ApiProperty({ type: clazz, isArray: true })
     @Type(() => clazz)
     @ValidateNested({ each: true })
-    items!: T[];
+    items!: InstanceType<T>[];
   }
 
   class Response {
-    constructor(items: T[], pagination: PaginationMetadataModel) {
+    constructor(items: InstanceType<T>[], pagination: PaginationMetadataModel) {
       this.data = { items };
       this.meta = pagination;
     }
@@ -46,17 +46,27 @@ export function ResponsePaginatedModel<T extends Class<any>>(clazz: T) {
 }
 
 export class PaginationMetadataModel {
-  @ApiProperty()
-  @IsNumber()
-  readonly total!: number;
+  constructor(total: number, page: number, limit: number) {
+    this.total = total;
+    this.page = page;
+    this.limit = limit;
+  }
 
   @ApiProperty()
   @IsNumber()
-  readonly page!: number;
+  readonly total: number;
 
   @ApiProperty()
   @IsNumber()
-  readonly limit!: number;
+  readonly page: number;
+
+  @ApiProperty()
+  @IsNumber()
+  readonly limit: number;
+
+  static from({ total, limit, page }: PaginationMetadataModel) {
+    return new PaginationMetadataModel(total, limit, page);
+  }
 }
 
 export class ErrorDetailModel {

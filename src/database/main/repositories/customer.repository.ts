@@ -1,7 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import { eq, InferInsertModel } from 'drizzle-orm';
+import { and, eq, exists, ilike, InferInsertModel, sql } from 'drizzle-orm';
 import { mainEntities } from '../main-entities';
 import { MainDatasource } from '../main-database-connection';
+import { FilterCustomerDto } from '../../../features/customer/dto/input/list-customer.request';
+import { promiseAllObject } from '../../../shared/utils/promise-all-object';
 
 @Injectable()
 export class CustomerRepository {
@@ -43,5 +45,50 @@ export class CustomerRepository {
       .where(eq(this.db.e.customer.id, id));
   }
 
-  async listPaginated() {}
+  async listPaginated({
+    page,
+    limit,
+    name,
+    birthDate,
+    phone,
+    email,
+  }: FilterCustomerDto) {
+    const offset = (page - 1) * limit;
+    const phoneSubQuery = this.db
+      .select({
+        1: sql`1`,
+      })
+      .from(this.db.e.customerPhone)
+      .where(
+        and(
+          eq(this.db.e.customer.id, this.db.e.customerPhone.customerId),
+          eq(this.db.e.customerPhone.number, phone!).if(phone),
+        ),
+      );
+    const where = and(
+      ilike(this.db.e.customer.name, `%${name}%`).if(name),
+      eq(this.db.e.customer.birthDate, birthDate!).if(birthDate),
+      eq(this.db.e.customer.email, email!).if(email),
+      exists(phoneSubQuery).if(phone),
+    );
+    const customers = this.db
+      .select({
+        id: this.db.e.customer.id,
+        name: this.db.e.customer.name,
+      })
+      .from(this.db.e.customer)
+      .where(where)
+      .limit(limit)
+      .offset(offset)
+      .execute();
+    const count = this.db
+      .select({
+        count: sql<number>`count(*)`.mapWith(Number),
+      })
+      .from(this.db.e.customer)
+      .where(where)
+      .execute()
+      .then(([{ count }]) => count ?? 0);
+    return promiseAllObject({ customers, count });
+  }
 }

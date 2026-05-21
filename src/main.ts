@@ -62,6 +62,11 @@ async function bootstrap() {
     {
       jsonDocumentUrl: '/openapi.json',
       yamlDocumentUrl: '/openapi.yaml',
+      swaggerOptions: {
+        deepLinking: true,
+        displayOperationId: true,
+        displayRequestDuration: true,
+      },
     },
   );
 
