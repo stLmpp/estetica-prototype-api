@@ -6,17 +6,19 @@ import { LoggerModule } from './shared/logger/logger.module';
 import { ConfigModule } from './shared/config/config.module';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { AppConfig } from './shared/config/app-config';
-import { APP_GUARD } from '@nestjs/core';
+import { APP_FILTER, APP_GUARD } from '@nestjs/core';
 import { AuthModule } from '@thallesp/nestjs-better-auth';
 import { auth } from './auth/auth';
 import { GracefulShutdownModule } from '@tygra/nestjs-graceful-shutdown';
+import { CustomerModule } from './features/customer/customer.module';
+import { AllExceptionsFilter } from './all-exception.filter';
 
 @Module({
   imports: [
+    // Core
     ScheduleModule.forRoot(),
     ConfigModule,
     MainDatabaseModule,
-    HealthModule,
     LoggerModule,
     ThrottlerModule.forRootAsync({
       imports: [ConfigModule],
@@ -45,11 +47,19 @@ import { GracefulShutdownModule } from '@tygra/nestjs-graceful-shutdown';
       },
     }),
     GracefulShutdownModule.forRoot(),
+
+    // Features
+    HealthModule,
+    CustomerModule,
   ],
   providers: [
     {
       provide: APP_GUARD,
       useClass: ThrottlerGuard,
+    },
+    {
+      provide: APP_FILTER,
+      useClass: AllExceptionsFilter,
     },
   ],
 })

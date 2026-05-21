@@ -1,0 +1,1681 @@
+{
+  "version": "8",
+  "dialect": "postgres",
+  "id": "85092d01-2ac9-4053-bee4-e05ab1d7fd7d",
+  "prevIds": [
+    "4db6d13f-31b5-4905-8183-acd0f352dcd7"
+  ],
+  "ddl": [
+    {
+      "values": [
+        "TEXT",
+        "NUMBER",
+        "DATE",
+        "CHECKBOX",
+        "RADIO",
+        "SELECT"
+      ],
+      "name": "anamnese_field_type",
+      "entityType": "enums",
+      "schema": "public"
+    },
+    {
+      "values": [
+        "required",
+        "minLength",
+        "maxLength",
+        "minValue",
+        "maxValue",
+        "pattern"
+      ],
+      "name": "anamnese_field_validation_type",
+      "entityType": "enums",
+      "schema": "public"
+    },
+    {
+      "values": [
+        "Produto",
+        "Serviço"
+      ],
+      "name": "catalog_item_type",
+      "entityType": "enums",
+      "schema": "public"
+    },
+    {
+      "values": [
+        "Casado(a)",
+        "Solteiro(a)",
+        "Divorciado(a)",
+        "Viúvo(a)"
+      ],
+      "name": "marital_status",
+      "entityType": "enums",
+      "schema": "public"
+    },
+    {
+      "values": [
+        "Celular",
+        "Residencial",
+        "Trabalho"
+      ],
+      "name": "phone_type",
+      "entityType": "enums",
+      "schema": "public"
+    },
+    {
+      "isRlsEnabled": false,
+      "name": "anamnese_field",
+      "entityType": "tables",
+      "schema": "public"
+    },
+    {
+      "isRlsEnabled": false,
+      "name": "anamnese_field_validation",
+      "entityType": "tables",
+      "schema": "public"
+    },
+    {
+      "isRlsEnabled": false,
+      "name": "catalog_item",
+      "entityType": "tables",
+      "schema": "public"
+    },
+    {
+      "isRlsEnabled": false,
+      "name": "customer_anamnese",
+      "entityType": "tables",
+      "schema": "public"
+    },
+    {
+      "isRlsEnabled": false,
+      "name": "customer_anamnese_field",
+      "entityType": "tables",
+      "schema": "public"
+    },
+    {
+      "isRlsEnabled": false,
+      "name": "customer",
+      "entityType": "tables",
+      "schema": "public"
+    },
+    {
+      "isRlsEnabled": false,
+      "name": "customer_followup",
+      "entityType": "tables",
+      "schema": "public"
+    },
+    {
+      "isRlsEnabled": false,
+      "name": "customer_phone",
+      "entityType": "tables",
+      "schema": "public"
+    },
+    {
+      "isRlsEnabled": false,
+      "name": "followup_item",
+      "entityType": "tables",
+      "schema": "public"
+    },
+    {
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": {
+        "type": "always",
+        "name": "anamnese_field_id_seq",
+        "increment": "1",
+        "startWith": "1",
+        "minValue": "1",
+        "maxValue": "2147483647",
+        "cache": 1,
+        "cycle": false
+      },
+      "name": "id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "anamnese_field"
+    },
+    {
+      "type": "timestamp",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "created_at",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "anamnese_field"
+    },
+    {
+      "type": "timestamp",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "updated_at",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "anamnese_field"
+    },
+    {
+      "type": "timestamp",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "deleted_at",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "anamnese_field"
+    },
+    {
+      "type": "anamnese_field_type",
+      "typeSchema": "public",
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "field_type",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "anamnese_field"
+    },
+    {
+      "type": "json",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "field_args",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "anamnese_field"
+    },
+    {
+      "type": "varchar(128)",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "label",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "anamnese_field"
+    },
+    {
+      "type": "json",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "extra_labels",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "anamnese_field"
+    },
+    {
+      "type": "boolean",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "active",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "anamnese_field"
+    },
+    {
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "display_order",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "anamnese_field"
+    },
+    {
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": {
+        "type": "always",
+        "name": "anamnese_field_validation_id_seq",
+        "increment": "1",
+        "startWith": "1",
+        "minValue": "1",
+        "maxValue": "2147483647",
+        "cache": 1,
+        "cycle": false
+      },
+      "name": "id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "anamnese_field_validation"
+    },
+    {
+      "type": "timestamp",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "created_at",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "anamnese_field_validation"
+    },
+    {
+      "type": "timestamp",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "updated_at",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "anamnese_field_validation"
+    },
+    {
+      "type": "timestamp",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "deleted_at",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "anamnese_field_validation"
+    },
+    {
+      "type": "anamnese_field_validation_type",
+      "typeSchema": "public",
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "validation_type",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "anamnese_field_validation"
+    },
+    {
+      "type": "json",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "validation_args",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "anamnese_field_validation"
+    },
+    {
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "anamnese_field_id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "anamnese_field_validation"
+    },
+    {
+      "type": "boolean",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "active",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "anamnese_field_validation"
+    },
+    {
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": {
+        "type": "always",
+        "name": "catalog_item_id_seq",
+        "increment": "1",
+        "startWith": "1",
+        "minValue": "1",
+        "maxValue": "2147483647",
+        "cache": 1,
+        "cycle": false
+      },
+      "name": "id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "catalog_item"
+    },
+    {
+      "type": "timestamp",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "created_at",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "catalog_item"
+    },
+    {
+      "type": "timestamp",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "updated_at",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "catalog_item"
+    },
+    {
+      "type": "timestamp",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "deleted_at",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "catalog_item"
+    },
+    {
+      "type": "catalog_item_type",
+      "typeSchema": "public",
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "item_type",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "catalog_item"
+    },
+    {
+      "type": "varchar(256)",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "name",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "catalog_item"
+    },
+    {
+      "type": "numeric(10,2)",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "default_price",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "catalog_item"
+    },
+    {
+      "type": "boolean",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "active",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "catalog_item"
+    },
+    {
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": {
+        "type": "always",
+        "name": "customer_anamnese_id_seq",
+        "increment": "1",
+        "startWith": "1",
+        "minValue": "1",
+        "maxValue": "2147483647",
+        "cache": 1,
+        "cycle": false
+      },
+      "name": "id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "customer_anamnese"
+    },
+    {
+      "type": "timestamp",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "created_at",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "customer_anamnese"
+    },
+    {
+      "type": "timestamp",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "updated_at",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "customer_anamnese"
+    },
+    {
+      "type": "timestamp",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "deleted_at",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "customer_anamnese"
+    },
+    {
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "customer_id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "customer_anamnese"
+    },
+    {
+      "type": "timestamp",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "date",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "customer_anamnese"
+    },
+    {
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": {
+        "type": "always",
+        "name": "customer_anamnese_field_id_seq",
+        "increment": "1",
+        "startWith": "1",
+        "minValue": "1",
+        "maxValue": "2147483647",
+        "cache": 1,
+        "cycle": false
+      },
+      "name": "id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "customer_anamnese_field"
+    },
+    {
+      "type": "timestamp",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "created_at",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "customer_anamnese_field"
+    },
+    {
+      "type": "timestamp",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "updated_at",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "customer_anamnese_field"
+    },
+    {
+      "type": "timestamp",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "deleted_at",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "customer_anamnese_field"
+    },
+    {
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "customer_anamnese_id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "customer_anamnese_field"
+    },
+    {
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "anamnese_field_id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "customer_anamnese_field"
+    },
+    {
+      "type": "varchar(2048)",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "value",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "customer_anamnese_field"
+    },
+    {
+      "type": "json",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "extra_values",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "customer_anamnese_field"
+    },
+    {
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": {
+        "type": "always",
+        "name": "customer_id_seq",
+        "increment": "1",
+        "startWith": "1",
+        "minValue": "1",
+        "maxValue": "2147483647",
+        "cache": 1,
+        "cycle": false
+      },
+      "name": "id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "customer"
+    },
+    {
+      "type": "timestamp",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "created_at",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "customer"
+    },
+    {
+      "type": "timestamp",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "updated_at",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "customer"
+    },
+    {
+      "type": "timestamp",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "deleted_at",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "customer"
+    },
+    {
+      "type": "varchar(1024)",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "name",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "customer"
+    },
+    {
+      "type": "date",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "birth_date",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "customer"
+    },
+    {
+      "type": "varchar(1024)",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "address",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "customer"
+    },
+    {
+      "type": "varchar(10)",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "zip_code",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "customer"
+    },
+    {
+      "type": "varchar(256)",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "neighborhood",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "customer"
+    },
+    {
+      "type": "varchar(256)",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "city",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "customer"
+    },
+    {
+      "type": "varchar(256)",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "state",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "customer"
+    },
+    {
+      "type": "varchar(256)",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "job_name",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "customer"
+    },
+    {
+      "type": "marital_status",
+      "typeSchema": "public",
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "marital_status",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "customer"
+    },
+    {
+      "type": "varchar(1024)",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "email",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "customer"
+    },
+    {
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": {
+        "type": "always",
+        "name": "customer_followup_id_seq",
+        "increment": "1",
+        "startWith": "1",
+        "minValue": "1",
+        "maxValue": "2147483647",
+        "cache": 1,
+        "cycle": false
+      },
+      "name": "id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "customer_followup"
+    },
+    {
+      "type": "timestamp",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "created_at",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "customer_followup"
+    },
+    {
+      "type": "timestamp",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "updated_at",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "customer_followup"
+    },
+    {
+      "type": "timestamp",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "deleted_at",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "customer_followup"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "text",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "customer_followup"
+    },
+    {
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "customer_id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "customer_followup"
+    },
+    {
+      "type": "timestamp",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "date",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "customer_followup"
+    },
+    {
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": {
+        "type": "always",
+        "name": "customer_phone_id_seq",
+        "increment": "1",
+        "startWith": "1",
+        "minValue": "1",
+        "maxValue": "2147483647",
+        "cache": 1,
+        "cycle": false
+      },
+      "name": "id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "customer_phone"
+    },
+    {
+      "type": "timestamp",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "created_at",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "customer_phone"
+    },
+    {
+      "type": "timestamp",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "updated_at",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "customer_phone"
+    },
+    {
+      "type": "timestamp",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "deleted_at",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "customer_phone"
+    },
+    {
+      "type": "phone_type",
+      "typeSchema": "public",
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "type",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "customer_phone"
+    },
+    {
+      "type": "varchar(12)",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "phone_number",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "customer_phone"
+    },
+    {
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "customer_id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "customer_phone"
+    },
+    {
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": {
+        "type": "always",
+        "name": "followup_item_id_seq",
+        "increment": "1",
+        "startWith": "1",
+        "minValue": "1",
+        "maxValue": "2147483647",
+        "cache": 1,
+        "cycle": false
+      },
+      "name": "id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "followup_item"
+    },
+    {
+      "type": "timestamp",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "created_at",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "followup_item"
+    },
+    {
+      "type": "timestamp",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "updated_at",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "followup_item"
+    },
+    {
+      "type": "timestamp",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "deleted_at",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "followup_item"
+    },
+    {
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "followup_id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "followup_item"
+    },
+    {
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "catalog_item_id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "followup_item"
+    },
+    {
+      "type": "varchar(2048)",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "description",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "followup_item"
+    },
+    {
+      "type": "numeric(10,2)",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "price_applied",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "followup_item"
+    },
+    {
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "quantity",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "followup_item"
+    },
+    {
+      "nameExplicit": false,
+      "columns": [
+        {
+          "value": "anamnese_field_id",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "anamnese_field_validation_anamnese_field_id_index",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "anamnese_field_validation"
+    },
+    {
+      "nameExplicit": false,
+      "columns": [
+        {
+          "value": "item_type",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "catalog_item_item_type_index",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "catalog_item"
+    },
+    {
+      "nameExplicit": false,
+      "columns": [
+        {
+          "value": "customer_id",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "customer_anamnese_customer_id_index",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "customer_anamnese"
+    },
+    {
+      "nameExplicit": false,
+      "columns": [
+        {
+          "value": "customer_anamnese_id",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "customer_anamnese_field_customer_anamnese_id_index",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "customer_anamnese_field"
+    },
+    {
+      "nameExplicit": false,
+      "columns": [
+        {
+          "value": "anamnese_field_id",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "customer_anamnese_field_anamnese_field_id_index",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "customer_anamnese_field"
+    },
+    {
+      "nameExplicit": false,
+      "columns": [
+        {
+          "value": "email",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "customer_email_index",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "customer"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        {
+          "value": "\"name\" gin_trgm_ops",
+          "isExpression": true,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "with": "",
+      "method": "gin",
+      "concurrently": false,
+      "name": "customer_name_trgm_index",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "customer"
+    },
+    {
+      "nameExplicit": false,
+      "columns": [
+        {
+          "value": "customer_id",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "customer_followup_customer_id_index",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "customer_followup"
+    },
+    {
+      "nameExplicit": false,
+      "columns": [
+        {
+          "value": "customer_id",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "customer_phone_customer_id_index",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "customer_phone"
+    },
+    {
+      "nameExplicit": false,
+      "columns": [
+        {
+          "value": "phone_number",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "customer_phone_phone_number_index",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "customer_phone"
+    },
+    {
+      "nameExplicit": false,
+      "columns": [
+        {
+          "value": "followup_id",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "followup_item_followup_id_index",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "followup_item"
+    },
+    {
+      "nameExplicit": false,
+      "columns": [
+        {
+          "value": "catalog_item_id",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "followup_item_catalog_item_id_index",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "followup_item"
+    },
+    {
+      "nameExplicit": false,
+      "columns": [
+        "anamnese_field_id"
+      ],
+      "schemaTo": "public",
+      "tableTo": "anamnese_field",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "NO ACTION",
+      "name": "anamnese_field_validation_vAksoN9R7QCH_fkey",
+      "entityType": "fks",
+      "schema": "public",
+      "table": "anamnese_field_validation"
+    },
+    {
+      "nameExplicit": false,
+      "columns": [
+        "customer_id"
+      ],
+      "schemaTo": "public",
+      "tableTo": "customer",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "NO ACTION",
+      "name": "customer_anamnese_customer_id_customer_id_fkey",
+      "entityType": "fks",
+      "schema": "public",
+      "table": "customer_anamnese"
+    },
+    {
+      "nameExplicit": false,
+      "columns": [
+        "customer_anamnese_id"
+      ],
+      "schemaTo": "public",
+      "tableTo": "customer_anamnese",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "NO ACTION",
+      "name": "customer_anamnese_field_cTbveaiBx0ls_fkey",
+      "entityType": "fks",
+      "schema": "public",
+      "table": "customer_anamnese_field"
+    },
+    {
+      "nameExplicit": false,
+      "columns": [
+        "anamnese_field_id"
+      ],
+      "schemaTo": "public",
+      "tableTo": "anamnese_field",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "NO ACTION",
+      "name": "customer_anamnese_field_pu6BG6rOHV2K_fkey",
+      "entityType": "fks",
+      "schema": "public",
+      "table": "customer_anamnese_field"
+    },
+    {
+      "nameExplicit": false,
+      "columns": [
+        "customer_id"
+      ],
+      "schemaTo": "public",
+      "tableTo": "customer",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "NO ACTION",
+      "name": "customer_followup_customer_id_customer_id_fkey",
+      "entityType": "fks",
+      "schema": "public",
+      "table": "customer_followup"
+    },
+    {
+      "nameExplicit": false,
+      "columns": [
+        "customer_id"
+      ],
+      "schemaTo": "public",
+      "tableTo": "customer",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "NO ACTION",
+      "name": "customer_phone_customer_id_customer_id_fkey",
+      "entityType": "fks",
+      "schema": "public",
+      "table": "customer_phone"
+    },
+    {
+      "nameExplicit": false,
+      "columns": [
+        "followup_id"
+      ],
+      "schemaTo": "public",
+      "tableTo": "customer_followup",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "NO ACTION",
+      "name": "followup_item_followup_id_customer_followup_id_fkey",
+      "entityType": "fks",
+      "schema": "public",
+      "table": "followup_item"
+    },
+    {
+      "nameExplicit": false,
+      "columns": [
+        "catalog_item_id"
+      ],
+      "schemaTo": "public",
+      "tableTo": "catalog_item",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "NO ACTION",
+      "name": "followup_item_catalog_item_id_catalog_item_id_fkey",
+      "entityType": "fks",
+      "schema": "public",
+      "table": "followup_item"
+    },
+    {
+      "columns": [
+        "id"
+      ],
+      "nameExplicit": false,
+      "name": "anamnese_field_pkey",
+      "schema": "public",
+      "table": "anamnese_field",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "id"
+      ],
+      "nameExplicit": false,
+      "name": "anamnese_field_validation_pkey",
+      "schema": "public",
+      "table": "anamnese_field_validation",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "id"
+      ],
+      "nameExplicit": false,
+      "name": "catalog_item_pkey",
+      "schema": "public",
+      "table": "catalog_item",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "id"
+      ],
+      "nameExplicit": false,
+      "name": "customer_anamnese_pkey",
+      "schema": "public",
+      "table": "customer_anamnese",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "id"
+      ],
+      "nameExplicit": false,
+      "name": "customer_anamnese_field_pkey",
+      "schema": "public",
+      "table": "customer_anamnese_field",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "id"
+      ],
+      "nameExplicit": false,
+      "name": "customer_pkey",
+      "schema": "public",
+      "table": "customer",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "id"
+      ],
+      "nameExplicit": false,
+      "name": "customer_followup_pkey",
+      "schema": "public",
+      "table": "customer_followup",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "id"
+      ],
+      "nameExplicit": false,
+      "name": "customer_phone_pkey",
+      "schema": "public",
+      "table": "customer_phone",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "id"
+      ],
+      "nameExplicit": false,
+      "name": "followup_item_pkey",
+      "schema": "public",
+      "table": "followup_item",
+      "entityType": "pks"
+    }
+  ],
+  "renames": []
+}

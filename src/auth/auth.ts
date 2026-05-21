@@ -3,16 +3,14 @@ import { AppConfig } from '../shared/config/app-config';
 import { admin, anonymous, openAPI } from 'better-auth/plugins';
 import { pinoLogger } from '../shared/logger/logger.config';
 import { LoggerService } from '../shared/logger/logger.service';
-import { Pool } from 'pg';
+import { getMainPool } from '../database/main/main-database-connection';
 
 const appConfig = AppConfig.instance;
 
 const logger = new LoggerService(pinoLogger, 'Auth');
 
 export const auth = betterAuth({
-  database: new Pool({
-    connectionString: appConfig.mainDatabaseUrl,
-  }),
+  database: getMainPool(appConfig),
   logger: {
     log: (level, message, ...args) => {
       logger[level](message, { ...args });
@@ -20,7 +18,9 @@ export const auth = betterAuth({
   },
   appName: appConfig.appName,
   plugins: [
-    openAPI(),
+    openAPI({
+      path: 'openapi',
+    }),
     admin() as never,
     anonymous(),
   ],
@@ -45,6 +45,9 @@ export const auth = betterAuth({
   },
   advanced: {
     cookiePrefix: `${appConfig.appName}-better-auth`,
+  },
+  emailAndPassword: {
+    enabled: true,
   },
 });
 

@@ -21,7 +21,10 @@
             ".dto.ts",
             ".entity.ts",
             ".param.ts",
-            ".response.ts"
+            ".response.ts",
+            ".request.ts",
+            ".enum.ts",
+            ".model.ts"
           ]
         }
       }

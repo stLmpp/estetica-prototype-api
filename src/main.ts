@@ -18,6 +18,8 @@ import { AppConfig } from './shared/config/app-config';
 import { useContainer } from 'class-validator';
 import { setupGracefulShutdown } from '@tygra/nestjs-graceful-shutdown';
 import { type NestExpressApplication } from '@nestjs/platform-express';
+import { getAuthOpenApi } from './auth-openapi';
+import { generateOpenApi } from './generate-open-api';
 
 dayjs.extend(customParseFormat);
 dayjs.extend(utc);
@@ -49,8 +51,18 @@ async function bootstrap() {
     .setDescription('WebGestor API')
     .setVersion('1.0.0')
     .build();
-  SwaggerModule.setup('openapi', app, () =>
-    SwaggerModule.createDocument(app, openapiConfig),
+  const authOpenApi = await getAuthOpenApi();
+  SwaggerModule.setup(
+    'openapi',
+    app,
+    () => {
+      const document = SwaggerModule.createDocument(app, openapiConfig);
+      return generateOpenApi(document, authOpenApi);
+    },
+    {
+      jsonDocumentUrl: '/openapi.json',
+      yamlDocumentUrl: '/openapi.yaml',
+    },
   );
 
   setupGracefulShutdown({ app });

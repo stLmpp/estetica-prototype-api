@@ -107,7 +107,7 @@ function isEnvValueDefined(value: string | undefined): value is string {
   return value !== undefined && value.trim() !== '';
 }
 
-export const ENV_PREFIX = 'WG_API_';
+export const ENV_PREFIX = '';
 
 function parseValue(config: ConfigPropertyMetadata): any {
   const { name, defaultValue, required, type } = config;
