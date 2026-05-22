@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { CustomerRepository } from '../../database/main/repositories/customer.repository';
 import { UpdateCustomerDto } from './dto/input/update-customer.request';
 import { CreateCustomerDto } from './dto/input/create-customer.request';
@@ -6,6 +6,7 @@ import { CreateCustomerDto } from './dto/input/create-customer.request';
 import { CreateCustomerResDto } from './dto/output/create-customer.response';
 import { FilterCustomerDto } from './dto/input/list-customer.request';
 import { GetCustomerResDto } from './dto/output/get-customer.response';
+import { CustomerExceptions } from './customer-exceptions';
 
 @Injectable()
 export class CustomerService {
@@ -40,8 +41,9 @@ export class CustomerService {
   async getById(id: number): Promise<GetCustomerResDto> {
     const customer = await this.customerRepository.getById(id);
     if (!customer) {
-      // TODO exceptions
-      throw new NotFoundException(`Customer not found with id ${id}`);
+      throw CustomerExceptions.customerNotFound([
+        { field: 'customerId', issue: `not found with value '${id}'` },
+      ]);
     }
     return {
       id: customer.id,

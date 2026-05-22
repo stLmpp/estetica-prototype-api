@@ -105,13 +105,27 @@ export class ErrorModel {
   readonly details?: ErrorDetailModel[];
 }
 
-export class ResponseErrorModel {
-  constructor(error: ErrorModel) {
+export class ResponseErrorModel extends Error {
+  constructor(error: ErrorModel, status: number) {
+    super(error.message);
     this.error = error;
+    this.statusCode = status;
   }
 
   @ApiProperty({ type: ErrorModel })
   @Type(() => ErrorModel)
   @ValidateNested()
   readonly error: ErrorModel;
+
+  @ApiProperty({ example: 400 })
+  @Type(() => Number)
+  @IsNumber()
+  readonly statusCode: number;
+
+  toJSON() {
+    return {
+      statusCode: this.statusCode,
+      error: this.error,
+    };
+  }
 }
