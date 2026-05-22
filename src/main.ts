@@ -1,4 +1,5 @@
 import './config';
+import './query-duration-logger';
 import metadata from './metadata';
 import { NestFactory, Reflector } from '@nestjs/core';
 import { AppModule } from './app.module';

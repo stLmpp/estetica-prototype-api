@@ -11,10 +11,11 @@ import {
 import { CustomerService } from './customer.service';
 import { UpdateCustomerRequest } from './dto/input/update-customer.request';
 import { CustomerCreateRequest } from './dto/input/create-customer.request';
-import { CustomerCreateResponseModel } from './dto/output/create-customer.response';
+import { CreateCustomerResponseModel } from './dto/output/create-customer.response';
 import { FilterCustomerDto } from './dto/input/list-customer.request';
 import { ListCustomerResponseModel } from './dto/output/list-customer.response';
 import { PaginationMetadataModel } from '../../shared/model/response.model';
+import { GetCustomerResponseModel } from './dto/output/get-customer.response';
 
 @Controller({
   path: 'customer',
@@ -26,7 +27,7 @@ export class CustomerController {
   @Post()
   async create(
     @Body() body: CustomerCreateRequest,
-  ): Promise<CustomerCreateResponseModel> {
+  ): Promise<CreateCustomerResponseModel> {
     const customer = await this.customerService.create(body.customer);
     return {
       data: {
@@ -57,6 +58,18 @@ export class CustomerController {
         limit: dto.limit,
         page: dto.page,
       }),
+    };
+  }
+
+  @Get(':customerId')
+  async getById(
+    @Param('customerId', ParseIntPipe) customerId: number,
+  ): Promise<GetCustomerResponseModel> {
+    const customer = await this.customerService.getById(customerId);
+    return {
+      data: {
+        customer,
+      },
     };
   }
 }

@@ -1,5 +1,5 @@
 import {
-  IsDateString,
+  IsDate,
   IsEmail,
   IsEnum,
   IsNotEmpty,
@@ -9,10 +9,11 @@ import {
   Matches,
   ValidateNested,
 } from 'class-validator';
-import { Transform, Type } from 'class-transformer';
+import { Type } from 'class-transformer';
 import { MaritalStatus } from '../../../../shared/domain/marital-status.enum';
 import { ApiProperty } from '@nestjs/swagger';
 import { CreateCustomerDto } from './create-customer.request';
+import { TransformDate } from '../../../../shared/transform-date';
 
 export class UpdateCustomerDto {
   @IsString()
@@ -21,8 +22,8 @@ export class UpdateCustomerDto {
   @IsOptional()
   name?: string;
 
-  @IsDateString()
-  @Transform(({ value }) => new Date(String(value)))
+  @IsDate()
+  @TransformDate()
   @IsOptional()
   @ApiProperty({
     format: 'date',

@@ -3,20 +3,27 @@ import {
   IsDate,
   IsEmail,
   IsEnum,
+  IsInt,
   IsNotEmpty,
+  IsNumber,
   IsOptional,
   IsString,
   Length,
   Matches,
   ValidateNested,
 } from 'class-validator';
-import { PhoneType } from '../../../../shared/domain/phone-type.enum';
 import { Type } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
 import { MaritalStatus } from '../../../../shared/domain/marital-status.enum';
 import { TransformDate } from '../../../../shared/transform-date';
+import { PhoneType } from '../../../../shared/domain/phone-type.enum';
+import { ResponseModel } from '../../../../shared/model/response.model';
 
-export class CreateCustomerDto {
+export class GetCustomerResDto {
+  @IsNumber()
+  @IsInt()
+  id!: number;
+
   @IsString()
   @IsNotEmpty()
   @Length(1, 1024)
@@ -76,11 +83,15 @@ export class CreateCustomerDto {
   @IsOptional()
   @IsArray()
   @ValidateNested({ each: true })
-  @Type(() => CreateCustomerPhoneDto)
-  phones?: CreateCustomerPhoneDto[];
+  @Type(() => GetCustomerPhoneResDto)
+  phones?: GetCustomerPhoneResDto[];
 }
 
-export class CreateCustomerPhoneDto {
+export class GetCustomerPhoneResDto {
+  @IsNumber()
+  @IsInt()
+  id!: number;
+
   @IsEnum(PhoneType)
   type!: PhoneType;
 
@@ -90,8 +101,12 @@ export class CreateCustomerPhoneDto {
   number!: string;
 }
 
-export class CustomerCreateRequest {
-  @Type(() => CreateCustomerDto)
+export class GetCustomerResponseDto {
+  @Type(() => GetCustomerResDto)
   @ValidateNested()
-  readonly customer!: CreateCustomerDto;
+  customer!: GetCustomerResDto;
 }
+
+export class GetCustomerResponseModel extends ResponseModel(
+  GetCustomerResponseDto,
+) {}

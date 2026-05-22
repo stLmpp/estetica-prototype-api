@@ -91,4 +91,37 @@ export class CustomerRepository {
       .then(([{ count }]) => count ?? 0);
     return promiseAllObject({ customers, count });
   }
+
+  async getById(id: number) {
+    return this.db.query.customer
+      .findFirst({
+        where: {
+          id,
+        },
+        columns: {
+          id: true,
+          name: true,
+          birthDate: true,
+          address: true,
+          zipCode: true,
+          neighborhood: true,
+          city: true,
+          state: true,
+          jobName: true,
+          maritalStatus: true,
+          email: true,
+        },
+        with: {
+          phones: {
+            columns: {
+              id: true,
+              number: true,
+              customerId: true,
+              type: true,
+            },
+          },
+        },
+      })
+      .execute();
+  }
 }

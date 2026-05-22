@@ -31,13 +31,14 @@ export function getMainDatabaseClient(pool: pg.Pool, logger: LoggerService) {
       relations: mainRelations,
       jit: true,
       // schema: mainEntities,
-      logger: {
-        logQuery: (query, parameters) => {
-          logger.debug(`${query} --${JSON.stringify(parameters)}`, {
-            parameters,
-          });
-        },
-      },
+      logger: false,
+      // logger: {
+      //   logQuery: (query, parameters) => {
+      //     logger.debug(`${query} --${JSON.stringify(parameters)}`, {
+      //       parameters,
+      //     });
+      //   },
+      // },
     }),
     {
       e: mainEntities,
