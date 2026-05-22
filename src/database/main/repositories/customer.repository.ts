@@ -1,5 +1,13 @@
 import { Injectable } from '@nestjs/common';
-import { and, eq, exists, ilike, InferInsertModel, sql } from 'drizzle-orm';
+import {
+  and,
+  eq,
+  exists,
+  ilike,
+  InferInsertModel,
+  isNull,
+  sql,
+} from 'drizzle-orm';
 import { mainEntities } from '../main-entities';
 import { MainDatasource } from '../main-database-connection';
 import { FilterCustomerDto } from '../../../features/customer/dto/input/list-customer.request';
@@ -42,7 +50,12 @@ export class CustomerRepository {
     await this.db
       .update(this.db.e.customer)
       .set(entity)
-      .where(eq(this.db.e.customer.id, id));
+      .where(
+        and(
+          eq(this.db.e.customer.id, id),
+          isNull(this.db.e.customer.deletedAt),
+        ),
+      );
   }
 
   async listPaginated({
@@ -63,6 +76,7 @@ export class CustomerRepository {
         and(
           eq(this.db.e.customer.id, this.db.e.customerPhone.customerId),
           eq(this.db.e.customerPhone.number, phone!).if(phone),
+          isNull(this.db.e.customerPhone.deletedAt),
         ),
       );
     const where = and(
@@ -70,6 +84,7 @@ export class CustomerRepository {
       eq(this.db.e.customer.birthDate, birthDate!).if(birthDate),
       eq(this.db.e.customer.email, email!).if(email),
       exists(phoneSubQuery).if(phone),
+      isNull(this.db.e.customer.deletedAt),
     );
     const customers = this.db
       .select({
@@ -97,6 +112,9 @@ export class CustomerRepository {
       .findFirst({
         where: {
           id,
+          deletedAt: {
+            isNull: true,
+          },
         },
         columns: {
           id: true,

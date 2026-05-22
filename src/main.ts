@@ -6,11 +6,7 @@ import { AppModule } from './app.module';
 import compression from 'compression';
 import helmet from 'helmet';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import {
-  ClassSerializerInterceptor,
-  ValidationPipe,
-  VersioningType,
-} from '@nestjs/common';
+import { ClassSerializerInterceptor, VersioningType } from '@nestjs/common';
 import { LoggerService } from './shared/logger/logger.service';
 import dayjs from 'dayjs';
 import customParseFormat from 'dayjs/plugin/customParseFormat';
@@ -21,6 +17,8 @@ import { setupGracefulShutdown } from '@tygra/nestjs-graceful-shutdown';
 import { type NestExpressApplication } from '@nestjs/platform-express';
 import { getAuthOpenApi } from './auth-openapi';
 import { generateOpenApi } from './generate-open-api';
+import { coreExceptions } from './shared/exception/core-exceptions';
+import { CustomValidationPipe } from './shared/exception/custom-validation.pipe';
 
 dayjs.extend(customParseFormat);
 dayjs.extend(utc);
@@ -39,9 +37,22 @@ async function bootstrap() {
     type: VersioningType.URI,
   });
   app.useGlobalPipes(
-    new ValidationPipe({
+    new CustomValidationPipe({
       transform: true,
       stopAtFirstError: false,
+      exceptionFactory: (type, errors) => {
+        console.log({ type, errors });
+        switch (type) {
+          case 'body':
+            return coreExceptions.invalidBody();
+          case 'query':
+            return coreExceptions.invalidQueryParameters();
+          case 'param':
+            return coreExceptions.invalidPathParameters();
+          default:
+            return coreExceptions.invalidRequest();
+        }
+      },
     }),
   );
   app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));

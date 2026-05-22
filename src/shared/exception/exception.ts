@@ -28,7 +28,7 @@ export function exception(
 ): ExceptionFactory {
   return (error, details) =>
     new ResponseErrorModel(
-      new ErrorModel(args.code, error, details),
+      new ErrorModel(args.code, error ?? args.message, details),
       args.status,
     );
 }
