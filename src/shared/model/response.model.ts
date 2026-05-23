@@ -28,7 +28,7 @@ export function ResponsePaginatedModel<T extends Class<any>>(clazz: T) {
   class Response {
     constructor(items: InstanceType<T>[], pagination: PaginationMetadataModel) {
       this.data = { items };
-      this.meta = pagination;
+      this.meta = PaginationMetadataModel.from(pagination);
     }
 
     @ApiProperty({ type: ResponseData })

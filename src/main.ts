@@ -30,18 +30,19 @@ async function bootstrap() {
   useContainer(app.select(AppModule), { fallbackOnErrors: true });
   const logger = await app.resolve(LoggerService);
   app.useLogger(logger);
-  app.use(compression());
-  app.use(helmet());
-  app.enableVersioning({
-    type: VersioningType.URI,
-  });
-  app.useGlobalPipes(
-    new CustomValidationPipe({
-      transform: true,
-      stopAtFirstError: false,
-      whitelist: true,
-    }),
-  );
+  app
+    .use(compression())
+    .use(helmet())
+    .enableVersioning({
+      type: VersioningType.URI,
+    })
+    .useGlobalPipes(
+      new CustomValidationPipe({
+        transform: true,
+        stopAtFirstError: false,
+        whitelist: true,
+      }),
+    );
   await SwaggerModule.loadPluginMetadata(metadata);
   const appConfig = app.get(AppConfig);
   const openapiConfig = new DocumentBuilder()
