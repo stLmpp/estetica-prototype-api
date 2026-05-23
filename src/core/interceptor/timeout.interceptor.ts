@@ -12,7 +12,7 @@ import {
   timeout,
   TimeoutError,
 } from 'rxjs';
-import { AppConfig } from './shared/config/app-config';
+import { AppConfig } from '../../shared/config/app-config';
 
 @Injectable()
 export class TimeoutInterceptor implements NestInterceptor {

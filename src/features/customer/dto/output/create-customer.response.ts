@@ -17,7 +17,7 @@ import { Type } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
 import { MaritalStatus } from '../../../../shared/domain/marital-status.enum';
 import { ResponseModel } from '../../../../shared/model/response.model';
-import { TransformDate } from '../../../../shared/transform-date';
+import { TransformDate } from '../../../../shared/decorator/transform-date.decorator';
 
 export class CustomerPhoneResDto {
   @IsNumber()

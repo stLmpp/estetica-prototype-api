@@ -6,12 +6,13 @@ import { LoggerModule } from './shared/logger/logger.module';
 import { ConfigModule } from './shared/config/config.module';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { AppConfig } from './shared/config/app-config';
-import { APP_FILTER, APP_GUARD } from '@nestjs/core';
+import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { AuthModule } from '@thallesp/nestjs-better-auth';
 import { auth } from './auth/auth';
 import { GracefulShutdownModule } from '@tygra/nestjs-graceful-shutdown';
 import { CustomerModule } from './features/customer/customer.module';
-import { AllExceptionsFilter } from './all-exception.filter';
+import { AllExceptionsFilter } from './core/filter/all-exception.filter';
+import { ResponseValidationInterceptor } from './core/interceptor/response-validation.interceptor';
 
 @Module({
   imports: [
@@ -60,6 +61,10 @@ import { AllExceptionsFilter } from './all-exception.filter';
     {
       provide: APP_FILTER,
       useClass: AllExceptionsFilter,
+    },
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: ResponseValidationInterceptor,
     },
   ],
 })

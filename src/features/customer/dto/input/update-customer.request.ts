@@ -13,7 +13,7 @@ import { Type } from 'class-transformer';
 import { MaritalStatus } from '../../../../shared/domain/marital-status.enum';
 import { ApiProperty } from '@nestjs/swagger';
 import { CreateCustomerDto } from './create-customer.request';
-import { TransformDate } from '../../../../shared/transform-date';
+import { TransformDate } from '../../../../shared/decorator/transform-date.decorator';
 
 export class UpdateCustomerDto {
   @IsString()

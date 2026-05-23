@@ -1,7 +1,7 @@
 import { applyDecorators } from '@nestjs/common';
 import { Transform } from 'class-transformer';
 
-export function TransformNumber() {
+export function TransformNumberDecorator() {
   return applyDecorators(
     Transform(({ value }) => {
       const numberValue = Number(value);

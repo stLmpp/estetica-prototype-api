@@ -52,6 +52,9 @@ export class LoggerService extends ConsoleLogger {
     context?: string,
   ): void {
     const [meta, ctx] = this.resolveMeta(metaOrStack, context);
+    if (message instanceof Error) {
+      meta.err = message;
+    }
     this.withContext(ctx).error(meta, String(message));
   }
 

@@ -1,12 +1,12 @@
 import './config';
 import './query-duration-logger';
 import metadata from './metadata';
-import { NestFactory, Reflector } from '@nestjs/core';
+import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import compression from 'compression';
 import helmet from 'helmet';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import { ClassSerializerInterceptor, VersioningType } from '@nestjs/common';
+import { VersioningType } from '@nestjs/common';
 import { LoggerService } from './shared/logger/logger.service';
 import dayjs from 'dayjs';
 import customParseFormat from 'dayjs/plugin/customParseFormat';
@@ -15,10 +15,9 @@ import { AppConfig } from './shared/config/app-config';
 import { useContainer } from 'class-validator';
 import { setupGracefulShutdown } from '@tygra/nestjs-graceful-shutdown';
 import { type NestExpressApplication } from '@nestjs/platform-express';
-import { getAuthOpenApi } from './auth-openapi';
-import { generateOpenApi } from './generate-open-api';
-import { coreExceptions } from './shared/exception/core-exceptions';
-import { CustomValidationPipe } from './shared/exception/custom-validation.pipe';
+import { getAuthOpenApi } from './core/openapi/auth-openapi';
+import { generateOpenApi } from './core/openapi/generate-open-api';
+import { CustomValidationPipe } from './core/pipe/custom-validation.pipe';
 
 dayjs.extend(customParseFormat);
 dayjs.extend(utc);
@@ -40,22 +39,9 @@ async function bootstrap() {
     new CustomValidationPipe({
       transform: true,
       stopAtFirstError: false,
-      exceptionFactory: (type, errors) => {
-        console.log({ type, errors });
-        switch (type) {
-          case 'body':
-            return coreExceptions.invalidBody();
-          case 'query':
-            return coreExceptions.invalidQueryParameters();
-          case 'param':
-            return coreExceptions.invalidPathParameters();
-          default:
-            return coreExceptions.invalidRequest();
-        }
-      },
+      whitelist: true,
     }),
   );
-  app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
   await SwaggerModule.loadPluginMetadata(metadata);
   const appConfig = app.get(AppConfig);
   const openapiConfig = new DocumentBuilder()

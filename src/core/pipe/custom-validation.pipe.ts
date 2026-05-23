@@ -14,6 +14,9 @@ import {
 } from 'class-transformer';
 import { validate, ValidatorOptions } from 'class-validator';
 import { isTypedArray } from 'util/types';
+import { coreExceptions } from '../core-exceptions';
+import { ExceptionFactoryWithoutError } from '../../shared/exception/exception';
+import { mapValidationErrorsToErrorDetails } from '../../shared/utils/map-validation-errors-to-error.details';
 
 const BUILT_IN_TYPES = [Date, RegExp, Error, Map, Set, WeakMap, WeakSet];
 const BUILT_IN_TYPES_SET: ReadonlySet<unknown> = new Set(BUILT_IN_TYPES);
@@ -22,24 +25,11 @@ export interface ValidationPipeOptions extends ValidatorOptions {
   transform?: boolean;
   disableErrorMessages?: boolean;
   transformOptions?: ClassTransformOptions;
-  exceptionFactory: (type: Paramtype, errors: ValidationError[]) => any;
   validateCustomDecorators?: boolean;
   expectedType?: Type;
 }
 
 export class CustomValidationPipe implements PipeTransform {
-  protected isTransformEnabled: boolean;
-  protected isDetailedOutputDisabled?: boolean;
-  protected validatorOptions: ValidatorOptions;
-  protected transformOptions: ClassTransformOptions | undefined;
-  protected errorHttpStatusCode: number;
-  protected expectedType: Type | undefined;
-  protected exceptionFactory: (
-    type: Paramtype,
-    errors: ValidationError[],
-  ) => any;
-  protected validateCustomDecorators: boolean;
-
   constructor(@Optional() options: ValidationPipeOptions) {
     const {
       transform,
@@ -59,8 +49,25 @@ export class CustomValidationPipe implements PipeTransform {
     this.validateCustomDecorators = validateCustomDecorators || false;
     this.errorHttpStatusCode = HttpStatus.BAD_REQUEST;
     this.expectedType = expectedType;
-    this.exceptionFactory = options.exceptionFactory;
   }
+
+  protected readonly isTransformEnabled: boolean;
+  protected isDetailedOutputDisabled?: boolean;
+  protected validatorOptions: ValidatorOptions;
+  protected transformOptions: ClassTransformOptions | undefined;
+  protected errorHttpStatusCode: number;
+  protected expectedType: Type | undefined;
+  protected validateCustomDecorators: boolean;
+
+  private readonly exceptionMapper: Record<
+    Paramtype,
+    ExceptionFactoryWithoutError
+  > = {
+    query: coreExceptions.invalidQueryParameters,
+    param: coreExceptions.invalidPathParameters,
+    body: coreExceptions.invalidBody,
+    custom: coreExceptions.invalidRequest,
+  };
 
   public async transform(value: unknown, metadata: ArgumentMetadata) {
     if (this.expectedType) {
@@ -99,7 +106,9 @@ export class CustomValidationPipe implements PipeTransform {
 
     const errors = await this.validate(entity, this.validatorOptions);
     if (errors.length > 0) {
-      throw await this.exceptionFactory(metadata.type, errors);
+      throw this.exceptionMapper[metadata.type](
+        mapValidationErrorsToErrorDetails(errors),
+      );
     }
 
     if (
@@ -219,12 +228,8 @@ export class CustomValidationPipe implements PipeTransform {
     }
 
     // Delete dangerous prototype pollution keys
-    if ('__proto__' in value) {
-      delete value.__proto__;
-    }
-    if ('prototype' in value) {
-      delete value.prototype;
-    }
+    Reflect.deleteProperty(value, '__proto__');
+    Reflect.deleteProperty(value, 'prototype');
 
     // Only delete constructor if it's NOT a built-in type
     const constructorType = value?.constructor;
@@ -232,9 +237,8 @@ export class CustomValidationPipe implements PipeTransform {
       Reflect.deleteProperty(value, 'constructor');
     }
 
-    for (const key in value) {
-      // TODO fix
-      this.stripProtoKeys(value[key]);
+    for (const item of Object.values(value)) {
+      this.stripProtoKeys(item);
     }
   }
 
@@ -247,54 +251,5 @@ export class CustomValidationPipe implements PipeTransform {
     validatorOptions?: ValidatorOptions,
   ): Promise<ValidationError[]> | ValidationError[] {
     return validate(object, validatorOptions);
-  }
-
-  protected flattenValidationErrors(
-    validationErrors: ValidationError[],
-  ): string[] {
-    return validationErrors
-      .map((error) => this.mapChildrenToValidationErrors(error))
-      .flat()
-      .filter((item) => !!item.constraints)
-      .map((item) => Object.values(item.constraints!))
-      .flat();
-  }
-
-  protected mapChildrenToValidationErrors(
-    error: ValidationError,
-    parentPath?: string,
-  ): ValidationError[] {
-    if (!(error.children && error.children.length)) {
-      return [error];
-    }
-    const validationErrors: ValidationError[] = [];
-    parentPath = parentPath
-      ? `${parentPath}.${error.property}`
-      : error.property;
-    for (const item of error.children) {
-      if (item.children && item.children.length) {
-        validationErrors.push(
-          ...this.mapChildrenToValidationErrors(item, parentPath),
-        );
-      }
-      validationErrors.push(
-        this.prependConstraintsWithParentProp(parentPath, item),
-      );
-    }
-    return validationErrors;
-  }
-
-  protected prependConstraintsWithParentProp(
-    parentPath: string,
-    error: ValidationError,
-  ): ValidationError {
-    const constraints: Record<string, string> = {};
-    for (const key in error.constraints) {
-      constraints[key] = `${parentPath}.${error.constraints[key]}`;
-    }
-    return {
-      ...error,
-      constraints,
-    };
   }
 }

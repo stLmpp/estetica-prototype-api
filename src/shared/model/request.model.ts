@@ -1,15 +1,15 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsIn, IsInt, IsNumber } from 'class-validator';
-import { TransformNumber } from '../transform-number';
+import { TransformNumberDecorator } from '../decorator/transform-number.decorator';
 
 export class RequestPaginatedModel {
-  @TransformNumber()
+  @TransformNumberDecorator()
   @IsNumber()
   @IsInt()
   @ApiProperty({ default: 1, type: 'number' })
   page = 1;
 
-  @TransformNumber()
+  @TransformNumberDecorator()
   @IsNumber()
   @IsInt()
   @IsIn([10, 25, 50, 100])

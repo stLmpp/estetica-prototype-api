@@ -7,7 +7,7 @@ import {
   Matches,
 } from 'class-validator';
 import { RequestPaginatedModel } from '../../../../shared/model/request.model';
-import { TransformDate } from '../../../../shared/transform-date';
+import { TransformDate } from '../../../../shared/decorator/transform-date.decorator';
 
 export class FilterCustomerDto extends RequestPaginatedModel {
   @IsString()

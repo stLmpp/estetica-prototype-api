@@ -3,7 +3,7 @@ import {
   ErrorDetailModel,
   ErrorModel,
   ResponseErrorModel,
-} from './shared/model/response.model';
+} from '../../shared/model/response.model';
 import { type Class } from 'type-fest';
 
 const errorSchemas: Class<any>[] = [
@@ -21,6 +21,7 @@ const errorStatus = [
   { status: 404, description: 'Not Found' },
   { status: 409, description: 'Conflict' },
   { status: 422, description: 'Unprocessable Entity' },
+  { status: 429, description: 'Too Many Requests' },
   { status: 500, description: 'Internal Server Error' },
 ];
 

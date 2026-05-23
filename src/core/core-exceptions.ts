@@ -1,4 +1,4 @@
-import { exception } from './exception';
+import { exception } from '../shared/exception/exception';
 
 export const coreExceptions = {
   invalidBody: exception({
@@ -20,5 +20,10 @@ export const coreExceptions = {
     code: 'INVALID_REQUEST',
     message: 'Invalid request',
     status: 400,
+  }),
+  invalidResponse: exception({
+    code: 'INVALID_RESPONSE',
+    message: 'Invalid response',
+    status: 500,
   }),
 };

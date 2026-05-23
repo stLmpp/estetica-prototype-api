@@ -16,6 +16,7 @@ import { FilterCustomerDto } from './dto/input/list-customer.request';
 import { ListCustomerResponseModel } from './dto/output/list-customer.response';
 import { PaginationMetadataModel } from '../../shared/model/response.model';
 import { GetCustomerResponseModel } from './dto/output/get-customer.response';
+import { ResponseType } from '../../shared/decorator/response-type.decorator';
 
 @Controller({
   path: 'customer',
@@ -24,16 +25,13 @@ import { GetCustomerResponseModel } from './dto/output/get-customer.response';
 export class CustomerController {
   constructor(private readonly customerService: CustomerService) {}
 
+  @ResponseType(CreateCustomerResponseModel)
   @Post()
   async create(
     @Body() body: CustomerCreateRequest,
   ): Promise<CreateCustomerResponseModel> {
     const customer = await this.customerService.create(body.customer);
-    return {
-      data: {
-        customer,
-      },
-    };
+    return { data: { customer } };
   }
 
   @Patch(':customerId')
@@ -44,6 +42,7 @@ export class CustomerController {
     await this.customerService.update(customerId, body.customer);
   }
 
+  @ResponseType(ListCustomerResponseModel)
   @Get()
   async listPaginated(
     @Query() dto: FilterCustomerDto,
@@ -61,6 +60,7 @@ export class CustomerController {
     };
   }
 
+  @ResponseType(GetCustomerResponseModel)
   @Get(':customerId')
   async getById(
     @Param('customerId', ParseIntPipe) customerId: number,

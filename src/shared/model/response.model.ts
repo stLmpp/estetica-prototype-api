@@ -65,7 +65,7 @@ export class PaginationMetadataModel {
   readonly limit: number;
 
   static from({ total, limit, page }: PaginationMetadataModel) {
-    return new PaginationMetadataModel(total, limit, page);
+    return new PaginationMetadataModel(total, page, limit);
   }
 }
 

@@ -1,6 +1,6 @@
 import { ArgumentsHost, Catch } from '@nestjs/common';
 import { BaseExceptionFilter } from '@nestjs/core';
-import { ResponseErrorModel } from './shared/model/response.model';
+import { ResponseErrorModel } from '../../shared/model/response.model';
 
 @Catch()
 export class AllExceptionsFilter extends BaseExceptionFilter {

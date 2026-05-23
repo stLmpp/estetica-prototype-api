@@ -14,7 +14,7 @@ import { PhoneType } from '../../../../shared/domain/phone-type.enum';
 import { Type } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
 import { MaritalStatus } from '../../../../shared/domain/marital-status.enum';
-import { TransformDate } from '../../../../shared/transform-date';
+import { TransformDate } from '../../../../shared/decorator/transform-date.decorator';
 
 export class CreateCustomerDto {
   @IsString()

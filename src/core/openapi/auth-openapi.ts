@@ -1,5 +1,5 @@
 import { OpenAPIV3 } from 'openapi-types';
-import { auth } from './auth/auth';
+import { auth } from '../../auth/auth';
 import { type OpenAPIObject } from '@nestjs/swagger';
 
 let _schema: OpenAPIV3.Document | null = null;
