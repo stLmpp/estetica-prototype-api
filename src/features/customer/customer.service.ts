@@ -13,19 +13,35 @@ export class CustomerService {
   constructor(private readonly customerRepository: CustomerRepository) {}
 
   async create(dto: CreateCustomerDto): Promise<CreateCustomerResDto> {
-    const entity = await this.customerRepository.insert(dto, dto.phones ?? []);
+    const entity = await this.customerRepository.insert(
+      {
+        jobName: dto.jobName,
+        person: {
+          name: dto.name,
+          birthDate: dto.birthDate,
+          address: dto.address,
+          zipCode: dto.zipCode,
+          neighborhood: dto.neighborhood,
+          city: dto.city,
+          state: dto.state,
+          maritalStatus: dto.maritalStatus,
+          email: dto.email,
+        },
+      },
+      dto.phones ?? [],
+    );
     return {
       id: entity.id,
-      name: entity.name,
-      birthDate: entity.birthDate ?? undefined,
-      address: entity.address ?? undefined,
-      zipCode: entity.zipCode ?? undefined,
-      neighborhood: entity.neighborhood ?? undefined,
-      city: entity.city ?? undefined,
-      state: entity.state ?? undefined,
+      name: entity.person.name,
+      birthDate: entity.person.birthDate ?? undefined,
+      address: entity.person.address ?? undefined,
+      zipCode: entity.person.zipCode ?? undefined,
+      neighborhood: entity.person.neighborhood ?? undefined,
+      city: entity.person.city ?? undefined,
+      state: entity.person.state ?? undefined,
       jobName: entity.jobName ?? undefined,
-      maritalStatus: entity.maritalStatus ?? undefined,
-      email: entity.email ?? undefined,
+      maritalStatus: entity.person.maritalStatus ?? undefined,
+      email: entity.person.email ?? undefined,
       phones: entity.phones,
     };
   }
@@ -47,17 +63,17 @@ export class CustomerService {
     }
     return {
       id: customer.id,
-      name: customer.name,
-      birthDate: customer.birthDate ?? undefined,
-      address: customer.address ?? undefined,
-      zipCode: customer.zipCode ?? undefined,
-      neighborhood: customer.neighborhood ?? undefined,
-      city: customer.city ?? undefined,
-      state: customer.state ?? undefined,
+      name: customer.person.name,
+      birthDate: customer.person.birthDate ?? undefined,
+      address: customer.person.address ?? undefined,
+      zipCode: customer.person.zipCode ?? undefined,
+      neighborhood: customer.person.neighborhood ?? undefined,
+      city: customer.person.city ?? undefined,
+      state: customer.person.state ?? undefined,
       jobName: customer.jobName ?? undefined,
-      maritalStatus: customer.maritalStatus ?? undefined,
-      phones: customer.phones,
-      email: customer.email ?? undefined,
+      maritalStatus: customer.person.maritalStatus ?? undefined,
+      phones: customer.person.personPhone,
+      email: customer.person.email ?? undefined,
     };
   }
 }

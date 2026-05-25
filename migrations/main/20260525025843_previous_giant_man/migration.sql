@@ -1,0 +1,23 @@
+ALTER TABLE "anamnese_field" ADD COLUMN "created_by" integer;--> statement-breakpoint
+ALTER TABLE "anamnese_field" ADD COLUMN "last_updated_by" integer;--> statement-breakpoint
+ALTER TABLE "anamnese_field_validation" ADD COLUMN "created_by" integer;--> statement-breakpoint
+ALTER TABLE "anamnese_field_validation" ADD COLUMN "last_updated_by" integer;--> statement-breakpoint
+ALTER TABLE "catalog_item" ADD COLUMN "created_by" integer;--> statement-breakpoint
+ALTER TABLE "catalog_item" ADD COLUMN "last_updated_by" integer;--> statement-breakpoint
+ALTER TABLE "customer_anamnese" ADD COLUMN "created_by" integer;--> statement-breakpoint
+ALTER TABLE "customer_anamnese" ADD COLUMN "last_updated_by" integer;--> statement-breakpoint
+ALTER TABLE "customer_anamnese_field" ADD COLUMN "created_by" integer;--> statement-breakpoint
+ALTER TABLE "customer_anamnese_field" ADD COLUMN "last_updated_by" integer;--> statement-breakpoint
+ALTER TABLE "customer" ADD COLUMN "created_by" integer;--> statement-breakpoint
+ALTER TABLE "customer" ADD COLUMN "last_updated_by" integer;--> statement-breakpoint
+ALTER TABLE "customer_followup" ADD COLUMN "created_by" integer;--> statement-breakpoint
+ALTER TABLE "customer_followup" ADD COLUMN "last_updated_by" integer;--> statement-breakpoint
+ALTER TABLE "employee" ADD COLUMN "created_by" integer;--> statement-breakpoint
+ALTER TABLE "employee" ADD COLUMN "last_updated_by" integer;--> statement-breakpoint
+ALTER TABLE "followup_item" ADD COLUMN "created_by" integer;--> statement-breakpoint
+ALTER TABLE "followup_item" ADD COLUMN "last_updated_by" integer;--> statement-breakpoint
+ALTER TABLE "person" ADD COLUMN "created_by" integer;--> statement-breakpoint
+ALTER TABLE "person" ADD COLUMN "last_updated_by" integer;--> statement-breakpoint
+ALTER TABLE "person" ADD COLUMN "user_id" text;--> statement-breakpoint
+ALTER TABLE "person_phone" ADD COLUMN "created_by" integer;--> statement-breakpoint
+ALTER TABLE "person_phone" ADD COLUMN "last_updated_by" integer;

@@ -2,14 +2,61 @@ import { defineRelations } from 'drizzle-orm';
 import { mainEntities } from './main-entities';
 
 export const mainRelations = defineRelations(mainEntities, (r) => ({
-  // --- CUSTOMER ---
-  customer: {
-    phones: r.many.customerPhone({
+  // --- PERSON ---
+  person: {
+    personPhone: r.many.personPhone({
       where: {
         deletedAt: {
           isNull: true,
         },
       },
+    }),
+    customer: r.many.customer({
+      where: {
+        deletedAt: {
+          isNull: true,
+        },
+      },
+    }),
+  },
+  personPhone: {
+    person: r.one.person({
+      from: r.personPhone.personId,
+      to: r.person.id,
+      where: {
+        deletedAt: {
+          isNull: true,
+        },
+      },
+      optional: false,
+    }),
+  },
+
+  // --- EMPLOYEE ---
+  employee: {
+    person: r.one.person({
+      from: r.employee.personId,
+      to: r.person.id,
+      where: {
+        deletedAt: {
+          isNull: true,
+        },
+      },
+      optional: false,
+    }),
+  },
+
+  // --- CUSTOMER ---
+  customer: {
+    person: r.one.person({
+      from: r.customer.personId,
+      to: r.person.id,
+      where: {
+        deletedAt: {
+          isNull: true,
+        },
+      },
+      optional: false,
     }),
     followups: r.many.customerFollowup({
       where: {
@@ -19,18 +66,6 @@ export const mainRelations = defineRelations(mainEntities, (r) => ({
       },
     }),
     anamneses: r.many.customerAnamnese({
-      where: {
-        deletedAt: {
-          isNull: true,
-        },
-      },
-    }),
-  },
-
-  customerPhone: {
-    customer: r.one.customer({
-      from: r.customerPhone.customerId,
-      to: r.customer.id,
       where: {
         deletedAt: {
           isNull: true,
@@ -59,6 +94,7 @@ export const mainRelations = defineRelations(mainEntities, (r) => ({
           isNull: true,
         },
       },
+      optional: false,
     }),
     items: r.many.followupItem({
       where: {
@@ -78,6 +114,7 @@ export const mainRelations = defineRelations(mainEntities, (r) => ({
           isNull: true,
         },
       },
+      optional: false,
     }),
     catalogItem: r.one.catalogItem({
       from: r.followupItem.catalogItemId,
@@ -87,6 +124,7 @@ export const mainRelations = defineRelations(mainEntities, (r) => ({
           isNull: true,
         },
       },
+      optional: false,
     }),
   },
 
@@ -117,6 +155,7 @@ export const mainRelations = defineRelations(mainEntities, (r) => ({
           isNull: true,
         },
       },
+      optional: false,
     }),
   },
 
@@ -129,6 +168,7 @@ export const mainRelations = defineRelations(mainEntities, (r) => ({
           isNull: true,
         },
       },
+      optional: false,
     }),
     fields: r.many.customerAnamneseField({
       where: {
@@ -148,6 +188,7 @@ export const mainRelations = defineRelations(mainEntities, (r) => ({
           isNull: true,
         },
       },
+      optional: false,
     }),
     anamneseField: r.one.anamneseField({
       from: r.customerAnamneseField.anamneseFieldId,
@@ -157,6 +198,7 @@ export const mainRelations = defineRelations(mainEntities, (r) => ({
           isNull: true,
         },
       },
+      optional: false,
     }),
   },
 }));

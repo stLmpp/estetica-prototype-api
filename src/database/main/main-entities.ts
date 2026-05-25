@@ -23,12 +23,14 @@ const baseEntity = {
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
   deletedAt: timestamp('deleted_at'),
+  createdBy: integer('created_by'), // TODO figure out how to do this
+  lastUpdatedBy: integer('last_updated_by'), // TODO figure out how to do this
 };
 
 export const maritalStatus = pgEnum('marital_status', MaritalStatus);
 
-export const customerEntity = pgTable(
-  'customer',
+export const personEntity = pgTable(
+  'person',
   {
     ...baseEntity,
     name: varchar('name', { length: 1024 }).notNull(),
@@ -38,9 +40,9 @@ export const customerEntity = pgTable(
     neighborhood: varchar('neighborhood', { length: 256 }),
     city: varchar('city', { length: 256 }),
     state: varchar('state', { length: 256 }),
-    jobName: varchar('job_name', { length: 256 }),
     maritalStatus: maritalStatus('marital_status'),
     email: varchar('email', { length: 1024 }),
+    userId: text('user_id'), // TODO figure out how to do this
   },
   (t) => [
     index().on(t.email),
@@ -48,20 +50,46 @@ export const customerEntity = pgTable(
   ],
 );
 
+export const employeeEntity = pgTable(
+  'employee',
+  {
+    ...baseEntity,
+    personId: integer('person_id')
+      .notNull()
+      .references(() => personEntity.id),
+    role: varchar('role', { length: 256 }).notNull(),
+  },
+  (t) => [index().on(t.personId)],
+);
+
+export const customerEntity = pgTable(
+  'customer',
+  {
+    ...baseEntity,
+    personId: integer('person_id')
+      .notNull()
+      .references(() => personEntity.id),
+    jobName: varchar('job_name', { length: 256 }),
+  },
+  (t) => [
+    index().on(t.personId),
+  ],
+);
+
 export const phoneType = pgEnum('phone_type', PhoneType);
 
-export const customerPhoneEntity = pgTable(
-  'customer_phone',
+export const personPhoneEntity = pgTable(
+  'person_phone',
   {
     ...baseEntity,
     type: phoneType().notNull(),
     number: varchar('phone_number', { length: 12 }).notNull(),
-    customerId: integer('customer_id')
+    personId: integer('person_id')
       .notNull()
-      .references(() => customerEntity.id),
+      .references(() => personEntity.id),
   },
   (t) => [
-    index().on(t.customerId),
+    index().on(t.personId),
     index().on(t.number),
   ],
 );
@@ -190,8 +218,10 @@ export const customerAnamneseFieldEntity = pgTable(
 );
 
 export const mainEntities = {
+  person: personEntity,
+  employee: employeeEntity,
   customer: customerEntity,
-  customerPhone: customerPhoneEntity,
+  personPhone: personPhoneEntity,
   catalogItem: catalogItemEntity,
   customerFollowup: customerFollowupEntity,
   followupItem: followupItemEntity,
