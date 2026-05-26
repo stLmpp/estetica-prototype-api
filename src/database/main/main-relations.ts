@@ -4,14 +4,14 @@ import { mainEntities } from './main-entities';
 export const mainRelations = defineRelations(mainEntities, (r) => ({
   // --- PERSON ---
   person: {
-    personPhone: r.many.personPhone({
+    personPhones: r.many.personPhone({
       where: {
         deletedAt: {
           isNull: true,
         },
       },
     }),
-    customer: r.many.customer({
+    customers: r.many.customer({
       where: {
         deletedAt: {
           isNull: true,
@@ -58,14 +58,14 @@ export const mainRelations = defineRelations(mainEntities, (r) => ({
       },
       optional: false,
     }),
-    followups: r.many.customerFollowup({
+    customerFollowups: r.many.customerFollowup({
       where: {
         deletedAt: {
           isNull: true,
         },
       },
     }),
-    anamneses: r.many.customerAnamnese({
+    customerAnamneses: r.many.customerAnamnese({
       where: {
         deletedAt: {
           isNull: true,
@@ -96,7 +96,7 @@ export const mainRelations = defineRelations(mainEntities, (r) => ({
       },
       optional: false,
     }),
-    items: r.many.followupItem({
+    followupItems: r.many.followupItem({
       where: {
         deletedAt: {
           isNull: true,
@@ -130,7 +130,7 @@ export const mainRelations = defineRelations(mainEntities, (r) => ({
 
   // --- ANAMNESE ---
   anamneseField: {
-    validations: r.many.anamneseFieldValidation({
+    anamneseFieldValidations: r.many.anamneseFieldValidation({
       where: {
         deletedAt: {
           isNull: true,
@@ -170,7 +170,7 @@ export const mainRelations = defineRelations(mainEntities, (r) => ({
       },
       optional: false,
     }),
-    fields: r.many.customerAnamneseField({
+    customerAnamneseFields: r.many.customerAnamneseField({
       where: {
         deletedAt: {
           isNull: true,
@@ -199,6 +199,36 @@ export const mainRelations = defineRelations(mainEntities, (r) => ({
         },
       },
       optional: false,
+    }),
+  },
+
+  appointment: {
+    customer: r.one.customer({
+      from: r.appointment.customerId,
+      to: r.customer.id,
+      where: {
+        deletedAt: {
+          isNull: true,
+        },
+      },
+      optional: false,
+    }),
+    employee: r.one.employee({
+      from: r.appointment.employeeId,
+      to: r.employee.id,
+      where: {
+        deletedAt: {
+          isNull: true,
+        },
+      },
+      optional: false,
+    }),
+    appointmentItems: r.many.appointmentItem({
+      where: {
+        deletedAt: {
+          isNull: true,
+        },
+      },
     }),
   },
 }));

@@ -181,12 +181,11 @@ export class CustomerRepository {
               neighborhood: true,
               city: true,
               state: true,
-              jobName: true,
               maritalStatus: true,
               email: true,
             },
             with: {
-              personPhone: {
+              personPhones: {
                 columns: {
                   id: true,
                   number: true,

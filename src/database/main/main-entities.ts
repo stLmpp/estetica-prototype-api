@@ -10,6 +10,7 @@ import {
   json,
   index,
   pgEnum,
+  bigint as pgCoreBigint,
 } from 'drizzle-orm/pg-core';
 import { sql } from 'drizzle-orm';
 import { MaritalStatus } from '../../shared/domain/marital-status.enum';
@@ -19,13 +20,21 @@ import { AnamneseFieldType } from '../../shared/domain/anamnese-field.type';
 import { AnamneseFieldValidationType } from '../../shared/domain/anamnese-field-validation.type';
 import { AppointmentStatus } from '../../shared/domain/appointment-staus.enum';
 
-const baseEntity = {
-  id: integer('id').primaryKey().generatedAlwaysAsIdentity(),
+function bigint(name: string): ReturnType<typeof pgCoreBigint<'number'>> {
+  return pgCoreBigint(name, { mode: 'number' });
+}
+
+const baseEntityWithoutId = {
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
   deletedAt: timestamp('deleted_at'),
-  createdBy: integer('created_by'), // TODO figure out how to do this
-  lastUpdatedBy: integer('last_updated_by'), // TODO figure out how to do this
+  createdBy: bigint('created_by'), // TODO figure out how to do this
+  lastUpdatedBy: bigint('last_updated_by'), // TODO figure out how to do this
+};
+
+const baseEntity = {
+  id: bigint('id').primaryKey().generatedAlwaysAsIdentity(),
+  ...baseEntityWithoutId,
 };
 
 export const maritalStatus = pgEnum('marital_status', MaritalStatus);
@@ -55,7 +64,7 @@ export const employeeEntity = pgTable(
   'employee',
   {
     ...baseEntity,
-    personId: integer('person_id')
+    personId: bigint('person_id')
       .notNull()
       .references(() => personEntity.id),
     role: varchar('role', { length: 256 }).notNull(),
@@ -67,7 +76,7 @@ export const customerEntity = pgTable(
   'customer',
   {
     ...baseEntity,
-    personId: integer('person_id')
+    personId: bigint('person_id')
       .notNull()
       .references(() => personEntity.id),
     jobName: varchar('job_name', { length: 256 }),
@@ -85,7 +94,7 @@ export const personPhoneEntity = pgTable(
     ...baseEntity,
     type: phoneType().notNull(),
     number: varchar('phone_number', { length: 12 }).notNull(),
-    personId: integer('person_id')
+    personId: bigint('person_id')
       .notNull()
       .references(() => personEntity.id),
   },
@@ -116,7 +125,7 @@ export const customerFollowupEntity = pgTable(
   {
     ...baseEntity,
     text: text('text').notNull(),
-    customerId: integer('customer_id')
+    customerId: bigint('customer_id')
       .notNull()
       .references(() => customerEntity.id),
     date: timestamp('date').notNull(),
@@ -130,10 +139,10 @@ export const followupItemEntity = pgTable(
   'followup_item',
   {
     ...baseEntity,
-    followupId: integer('followup_id')
+    followupId: bigint('followup_id')
       .notNull()
       .references(() => customerFollowupEntity.id),
-    catalogItemId: integer('catalog_item_id').references(
+    catalogItemId: bigint('catalog_item_id').references(
       () => catalogItemEntity.id,
     ),
     description: varchar('description', { length: 2048 }).notNull(),
@@ -175,7 +184,7 @@ export const anamneseFieldValidationEntity = pgTable(
     ...baseEntity,
     validationType: anamneseFieldValidationType('validation_type').notNull(),
     validationArgs: json('validation_args'),
-    anamneseFieldId: integer('anamnese_field_id')
+    anamneseFieldId: bigint('anamnese_field_id')
       .notNull()
       .references(() => anamneseFieldEntity.id),
     active: boolean('active').notNull(),
@@ -189,7 +198,7 @@ export const customerAnamneseEntity = pgTable(
   'customer_anamnese',
   {
     ...baseEntity,
-    customerId: integer('customer_id')
+    customerId: bigint('customer_id')
       .notNull()
       .references(() => customerEntity.id),
     date: timestamp('date').notNull(),
@@ -203,10 +212,10 @@ export const customerAnamneseFieldEntity = pgTable(
   'customer_anamnese_field',
   {
     ...baseEntity,
-    customerAnamneseId: integer('customer_anamnese_id')
+    customerAnamneseId: bigint('customer_anamnese_id')
       .notNull()
       .references(() => customerAnamneseEntity.id),
-    anamneseFieldId: integer('anamnese_field_id')
+    anamneseFieldId: bigint('anamnese_field_id')
       .notNull()
       .references(() => anamneseFieldEntity.id),
     value: varchar('value', { length: 2048 }).notNull(),
@@ -227,10 +236,10 @@ export const appointmentEntity = pgTable(
   'appointment',
   {
     ...baseEntity,
-    customerId: integer('customer_id')
+    customerId: bigint('customer_id')
       .notNull()
       .references(() => customerEntity.id),
-    employeeId: integer('employee_id')
+    employeeId: bigint('employee_id')
       .notNull()
       .references(() => employeeEntity.id),
     startTime: timestamp('start_time').notNull(),
@@ -249,10 +258,10 @@ export const appointmentItemEntity = pgTable(
   'appointment_item',
   {
     ...baseEntity,
-    appointmentId: integer('appointment_id')
+    appointmentId: bigint('appointment_id')
       .notNull()
       .references(() => appointmentEntity.id),
-    catalogItemId: integer('catalog_item_id')
+    catalogItemId: bigint('catalog_item_id')
       .notNull()
       .references(() => catalogItemEntity.id),
     quantity: integer('quantity').default(1).notNull(),

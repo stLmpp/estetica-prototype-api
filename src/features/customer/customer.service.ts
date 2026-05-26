@@ -72,7 +72,7 @@ export class CustomerService {
       state: customer.person.state ?? undefined,
       jobName: customer.jobName ?? undefined,
       maritalStatus: customer.person.maritalStatus ?? undefined,
-      phones: customer.person.personPhone,
+      phones: customer.person.personPhones,
       email: customer.person.email ?? undefined,
     };
   }
