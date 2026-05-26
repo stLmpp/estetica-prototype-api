@@ -17,6 +17,7 @@ import { PhoneType } from '../../shared/domain/phone-type.enum';
 import { CatalogItemType } from '../../shared/domain/catalog-item-type.enum';
 import { AnamneseFieldType } from '../../shared/domain/anamnese-field.type';
 import { AnamneseFieldValidationType } from '../../shared/domain/anamnese-field-validation.type';
+import { AppointmentStatus } from '../../shared/domain/appointment-staus.enum';
 
 const baseEntity = {
   id: integer('id').primaryKey().generatedAlwaysAsIdentity(),
@@ -217,6 +218,55 @@ export const customerAnamneseFieldEntity = pgTable(
   ],
 );
 
+export const appointmentStatusEnum = pgEnum(
+  'appointment_status',
+  AppointmentStatus,
+);
+
+export const appointmentEntity = pgTable(
+  'appointment',
+  {
+    ...baseEntity,
+    customerId: integer('customer_id')
+      .notNull()
+      .references(() => customerEntity.id),
+    employeeId: integer('employee_id')
+      .notNull()
+      .references(() => employeeEntity.id),
+    startTime: timestamp('start_time').notNull(),
+    endTime: timestamp('end_time').notNull(),
+    status: appointmentStatusEnum('status').notNull(),
+    notes: varchar('notes', { length: 2048 }),
+  },
+  (t) => [
+    index().on(t.customerId),
+    index().on(t.employeeId),
+    index().on(t.startTime),
+  ],
+);
+
+export const appointmentItemEntity = pgTable(
+  'appointment_item',
+  {
+    ...baseEntity,
+    appointmentId: integer('appointment_id')
+      .notNull()
+      .references(() => appointmentEntity.id),
+    catalogItemId: integer('catalog_item_id')
+      .notNull()
+      .references(() => catalogItemEntity.id),
+    quantity: integer('quantity').default(1).notNull(),
+    priceApplied: numeric('price_applied', {
+      precision: 10,
+      scale: 2,
+    }),
+  },
+  (t) => [
+    index().on(t.appointmentId),
+    index().on(t.catalogItemId),
+  ],
+);
+
 export const mainEntities = {
   person: personEntity,
   employee: employeeEntity,
@@ -229,4 +279,6 @@ export const mainEntities = {
   anamneseFieldValidation: anamneseFieldValidationEntity,
   customerAnamnese: customerAnamneseEntity,
   customerAnamneseField: customerAnamneseFieldEntity,
+  appointment: appointmentEntity,
+  appointmentItem: appointmentItemEntity,
 };
