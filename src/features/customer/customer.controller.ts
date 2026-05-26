@@ -24,13 +24,13 @@ import { ResponseType } from '../../shared/decorator/response-type.decorator';
 export class CustomerController {
   constructor(private readonly customerService: CustomerService) {}
 
-  @ResponseType(CreateCustomerResponseModel)
+  @ResponseType(CreateCustomerResponseModel, 201)
   @Post()
   async create(
     @Body() body: CustomerCreateRequest,
   ): Promise<CreateCustomerResponseModel> {
     const customer = await this.customerService.create(body.customer);
-    return new CreateCustomerResponseModel({ customer });
+    return { data: { customer } };
   }
 
   @Patch(':customerId')
@@ -47,11 +47,14 @@ export class CustomerController {
     @Query() dto: FilterCustomerDto,
   ): Promise<ListCustomerResponseModel> {
     const { customers, count } = await this.customerService.listPaginated(dto);
-    return new ListCustomerResponseModel(customers, {
-      total: count,
-      limit: dto.limit,
-      page: dto.page,
-    });
+    return {
+      data: { items: customers },
+      meta: {
+        total: count,
+        limit: dto.limit,
+        page: dto.page,
+      },
+    };
   }
 
   @ResponseType(GetCustomerResponseModel)
@@ -60,6 +63,6 @@ export class CustomerController {
     @Param('customerId', ParseIntPipe) customerId: number,
   ): Promise<GetCustomerResponseModel> {
     const customer = await this.customerService.getById(customerId);
-    return new GetCustomerResponseModel({ customer });
+    return { data: { customer } };
   }
 }

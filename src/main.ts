@@ -12,12 +12,10 @@ import dayjs from 'dayjs';
 import customParseFormat from 'dayjs/plugin/customParseFormat';
 import utc from 'dayjs/plugin/utc';
 import { AppConfig } from './shared/config/app-config';
-import { useContainer } from 'class-validator';
 import { setupGracefulShutdown } from '@tygra/nestjs-graceful-shutdown';
 import { type NestExpressApplication } from '@nestjs/platform-express';
 import { getAuthOpenApi } from './core/openapi/auth-openapi';
 import { generateOpenApi } from './core/openapi/generate-open-api';
-import { CustomValidationPipe } from './core/pipe/custom-validation.pipe';
 
 dayjs.extend(customParseFormat);
 dayjs.extend(utc);
@@ -27,22 +25,11 @@ async function bootstrap() {
     bufferLogs: true,
     bodyParser: false,
   });
-  useContainer(app.select(AppModule), { fallbackOnErrors: true });
   const logger = await app.resolve(LoggerService);
   app.useLogger(logger);
-  app
-    .use(compression())
-    .use(helmet())
-    .enableVersioning({
-      type: VersioningType.URI,
-    })
-    .useGlobalPipes(
-      new CustomValidationPipe({
-        transform: true,
-        stopAtFirstError: false,
-        whitelist: true,
-      }),
-    );
+  app.use(compression()).use(helmet()).enableVersioning({
+    type: VersioningType.URI,
+  });
   await SwaggerModule.loadPluginMetadata(metadata);
   const appConfig = app.get(AppConfig);
   const openapiConfig = new DocumentBuilder()

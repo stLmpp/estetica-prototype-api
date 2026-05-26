@@ -6,3 +6,6 @@ allowBuilds:
   esbuild: true
   ssh2: true
   unrs-resolver: true
+
+patchedDependencies:
+  nestjs-zod: patches/nestjs-zod.patch

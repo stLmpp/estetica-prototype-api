@@ -1,0 +1,90 @@
+diff --git a/dist/dto-BBR1Ry2A.d.mts b/dist/dto-BBR1Ry2A.d.mts
+index 572471c9de6d9ce8d06c7861e12fe50e2e4dc4e1..ab04ba8607ba28eb7a7e97b6d1bc8f94f25cd825 100644
+--- a/dist/dto-BBR1Ry2A.d.mts
++++ b/dist/dto-BBR1Ry2A.d.mts
+@@ -1,15 +1,20 @@
+ //#region src/types.d.ts
++import type { z, ZodType } from 'zod';
++
+ interface UnknownSchema {
+   parse(input: unknown, options?: {
+     reportInput?: boolean;
+     [x: string | number | symbol]: unknown;
+   }): unknown;
++
+   encode?(input: unknown, options?: {
+     reportInput?: boolean;
+     [x: string | number | symbol]: unknown;
+   }): unknown;
++
+   array?: () => UnknownSchema;
+ }
++
+ /**
+  * RequiredBy
+  * @desc From `T` make a set of properties by key `K` become required
+@@ -29,18 +34,30 @@ interface UnknownSchema {
+ type RequiredBy<T extends object, K extends keyof T = keyof T> = Omit<T, K> & Required<Pick<T, K>>;
+ //#endregion
+ //#region src/dto.d.ts
+-interface ZodDto<TSchema extends UnknownSchema = UnknownSchema, TCodec extends boolean = boolean> {
+-  new (): ReturnType<TSchema['parse']>;
++interface ZodDto<TSchema extends ZodType = ZodType, Type extends 'input' | 'output' = 'input'> {
++  new(): Type extends 'input' ? z.input<TSchema> : z.output<TSchema>;
+   isZodDto: true;
+   schema: TSchema;
+-  codec: TCodec;
+-  create(input: unknown): ReturnType<TSchema['parse']>;
++  codec: true;
++  create(input: unknown): Type extends 'input' ? z.input<TSchema> : z.output<TSchema>;
+   Output: ZodDto<UnknownSchema, TCodec>;
+   _OPENAPI_METADATA_FACTORY(): unknown;
+ }
+-declare function createZodDto<TSchema extends UnknownSchema, TCodec extends boolean = false>(schema: TSchema, options?: {
+-  codec: TCodec;
+-}): ZodDto<TSchema, TCodec>;
++
++declare function createZodDto<TSchema extends UnknownSchema>(schema: TSchema, options?: {
++  type: 'input'
++}): ZodDto<TSchema, 'input'>;
++declare function createZodDto<TSchema extends UnknownSchema>(schema: TSchema, options?: {
++  type: 'output'
++}): ZodDto<TSchema, 'output'>;
++declare function createZodDto<TSchema extends UnknownSchema>(schema: TSchema, options?: {
++  type?: undefined;
++}): ZodDto<TSchema, 'input'>;
++declare function createZodDto<TSchema extends UnknownSchema>(schema: TSchema, options?: {
++  type?: 'input' | 'output';
++}): ZodDto<TSchema>;
++
+ declare function isZodDto(metatype: unknown): metatype is ZodDto<UnknownSchema, boolean>;
++
+ //#endregion
+ export { UnknownSchema as a, RequiredBy as i, createZodDto as n, isZodDto as r, ZodDto as t };
+\ No newline at end of file
+diff --git a/dist/dto-D6Zp_oRO.mjs b/dist/dto-D6Zp_oRO.mjs
+index dee9759469985c7b9296b7fddf182a8a8e9f53c2..595868caa357742f988f3e036db15e834a90a511 100644
+--- a/dist/dto-D6Zp_oRO.mjs
++++ b/dist/dto-D6Zp_oRO.mjs
+@@ -265,7 +265,7 @@ function createZodDto(schema, options) {
+ 			this.schema = schema;
+ 		}
+ 		static {
+-			this.codec = options?.codec || false;
++			this.codec = true;
+ 		}
+ 		static {
+ 			this[ioSymbol] = "input";
+diff --git a/dist/dto-ikA0c0Dz.cjs b/dist/dto-ikA0c0Dz.cjs
+index f4d4c6e031c23160d1e30d56f3162d88fc3910a8..76fe886a6937af529e28dcc11a5d074fdfd426df 100644
+--- a/dist/dto-ikA0c0Dz.cjs
++++ b/dist/dto-ikA0c0Dz.cjs
+@@ -288,7 +288,7 @@ function createZodDto(schema, options) {
+ 			this.schema = schema;
+ 		}
+ 		static {
+-			this.codec = options?.codec || false;
++			this.codec = true;
+ 		}
+ 		static {
+ 			this[ioSymbol] = "input";

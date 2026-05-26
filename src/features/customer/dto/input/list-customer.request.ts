@@ -1,32 +1,23 @@
-import {
-  IsDate,
-  IsEmail,
-  IsOptional,
-  IsString,
-  Length,
-  Matches,
-} from 'class-validator';
-import { RequestPaginatedModel } from '../../../../shared/model/request.model';
-import { TransformDate } from '../../../../shared/decorator/transform-date.decorator';
+import { z } from 'zod';
+import { createZodDto } from 'nestjs-zod';
+import { RequestPaginatedSchema } from '../../../../shared/model/request.model';
 
-export class FilterCustomerDto extends RequestPaginatedModel {
-  @IsString()
-  @IsOptional()
-  @Length(1, 1024)
-  name?: string;
+export const FilterCustomerSchema = RequestPaginatedSchema.extend({
+  name: z.string().trim().min(1).max(1024).optional(),
+  birthDate: z
+    .codec(z.iso.datetime(), z.date(), {
+      encode: (val) => val.toISOString(),
+      decode: (val) => new Date(val),
+    })
+    .optional(),
+  email: z.email().trim().max(1024).optional(),
+  phone: z
+    .string()
+    .trim()
+    .regex(/^\d{10,11}$/)
+    .optional(),
+});
 
-  @IsOptional()
-  @TransformDate()
-  @IsDate()
-  birthDate?: Date;
-
-  @IsEmail()
-  @IsOptional()
-  @Length(1, 1024)
-  email?: string;
-
-  @IsString()
-  @IsOptional()
-  @Matches(/^\d{10,11}$/)
-  phone?: string;
-}
+export class FilterCustomerDto extends createZodDto(FilterCustomerSchema, {
+  type: 'output',
+}) {}

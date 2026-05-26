@@ -9,6 +9,8 @@ export class AllExceptionsFilter extends BaseExceptionFilter {
       this.applicationRef ||
       (this.httpAdapterHost && this.httpAdapterHost.httpAdapter)!;
 
+    // TODO add handling for zod exceptions
+
     if (exception instanceof ResponseErrorModel) {
       const response: unknown = host.getArgByIndex(1);
       if (!applicationRef.isHeadersSent(response)) {

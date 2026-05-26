@@ -6,13 +6,13 @@ import { LoggerModule } from './shared/logger/logger.module';
 import { ConfigModule } from './shared/config/config.module';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { AppConfig } from './shared/config/app-config';
-import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
+import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
 import { AuthModule } from '@thallesp/nestjs-better-auth';
 import { auth } from './auth/auth';
 import { GracefulShutdownModule } from '@tygra/nestjs-graceful-shutdown';
 import { CustomerModule } from './features/customer/customer.module';
 import { AllExceptionsFilter } from './core/filter/all-exception.filter';
-import { ResponseValidationInterceptor } from './core/interceptor/response-validation.interceptor';
+import { createZodValidationPipe, ZodSerializerInterceptor } from 'nestjs-zod';
 
 @Module({
   imports: [
@@ -63,8 +63,14 @@ import { ResponseValidationInterceptor } from './core/interceptor/response-valid
       useClass: AllExceptionsFilter,
     },
     {
+      provide: APP_PIPE,
+      useClass: createZodValidationPipe({
+        strictSchemaDeclaration: true,
+      }),
+    },
+    {
       provide: APP_INTERCEPTOR,
-      useClass: ResponseValidationInterceptor,
+      useClass: ZodSerializerInterceptor,
     },
   ],
 })

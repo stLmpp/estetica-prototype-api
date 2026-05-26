@@ -5,6 +5,7 @@ import {
   ResponseErrorModel,
 } from '../../shared/model/response.model';
 import { type Class } from 'type-fest';
+import { cleanupOpenApiDoc } from 'nestjs-zod';
 
 const errorSchemas: Class<any>[] = [
   ResponseErrorModel,
@@ -78,5 +79,5 @@ export function generateOpenApi(
     Object.assign(document.components[key], authOpenApi.components?.[key]);
   }
 
-  return document;
+  return cleanupOpenApiDoc(document);
 }

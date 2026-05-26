@@ -1,18 +1,21 @@
-import { applyDecorators, SetMetadata } from '@nestjs/common';
-import { type Class } from 'type-fest';
+import { type ZodDto, ZodSerializerDto } from 'nestjs-zod';
+import { applyDecorators, HttpCode } from '@nestjs/common';
+import { ApiResponse } from '@nestjs/swagger';
 
-export const RESPONSE_TYPE_METADATA_KEY = 'app:res:metadata';
-
-export interface ResponseTypeMetadata {
-  type: Class<any>;
-  isArray: boolean;
-}
-
-export function ResponseType(type: Class<any>, isArray = false) {
-  return applyDecorators(
-    SetMetadata(RESPONSE_TYPE_METADATA_KEY, {
-      isArray,
-      type,
-    } satisfies ResponseTypeMetadata),
-  );
+export function ResponseType(schema: ZodDto | [ZodDto], status = 200) {
+  const decorators: Array<
+    ClassDecorator | MethodDecorator | PropertyDecorator
+  > = [
+    ZodSerializerDto(schema),
+    ApiResponse({
+      type: (Array.isArray(schema)
+        ? schema.map((s) => s.Output)
+        : schema.Output) as never,
+      status,
+    }),
+  ];
+  if (status) {
+    decorators.push(HttpCode(status));
+  }
+  return applyDecorators(...decorators);
 }

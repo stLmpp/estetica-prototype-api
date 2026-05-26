@@ -1,112 +1,47 @@
-import {
-  IsArray,
-  IsDate,
-  IsEmail,
-  IsEnum,
-  IsInt,
-  IsNotEmpty,
-  IsNumber,
-  IsOptional,
-  IsString,
-  Length,
-  Matches,
-  ValidateNested,
-} from 'class-validator';
-import { Type } from 'class-transformer';
-import { ApiProperty } from '@nestjs/swagger';
-import { MaritalStatus } from '../../../../shared/domain/marital-status.enum';
-import { TransformDate } from '../../../../shared/decorator/transform-date.decorator';
+import { z } from 'zod';
+import { createZodDto } from 'nestjs-zod';
 import { PhoneType } from '../../../../shared/domain/phone-type.enum';
-import { ResponseModel } from '../../../../shared/model/response.model';
+import { MaritalStatus } from '../../../../shared/domain/marital-status.enum';
+import { createResponseSchema } from '../../../../shared/model/response.model';
 
-export class GetCustomerResDto {
-  @IsNumber()
-  @IsInt()
-  id!: number;
+export const GetCustomerPhoneResSchema = z.object({
+  id: z.number(),
+  type: z.enum(PhoneType),
+  number: z.string(),
+});
 
-  @IsString()
-  @IsNotEmpty()
-  @Length(1, 1024)
-  name!: string;
+export const GetCustomerResSchema = z.object({
+  id: z.number(),
+  name: z.string().trim().min(1).max(1024),
+  birthDate: z
+    .codec(z.date(), z.iso.datetime(), {
+      encode: (val) => new Date(val),
+      decode: (val) => val.toISOString(),
+    })
+    .optional(),
+  address: z.string().trim().min(1).max(1024).optional(),
+  zipCode: z
+    .string()
+    .trim()
+    .regex(/^\d{8}$/)
+    .optional(),
+  neighborhood: z.string().trim().min(1).max(256).optional(),
+  city: z.string().trim().min(1).max(256).optional(),
+  state: z.string().trim().min(1).max(256).optional(),
+  jobName: z.string().trim().min(1).max(256).optional(),
+  maritalStatus: z.enum(MaritalStatus).optional(),
+  email: z.email().trim().optional(),
+  phones: z.array(GetCustomerPhoneResSchema).optional(),
+});
 
-  @IsDate()
-  @TransformDate()
-  @IsOptional()
-  @ApiProperty({
-    format: 'date',
-  })
-  birthDate?: Date;
+export type GetCustomerResDto = z.input<typeof GetCustomerResSchema>;
 
-  @IsString()
-  @IsNotEmpty()
-  @Length(1, 1024)
-  @IsOptional()
-  address?: string;
+export const GetCustomerResponseSchema = createResponseSchema(
+  z.object({
+    customer: GetCustomerResSchema,
+  }),
+);
 
-  @IsString()
-  @Matches(/^\d{8}$/)
-  @IsOptional()
-  zipCode?: string;
-
-  @IsString()
-  @IsNotEmpty()
-  @Length(1, 256)
-  @IsOptional()
-  neighborhood?: string;
-
-  @IsString()
-  @IsNotEmpty()
-  @Length(1, 256)
-  @IsOptional()
-  city?: string;
-
-  @IsString()
-  @IsNotEmpty()
-  @Length(1, 256)
-  @IsOptional()
-  state?: string;
-
-  @IsString()
-  @IsNotEmpty()
-  @Length(1, 256)
-  @IsOptional()
-  jobName?: string;
-
-  @IsEnum(MaritalStatus)
-  @IsOptional()
-  maritalStatus?: MaritalStatus;
-
-  @IsEmail()
-  @IsOptional()
-  email?: string;
-
-  @IsOptional()
-  @IsArray()
-  @ValidateNested({ each: true })
-  @Type(() => GetCustomerPhoneResDto)
-  phones?: GetCustomerPhoneResDto[];
-}
-
-export class GetCustomerPhoneResDto {
-  @IsNumber()
-  @IsInt()
-  id!: number;
-
-  @IsEnum(PhoneType)
-  type!: PhoneType;
-
-  @IsString()
-  @IsNotEmpty()
-  @Matches(/^\d{10,11}$/)
-  number!: string;
-}
-
-export class GetCustomerResponseDto {
-  @Type(() => GetCustomerResDto)
-  @ValidateNested()
-  customer!: GetCustomerResDto;
-}
-
-export class GetCustomerResponseModel extends ResponseModel(
-  GetCustomerResponseDto,
+export class GetCustomerResponseModel extends createZodDto(
+  GetCustomerResponseSchema,
 ) {}

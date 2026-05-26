@@ -1,108 +1,70 @@
-import { type Class } from 'type-fest';
-import { ApiProperty } from '@nestjs/swagger';
-import { Type } from 'class-transformer';
-import { IsNumber, IsString, ValidateNested } from 'class-validator';
+import { z } from 'zod';
+import { createZodDto } from 'nestjs-zod';
 
-export function ResponseModel<T extends Class<any>>(clazz: T) {
-  class Response {
-    constructor(data: InstanceType<T>) {
-      this.data = data;
-    }
+export const PaginationMetadataSchema = z.object({
+  total: z.number(),
+  page: z.number(),
+  limit: z.number(),
+});
 
-    @ApiProperty({ type: clazz })
-    @Type(() => clazz)
-    @ValidateNested()
-    data: InstanceType<T>;
-  }
-  return Response;
-}
-
-export function ResponsePaginatedModel<T extends Class<any>>(clazz: T) {
-  class ResponseData {
-    @ApiProperty({ type: clazz, isArray: true })
-    @Type(() => clazz)
-    @ValidateNested({ each: true })
-    items!: InstanceType<T>[];
-  }
-
-  class Response {
-    constructor(items: InstanceType<T>[], pagination: PaginationMetadataModel) {
-      this.data = { items };
-      this.meta = PaginationMetadataModel.from(pagination);
-    }
-
-    @ApiProperty({ type: ResponseData })
-    @Type(() => ResponseData)
-    @ValidateNested()
-    data: ResponseData;
-
-    @ApiProperty({ type: PaginationMetadataModel })
-    @Type(() => PaginationMetadataModel)
-    @ValidateNested()
-    meta: PaginationMetadataModel;
-  }
-
-  return Response;
-}
-
-export class PaginationMetadataModel {
+export class PaginationMetadataModel extends createZodDto(
+  PaginationMetadataSchema,
+) {
   constructor(total: number, page: number, limit: number) {
+    super();
     this.total = total;
     this.page = page;
     this.limit = limit;
   }
-
-  @ApiProperty()
-  @IsNumber()
-  readonly total: number;
-
-  @ApiProperty()
-  @IsNumber()
-  readonly page: number;
-
-  @ApiProperty()
-  @IsNumber()
-  readonly limit: number;
 
   static from({ total, limit, page }: PaginationMetadataModel) {
     return new PaginationMetadataModel(total, page, limit);
   }
 }
 
-export class ErrorDetailModel {
+export const ErrorDetailSchema = z.object({
+  issue: z.string(),
+  field: z.string(),
+});
+
+export class ErrorDetailModel extends createZodDto(ErrorDetailSchema) {
   constructor(issue: string, field: string) {
+    super();
     this.issue = issue;
     this.field = field;
   }
-
-  @ApiProperty()
-  @IsString()
-  readonly issue: string;
-
-  @ApiProperty()
-  @IsString()
-  readonly field: string;
 }
 
-export class ErrorModel {
+export const ErrorSchema = z.object({
+  code: z.string(),
+  message: z.string(),
+  details: z.array(ErrorDetailSchema).optional(),
+});
+
+export class ErrorModel extends createZodDto(ErrorSchema) {
   constructor(code: string, message: string, details?: ErrorDetailModel[]) {
+    super();
     this.code = code;
     this.message = message;
     this.details = details;
   }
+}
 
-  @ApiProperty()
-  @IsString()
-  readonly code: string;
+export function createResponseSchema<T extends z.ZodTypeAny>(schema: T) {
+  return z.object({
+    data: schema,
+  });
+}
 
-  @ApiProperty()
-  @IsString()
-  readonly message: string;
-
-  @ApiProperty({ type: ErrorDetailModel, isArray: true })
-  @Type(() => ErrorDetailModel)
-  @ValidateNested({ each: true })
-  readonly details?: ErrorDetailModel[];
+export function createPaginatedResponseSchema<T extends z.ZodTypeAny>(
+  schema: T,
+) {
+  return z.object({
+    data: z.object({
+      items: z.array(schema),
+    }),
+    meta: PaginationMetadataSchema,
+  });
 }
 
 export class ResponseErrorModel extends Error {
@@ -112,14 +74,8 @@ export class ResponseErrorModel extends Error {
     this.statusCode = status;
   }
 
-  @ApiProperty({ type: ErrorModel })
-  @Type(() => ErrorModel)
-  @ValidateNested()
   readonly error: ErrorModel;
 
-  @ApiProperty({ example: 400 })
-  @Type(() => Number)
-  @IsNumber()
   readonly statusCode: number;
 
   toJSON() {

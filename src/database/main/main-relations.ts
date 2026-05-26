@@ -83,6 +83,13 @@ export const mainRelations = defineRelations(mainEntities, (r) => ({
         },
       },
     }),
+    appointmentItems: r.many.appointmentItem({
+      where: {
+        deletedAt: {
+          isNull: true,
+        },
+      },
+    }),
   },
 
   customerFollowup: {
@@ -229,6 +236,29 @@ export const mainRelations = defineRelations(mainEntities, (r) => ({
           isNull: true,
         },
       },
+    }),
+  },
+
+  appointmentItem: {
+    appointment: r.one.appointment({
+      from: r.appointmentItem.appointmentId,
+      to: r.appointment.id,
+      where: {
+        deletedAt: {
+          isNull: true,
+        },
+      },
+      optional: false,
+    }),
+    catalogItem: r.one.catalogItem({
+      from: r.appointmentItem.catalogItemId,
+      to: r.catalogItem.id,
+      where: {
+        deletedAt: {
+          isNull: true,
+        },
+      },
+      optional: false,
     }),
   },
 }));

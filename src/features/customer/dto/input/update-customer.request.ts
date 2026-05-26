@@ -1,81 +1,38 @@
-import {
-  IsDate,
-  IsEmail,
-  IsEnum,
-  IsNotEmpty,
-  IsOptional,
-  IsString,
-  Length,
-  Matches,
-  ValidateNested,
-} from 'class-validator';
-import { Type } from 'class-transformer';
+import { z } from 'zod';
+import { createZodDto } from 'nestjs-zod';
 import { MaritalStatus } from '../../../../shared/domain/marital-status.enum';
-import { ApiProperty } from '@nestjs/swagger';
-import { CreateCustomerDto } from './create-customer.request';
-import { TransformDate } from '../../../../shared/decorator/transform-date.decorator';
 
-export class UpdateCustomerDto {
-  @IsString()
-  @IsNotEmpty()
-  @Length(1, 1024)
-  @IsOptional()
-  name?: string;
+export const UpdateCustomerSchema = z.object({
+  name: z.string().trim().min(1).max(1024).optional(),
+  birthDate: z
+    .codec(z.iso.datetime(), z.date(), {
+      encode: (val) => val.toISOString(),
+      decode: (val) => new Date(val),
+    })
+    .optional(),
+  address: z.string().trim().min(1).max(1024).optional(),
+  zipCode: z
+    .string()
+    .trim()
+    .regex(/^\d{8}$/)
+    .optional(),
+  neighborhood: z.string().trim().min(1).max(256).optional(),
+  city: z.string().trim().min(1).max(256).optional(),
+  state: z.string().trim().min(1).max(256).optional(),
+  jobName: z.string().trim().min(1).max(256).optional(),
+  maritalStatus: z.enum(MaritalStatus).optional(),
+  email: z.email().trim().optional(),
+});
 
-  @IsDate()
-  @TransformDate()
-  @IsOptional()
-  @ApiProperty({
-    format: 'date',
-  })
-  birthDate?: Date;
+export class UpdateCustomerDto extends createZodDto(UpdateCustomerSchema, {
+  type: 'output',
+}) {}
 
-  @IsString()
-  @IsNotEmpty()
-  @Length(1, 1024)
-  @IsOptional()
-  address?: string;
+export const UpdateCustomerRequestSchema = z.object({
+  customer: UpdateCustomerSchema,
+});
 
-  @IsString()
-  @Matches(/^\d{8}$/)
-  @IsOptional()
-  zipCode?: string;
-
-  @IsString()
-  @IsNotEmpty()
-  @Length(1, 256)
-  @IsOptional()
-  neighborhood?: string;
-
-  @IsString()
-  @IsNotEmpty()
-  @Length(1, 256)
-  @IsOptional()
-  city?: string;
-
-  @IsString()
-  @IsNotEmpty()
-  @Length(1, 256)
-  @IsOptional()
-  state?: string;
-
-  @IsString()
-  @IsNotEmpty()
-  @Length(1, 256)
-  @IsOptional()
-  jobName?: string;
-
-  @IsEnum(MaritalStatus)
-  @IsOptional()
-  maritalStatus?: MaritalStatus;
-
-  @IsEmail()
-  @IsOptional()
-  email?: string;
-}
-
-export class UpdateCustomerRequest {
-  @Type(() => CreateCustomerDto)
-  @ValidateNested()
-  readonly customer!: UpdateCustomerDto;
-}
+export class UpdateCustomerRequest extends createZodDto(
+  UpdateCustomerRequestSchema,
+  { type: 'output' },
+) {}

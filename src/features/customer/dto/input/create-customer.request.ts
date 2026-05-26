@@ -1,97 +1,47 @@
-import {
-  IsArray,
-  IsDate,
-  IsEmail,
-  IsEnum,
-  IsNotEmpty,
-  IsOptional,
-  IsString,
-  Length,
-  Matches,
-  ValidateNested,
-} from 'class-validator';
+import { z } from 'zod';
+import { createZodDto } from 'nestjs-zod';
 import { PhoneType } from '../../../../shared/domain/phone-type.enum';
-import { Type } from 'class-transformer';
-import { ApiProperty } from '@nestjs/swagger';
 import { MaritalStatus } from '../../../../shared/domain/marital-status.enum';
-import { TransformDate } from '../../../../shared/decorator/transform-date.decorator';
 
-export class CreateCustomerDto {
-  @IsString()
-  @IsNotEmpty()
-  @Length(1, 1024)
-  name!: string;
+export const CreateCustomerPhoneSchema = z.object({
+  type: z.enum(PhoneType),
+  number: z
+    .string()
+    .trim()
+    .regex(/^\d{10,11}$/),
+});
 
-  @IsDate()
-  @TransformDate()
-  @IsOptional()
-  @ApiProperty({
-    format: 'date',
-  })
-  birthDate?: Date;
+export const CreateCustomerSchema = z.object({
+  name: z.string().trim().min(1).max(1024),
+  birthDate: z
+    .codec(z.iso.datetime(), z.date(), {
+      encode: (val) => val.toISOString(),
+      decode: (val) => new Date(val),
+    })
+    .optional(),
+  address: z.string().trim().min(1).max(1024).optional(),
+  zipCode: z
+    .string()
+    .trim()
+    .regex(/^\d{8}$/)
+    .optional(),
+  neighborhood: z.string().trim().min(1).max(256).optional(),
+  city: z.string().trim().min(1).max(256).optional(),
+  state: z.string().trim().min(1).max(256).optional(),
+  jobName: z.string().trim().min(1).max(256).optional(),
+  maritalStatus: z.enum(MaritalStatus).optional(),
+  email: z.email().trim().optional(),
+  phones: z.array(CreateCustomerPhoneSchema).optional(),
+});
 
-  @IsString()
-  @IsNotEmpty()
-  @Length(1, 1024)
-  @IsOptional()
-  address?: string;
+export class CreateCustomerDto extends createZodDto(CreateCustomerSchema, {
+  type: 'output',
+}) {}
 
-  @IsString()
-  @Matches(/^\d{8}$/)
-  @IsOptional()
-  zipCode?: string;
+export const CustomerCreateSchema = z.object({
+  customer: CreateCustomerSchema,
+});
 
-  @IsString()
-  @IsNotEmpty()
-  @Length(1, 256)
-  @IsOptional()
-  neighborhood?: string;
-
-  @IsString()
-  @IsNotEmpty()
-  @Length(1, 256)
-  @IsOptional()
-  city?: string;
-
-  @IsString()
-  @IsNotEmpty()
-  @Length(1, 256)
-  @IsOptional()
-  state?: string;
-
-  @IsString()
-  @IsNotEmpty()
-  @Length(1, 256)
-  @IsOptional()
-  jobName?: string;
-
-  @IsEnum(MaritalStatus)
-  @IsOptional()
-  maritalStatus?: MaritalStatus;
-
-  @IsEmail()
-  @IsOptional()
-  email?: string;
-
-  @IsOptional()
-  @IsArray()
-  @ValidateNested({ each: true })
-  @Type(() => CreateCustomerPhoneDto)
-  phones?: CreateCustomerPhoneDto[];
-}
-
-export class CreateCustomerPhoneDto {
-  @IsEnum(PhoneType)
-  type!: PhoneType;
-
-  @IsString()
-  @IsNotEmpty()
-  @Matches(/^\d{10,11}$/)
-  number!: string;
-}
-
-export class CustomerCreateRequest {
-  @Type(() => CreateCustomerDto)
-  @ValidateNested()
-  readonly customer!: CreateCustomerDto;
-}
+export class CustomerCreateRequest extends createZodDto(CustomerCreateSchema, {
+  type: 'output',
+}) {}

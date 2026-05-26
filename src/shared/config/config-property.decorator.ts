@@ -1,6 +1,5 @@
-import { type Type } from '@nestjs/common';
-import { plainToInstance } from 'class-transformer';
 import { safe } from '../utils/safe';
+import { type ZodType } from 'zod';
 
 interface ConfigPropertyOptionsBase {
   name: string;
@@ -24,7 +23,7 @@ export type ConfigPropertyOptions = ConfigPropertyOptionsBase &
     | {
         type: 'json';
         defaultValue?: unknown;
-        typeGetter?: () => Type;
+        typeGetter?: () => ZodType;
       }
     | {
         type: 'list';
@@ -38,7 +37,7 @@ export interface ConfigPropertyMetadata {
   name: string;
   required: boolean;
   type: 'string' | 'number' | 'boolean' | 'json' | 'list';
-  typeGetter?: () => Type;
+  typeGetter?: () => ZodType;
   defaultValue?: unknown;
   separator?: string;
   listType?: 'string' | 'number' | 'boolean';
@@ -63,15 +62,19 @@ const typeParser: Record<
   },
   string: (value) => value,
   boolean: (value) => value === 'true',
-  json: (value, { typeGetter, name }) => {
+  json: (value, { name, typeGetter }) => {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     const [error, json] = safe(() => JSON.parse(value));
     if (error) {
       throw new Error(`Invalid JSON value for ${name}: ${value}`);
     }
     if (typeGetter) {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-      return plainToInstance(typeGetter(), json);
+      const schema = typeGetter();
+      const parsedJson = schema.safeParse(json);
+      if (!parsedJson.success) {
+        throw new Error(`Invalid JSON schema for ${name}: ${parsedJson.error}`);
+      }
+      return parsedJson.data;
     }
     // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     return json;

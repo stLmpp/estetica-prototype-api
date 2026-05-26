@@ -2,7 +2,7 @@ import { Controller, Get } from '@nestjs/common';
 import { HealthResponse, HealthStatus } from './health.response';
 import { ApiTags } from '@nestjs/swagger';
 import { OptionalAuth } from '@thallesp/nestjs-better-auth';
-import { ResponseType } from '../../shared/decorator/response-type.decorator';
+import { ZodResponse } from 'nestjs-zod';
 
 @Controller({
   path: 'health',
@@ -11,7 +11,7 @@ import { ResponseType } from '../../shared/decorator/response-type.decorator';
 @ApiTags('Health')
 @OptionalAuth()
 export class HealthController {
-  @ResponseType(HealthResponse)
+  @ZodResponse({ type: HealthResponse })
   @Get()
   health(): HealthResponse {
     return {
