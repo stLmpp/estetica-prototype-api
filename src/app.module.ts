@@ -18,6 +18,7 @@ import { AllExceptionsFilter } from './core/filter/all-exception.filter';
 import { createZodValidationPipe } from 'nestjs-zod';
 import { CustomZodSerializerInterceptor } from './core/interceptor/custom-zod-serializer-interceptor';
 import { ClsModule } from 'nestjs-cls';
+import { SessionInterceptor } from './core/interceptor/session.interceptor';
 
 @Module({
   imports: [
@@ -85,6 +86,10 @@ import { ClsModule } from 'nestjs-cls';
     {
       provide: APP_INTERCEPTOR,
       useClass: CustomZodSerializerInterceptor,
+    },
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: SessionInterceptor,
     },
   ],
 })

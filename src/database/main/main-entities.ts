@@ -1,16 +1,16 @@
 import {
-  pgTable,
-  integer,
-  varchar,
-  date,
+  bigint as pgCoreBigint,
   boolean,
+  date,
+  index,
+  integer,
+  json,
   numeric,
+  pgEnum,
+  pgTable,
   text,
   timestamp,
-  json,
-  index,
-  pgEnum,
-  bigint as pgCoreBigint,
+  varchar,
 } from 'drizzle-orm/pg-core';
 import { sql } from 'drizzle-orm';
 import { MaritalStatus } from '../../shared/domain/marital-status.enum';
@@ -19,21 +19,38 @@ import { CatalogItemType } from '../../shared/domain/catalog-item-type.enum';
 import { AnamneseFieldType } from '../../shared/domain/anamnese-field.type';
 import { AnamneseFieldValidationType } from '../../shared/domain/anamnese-field-validation.type';
 import { AppointmentStatus } from '../../shared/domain/appointment-staus.enum';
+import { ClsServiceManager } from 'nestjs-cls';
+import { type UserSession } from '@thallesp/nestjs-better-auth';
+import { safe } from '../../shared/utils/safe';
 
 function bigint(name: string): ReturnType<typeof pgCoreBigint<'number'>> {
   return pgCoreBigint(name, { mode: 'number' });
+}
+
+function getUserId() {
+  const [error, userId] = safe(() => {
+    const clsService = ClsServiceManager.getClsService();
+    const session: UserSession = clsService.get('session');
+    return session.user.id;
+  });
+  if (error) {
+    console.warn('Failed to retrieve user ID from session', error);
+  }
+  return userId ?? 'unknown';
 }
 
 const baseEntityWithoutId = {
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
   deletedAt: timestamp('deleted_at'),
-  createdBy: bigint('created_by'), // TODO figure out how to do this
-  lastUpdatedBy: bigint('last_updated_by'), // TODO figure out how to do this
+  createdBy: varchar('created_by', { length: 64 }).$default(() => getUserId()),
+  lastUpdatedBy: varchar('last_updated_by', { length: 64 })
+    .$default(() => getUserId())
+    .$onUpdate(() => getUserId()),
 };
 
 const baseEntity = {
-  id: bigint('id').primaryKey().generatedAlwaysAsIdentity(),
+  id: bigint('id').primaryKey().generatedByDefaultAsIdentity(),
   ...baseEntityWithoutId,
 };
 
@@ -52,7 +69,7 @@ export const personEntity = pgTable(
     state: varchar('state', { length: 256 }),
     maritalStatus: maritalStatus('marital_status'),
     email: varchar('email', { length: 1024 }),
-    userId: text('user_id'), // TODO figure out how to do this
+    userId: varchar('user_id', { length: 64 }), // TODO figure out how to do this
   },
   (t) => [
     index().on(t.email),

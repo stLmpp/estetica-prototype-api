@@ -90,7 +90,14 @@ export class AllExceptionsFilter extends BaseExceptionFilter {
       return;
     }
 
+    // TODO improve logger
+    // TODO catch APIError from better-auth
     this.logger.error('An unknown exception occurred', {
+      clazz:
+        unknownException &&
+        typeof unknownException === 'object' &&
+        'constructor' in unknownException &&
+        unknownException.constructor.name,
       exception: unknownException,
       stack:
         unknownException instanceof Error ? unknownException.stack : undefined,

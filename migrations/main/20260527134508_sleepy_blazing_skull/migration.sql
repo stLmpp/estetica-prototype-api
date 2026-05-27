@@ -1,0 +1,27 @@
+ALTER TABLE "anamnese_field" ALTER COLUMN "created_by" SET DATA TYPE varchar(64) USING "created_by"::varchar(64);--> statement-breakpoint
+ALTER TABLE "anamnese_field" ALTER COLUMN "last_updated_by" SET DATA TYPE varchar(64) USING "last_updated_by"::varchar(64);--> statement-breakpoint
+ALTER TABLE "anamnese_field_validation" ALTER COLUMN "created_by" SET DATA TYPE varchar(64) USING "created_by"::varchar(64);--> statement-breakpoint
+ALTER TABLE "anamnese_field_validation" ALTER COLUMN "last_updated_by" SET DATA TYPE varchar(64) USING "last_updated_by"::varchar(64);--> statement-breakpoint
+ALTER TABLE "appointment" ALTER COLUMN "created_by" SET DATA TYPE varchar(64) USING "created_by"::varchar(64);--> statement-breakpoint
+ALTER TABLE "appointment" ALTER COLUMN "last_updated_by" SET DATA TYPE varchar(64) USING "last_updated_by"::varchar(64);--> statement-breakpoint
+ALTER TABLE "appointment_item" ALTER COLUMN "created_by" SET DATA TYPE varchar(64) USING "created_by"::varchar(64);--> statement-breakpoint
+ALTER TABLE "appointment_item" ALTER COLUMN "last_updated_by" SET DATA TYPE varchar(64) USING "last_updated_by"::varchar(64);--> statement-breakpoint
+ALTER TABLE "catalog_item" ALTER COLUMN "created_by" SET DATA TYPE varchar(64) USING "created_by"::varchar(64);--> statement-breakpoint
+ALTER TABLE "catalog_item" ALTER COLUMN "last_updated_by" SET DATA TYPE varchar(64) USING "last_updated_by"::varchar(64);--> statement-breakpoint
+ALTER TABLE "customer_anamnese" ALTER COLUMN "created_by" SET DATA TYPE varchar(64) USING "created_by"::varchar(64);--> statement-breakpoint
+ALTER TABLE "customer_anamnese" ALTER COLUMN "last_updated_by" SET DATA TYPE varchar(64) USING "last_updated_by"::varchar(64);--> statement-breakpoint
+ALTER TABLE "customer_anamnese_field" ALTER COLUMN "created_by" SET DATA TYPE varchar(64) USING "created_by"::varchar(64);--> statement-breakpoint
+ALTER TABLE "customer_anamnese_field" ALTER COLUMN "last_updated_by" SET DATA TYPE varchar(64) USING "last_updated_by"::varchar(64);--> statement-breakpoint
+ALTER TABLE "customer" ALTER COLUMN "created_by" SET DATA TYPE varchar(64) USING "created_by"::varchar(64);--> statement-breakpoint
+ALTER TABLE "customer" ALTER COLUMN "last_updated_by" SET DATA TYPE varchar(64) USING "last_updated_by"::varchar(64);--> statement-breakpoint
+ALTER TABLE "customer_followup" ALTER COLUMN "created_by" SET DATA TYPE varchar(64) USING "created_by"::varchar(64);--> statement-breakpoint
+ALTER TABLE "customer_followup" ALTER COLUMN "last_updated_by" SET DATA TYPE varchar(64) USING "last_updated_by"::varchar(64);--> statement-breakpoint
+ALTER TABLE "employee" ALTER COLUMN "created_by" SET DATA TYPE varchar(64) USING "created_by"::varchar(64);--> statement-breakpoint
+ALTER TABLE "employee" ALTER COLUMN "last_updated_by" SET DATA TYPE varchar(64) USING "last_updated_by"::varchar(64);--> statement-breakpoint
+ALTER TABLE "followup_item" ALTER COLUMN "created_by" SET DATA TYPE varchar(64) USING "created_by"::varchar(64);--> statement-breakpoint
+ALTER TABLE "followup_item" ALTER COLUMN "last_updated_by" SET DATA TYPE varchar(64) USING "last_updated_by"::varchar(64);--> statement-breakpoint
+ALTER TABLE "person" ALTER COLUMN "created_by" SET DATA TYPE varchar(64) USING "created_by"::varchar(64);--> statement-breakpoint
+ALTER TABLE "person" ALTER COLUMN "last_updated_by" SET DATA TYPE varchar(64) USING "last_updated_by"::varchar(64);--> statement-breakpoint
+ALTER TABLE "person" ALTER COLUMN "user_id" SET DATA TYPE varchar(64) USING "user_id"::varchar(64);--> statement-breakpoint
+ALTER TABLE "person_phone" ALTER COLUMN "created_by" SET DATA TYPE varchar(64) USING "created_by"::varchar(64);--> statement-breakpoint
+ALTER TABLE "person_phone" ALTER COLUMN "last_updated_by" SET DATA TYPE varchar(64) USING "last_updated_by"::varchar(64);
