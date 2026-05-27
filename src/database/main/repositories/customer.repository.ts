@@ -9,53 +9,19 @@ import {
   sql,
 } from 'drizzle-orm';
 import { mainEntities } from '../main-entities';
-import { MainDatasource } from '../main-database-connection';
 import { FilterCustomerDto } from '../../../features/customer/dto/input/list-customer.request';
 import { promiseAllObject } from '../../../shared/utils/promise-all-object';
 import { isObjectEmpty } from '../../../shared/utils/is-object-empty';
+import { Repository } from './repository';
 
 @Injectable()
-export class CustomerRepository {
-  constructor(private readonly db: MainDatasource) {}
-
-  async insert(
-    entity: Omit<InferInsertModel<typeof mainEntities.customer>, 'personId'> & {
-      person: InferInsertModel<typeof mainEntities.person>;
-    },
-    phones: Array<
-      Omit<InferInsertModel<typeof mainEntities.personPhone>, 'personId'>
-    >,
-  ) {
-    return this.db.transaction(async (tx) => {
-      const [person] = await tx
-        .insert(this.db.e.person)
-        .values(entity.person)
-        .returning();
-      const [customer] = await tx
-        .insert(this.db.e.customer)
-        .values({ personId: person!.id, jobName: entity.jobName })
-        .returning();
-      if (!phones.length) {
-        return Object.assign(customer!, {
-          phones: [],
-          person: person!,
-        });
-      }
-      const insertedPhones = await tx
-        .insert(this.db.e.personPhone)
-        .values(
-          phones.map((phone) =>
-            Object.assign(phone, {
-              personId: person!.id,
-            }),
-          ),
-        )
-        .returning();
-      return Object.assign(customer!, {
-        phones: insertedPhones,
-        person: person!,
-      });
-    });
+export class CustomerRepository extends Repository {
+  async insert(customer: InferInsertModel<typeof mainEntities.customer>) {
+    const [entity] = await this.db
+      .insert(this.db.e.customer)
+      .values(customer)
+      .returning();
+    return entity!;
   }
 
   async update(

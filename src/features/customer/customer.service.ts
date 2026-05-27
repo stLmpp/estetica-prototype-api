@@ -7,42 +7,57 @@ import { CreateCustomerResDto } from './dto/output/create-customer.response';
 import { FilterCustomerDto } from './dto/input/list-customer.request';
 import { GetCustomerResDto } from './dto/output/get-customer.response';
 import { CustomerExceptions } from './customer-exceptions';
+import { MainTransactional } from '../../database/main/main-database-connection';
+import { PersonRepository } from '../../database/main/repositories/person.repository';
+import { CustomerPhoneRepository } from '../../database/main/repositories/customer-phone.repository';
 
 @Injectable()
 export class CustomerService {
-  constructor(private readonly customerRepository: CustomerRepository) {}
+  constructor(
+    private readonly customerRepository: CustomerRepository,
+    private readonly personRepository: PersonRepository,
+    private readonly customerPhoneRepository: CustomerPhoneRepository,
+  ) {}
 
+  @MainTransactional()
   async create(dto: CreateCustomerDto): Promise<CreateCustomerResDto> {
-    const entity = await this.customerRepository.insert(
-      {
+    const person = await this.personRepository.insert({
+      name: dto.name,
+      birthDate: dto.birthDate,
+      address: dto.address,
+      zipCode: dto.zipCode,
+      neighborhood: dto.neighborhood,
+      city: dto.city,
+      state: dto.state,
+      maritalStatus: dto.maritalStatus,
+      email: dto.email,
+    });
+    const [customer, phones] = await Promise.all([
+      this.customerRepository.insert({
+        personId: person.id,
         jobName: dto.jobName,
-        person: {
-          name: dto.name,
-          birthDate: dto.birthDate,
-          address: dto.address,
-          zipCode: dto.zipCode,
-          neighborhood: dto.neighborhood,
-          city: dto.city,
-          state: dto.state,
-          maritalStatus: dto.maritalStatus,
-          email: dto.email,
-        },
-      },
-      dto.phones ?? [],
-    );
+      }),
+      this.customerPhoneRepository.insertMany(
+        dto.phones?.map((phone) => ({
+          number: phone.number,
+          type: phone.type,
+          personId: person.id,
+        })) ?? [],
+      ),
+    ]);
     return {
-      id: entity.id,
-      name: entity.person.name,
-      birthDate: entity.person.birthDate ?? undefined,
-      address: entity.person.address ?? undefined,
-      zipCode: entity.person.zipCode ?? undefined,
-      neighborhood: entity.person.neighborhood ?? undefined,
-      city: entity.person.city ?? undefined,
-      state: entity.person.state ?? undefined,
-      jobName: entity.jobName ?? undefined,
-      maritalStatus: entity.person.maritalStatus ?? undefined,
-      email: entity.person.email ?? undefined,
-      phones: entity.phones,
+      id: customer.id,
+      name: person.name,
+      birthDate: person.birthDate ?? undefined,
+      address: person.address ?? undefined,
+      zipCode: person.zipCode ?? undefined,
+      neighborhood: person.neighborhood ?? undefined,
+      city: person.city ?? undefined,
+      state: person.state ?? undefined,
+      jobName: customer.jobName ?? undefined,
+      maritalStatus: person.maritalStatus ?? undefined,
+      email: person.email ?? undefined,
+      phones,
     };
   }
 

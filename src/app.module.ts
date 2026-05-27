@@ -1,6 +1,9 @@
 import { Module } from '@nestjs/common';
 import { ScheduleModule } from '@nestjs/schedule';
-import { MainDatabaseModule } from './database/main/main-database.module';
+import {
+  MainDatabaseClsTransactional,
+  MainDatabaseModule,
+} from './database/main/main-database.module';
 import { HealthModule } from './features/health/health.module';
 import { LoggerModule } from './shared/logger/logger.module';
 import { ConfigModule } from './shared/config/config.module';
@@ -14,6 +17,7 @@ import { CustomerModule } from './features/customer/customer.module';
 import { AllExceptionsFilter } from './core/filter/all-exception.filter';
 import { createZodValidationPipe } from 'nestjs-zod';
 import { CustomZodSerializerInterceptor } from './core/interceptor/custom-zod-serializer-interceptor';
+import { ClsModule } from 'nestjs-cls';
 
 @Module({
   imports: [
@@ -49,6 +53,15 @@ import { CustomZodSerializerInterceptor } from './core/interceptor/custom-zod-se
       },
     }),
     GracefulShutdownModule.forRoot(),
+    ClsModule.forRoot({
+      global: true,
+      middleware: {
+        mount: true,
+      },
+      plugins: [
+        MainDatabaseClsTransactional,
+      ],
+    }),
 
     // Features
     HealthModule,

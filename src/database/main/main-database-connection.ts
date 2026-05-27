@@ -1,4 +1,4 @@
-import { type FactoryProvider } from '@nestjs/common';
+import { applyDecorators, type FactoryProvider } from '@nestjs/common';
 import { AppConfig } from '../../shared/config/app-config';
 import { LoggerService } from '../../shared/logger/logger.service';
 import { drizzle } from 'drizzle-orm/node-postgres';
@@ -6,6 +6,10 @@ import { getClazz } from '../../shared/utils/get-clazz';
 import { mainEntities } from './main-entities';
 import { mainRelations } from './main-relations';
 import pg from 'pg';
+import { Transactional } from '@nestjs-cls/transactional';
+import { MAIN_DATABASE_CONNECTION_NAME } from './main-database-connection-name';
+import { type PgTransactionConfig } from 'drizzle-orm/pg-core';
+import { type TransactionalAdapterDrizzleOrm } from '@nestjs-cls/transactional-adapter-drizzle-orm';
 
 let pool: pg.Pool | undefined = undefined;
 
@@ -50,7 +54,7 @@ export class MainDatasource extends getClazz<
   ReturnType<typeof getMainDatabaseClient>
 >() {}
 
-export const MAIN_DATASOURCE_CLIENTE_PROVIDER: FactoryProvider = {
+export const MAIN_DATASOURCE_CLIENT_PROVIDER: FactoryProvider = {
   provide: MainDatasource,
   inject: [MAIN_DATABASE_CONNECTION_POOL, LoggerService],
   useFactory: getMainDatabaseClient,
@@ -58,5 +62,14 @@ export const MAIN_DATASOURCE_CLIENTE_PROVIDER: FactoryProvider = {
 
 export const MAIN_DATABASE_PROVIDERS = [
   MAIN_DATABASE_CONNECTION_POOL_PROVIDER,
-  MAIN_DATASOURCE_CLIENTE_PROVIDER,
+  MAIN_DATASOURCE_CLIENT_PROVIDER,
 ];
+
+export function MainTransactional(options?: PgTransactionConfig) {
+  return applyDecorators(
+    Transactional<TransactionalAdapterDrizzleOrm<MainDatasource>>(
+      MAIN_DATABASE_CONNECTION_NAME,
+      options,
+    ),
+  );
+}
