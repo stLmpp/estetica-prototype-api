@@ -1,11 +1,11 @@
 import { generateSchema, type OpenAPIObject } from '@nestjs/swagger';
+import { type Class } from 'type-fest';
+import { cleanupOpenApiDoc } from 'nestjs-zod';
 import {
   ErrorDetailModel,
   ErrorModel,
   ResponseErrorModel,
-} from '../../shared/model/response.model';
-import { type Class } from 'type-fest';
-import { cleanupOpenApiDoc } from 'nestjs-zod';
+} from '../../shared/model/response-error.model';
 
 const errorSchemas: Class<any>[] = [
   ResponseErrorModel,

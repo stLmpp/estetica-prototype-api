@@ -2,33 +2,32 @@ import {
   type ErrorDetailModel,
   ErrorModel,
   ResponseErrorModel,
-} from '../model/response.model';
+} from '../model/response-error.model';
 import { type SetOptional } from 'type-fest';
 
-export interface ExceptionFactoryWithoutError {
-  (details?: ErrorDetailModel[]): ResponseErrorModel;
+export interface ExceptionFactory {
+  (error?: string, details?: ErrorDetailModel[]): ResponseErrorModel;
+  (details?: ErrorDetailModel[], _?: ErrorDetailModel[]): ResponseErrorModel;
+  (
+    errorOrDetails?: string | ErrorDetailModel[],
+    details?: ErrorDetailModel[],
+  ): ResponseErrorModel;
 }
-
-export interface ExceptionFactoryWithError {
-  (error: string, details?: ErrorDetailModel[]): ResponseErrorModel;
-}
-
-export type ExceptionFactory =
-  | ExceptionFactoryWithoutError
-  | ExceptionFactoryWithError;
 
 type ExceptionArgs = ErrorModel & { status: number };
 
-export function exception(args: ExceptionArgs): ExceptionFactoryWithoutError;
 export function exception(
-  args: SetOptional<ExceptionArgs, 'message' | 'details'>,
-): ExceptionFactoryWithError;
-export function exception(
-  args: SetOptional<ExceptionArgs, 'message' | 'details'>,
+  args: SetOptional<ExceptionArgs, 'error' | 'details'>,
 ): ExceptionFactory {
-  return (error, details) =>
-    new ResponseErrorModel(
-      new ErrorModel(args.code, error ?? args.message, details),
+  return (errorOrDetails, details) => {
+    const isDetails = Array.isArray(errorOrDetails);
+    const error = String(
+      isDetails ? args.error : (errorOrDetails ?? args.message),
+    );
+    const resolvedDetails = isDetails ? errorOrDetails : details;
+    return new ResponseErrorModel(
+      new ErrorModel(args.code, args.message, error, resolvedDetails),
       args.status,
     );
+  };
 }

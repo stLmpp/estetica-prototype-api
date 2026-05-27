@@ -3,28 +3,24 @@ import { createZodDto } from 'nestjs-zod';
 import { PhoneType } from '../../../../shared/domain/phone-type.enum';
 import { MaritalStatus } from '../../../../shared/domain/marital-status.enum';
 import { createResponseSchema } from '../../../../shared/model/response.model';
+import {
+  DateSchema,
+  PhoneNumberSchema,
+  ZipCodeSchema,
+} from '../../../../shared/model/common.model';
 
 export const GetCustomerPhoneResSchema = z.object({
   id: z.number(),
   type: z.enum(PhoneType),
-  number: z.string(),
+  number: PhoneNumberSchema,
 });
 
 export const GetCustomerResSchema = z.object({
   id: z.number(),
   name: z.string().trim().min(1).max(1024),
-  birthDate: z
-    .codec(z.date(), z.iso.datetime(), {
-      encode: (val) => new Date(val),
-      decode: (val) => val.toISOString(),
-    })
-    .optional(),
+  birthDate: DateSchema.optional(),
   address: z.string().trim().min(1).max(1024).optional(),
-  zipCode: z
-    .string()
-    .trim()
-    .regex(/^\d{8}$/)
-    .optional(),
+  zipCode: ZipCodeSchema.optional(),
   neighborhood: z.string().trim().min(1).max(256).optional(),
   city: z.string().trim().min(1).max(256).optional(),
   state: z.string().trim().min(1).max(256).optional(),

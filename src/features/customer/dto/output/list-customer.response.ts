@@ -7,8 +7,6 @@ export const CustomerSchema = z.object({
   name: z.string().trim().min(1).max(1024),
 });
 
-export class CustomerDto extends createZodDto(CustomerSchema) {}
-
 export const ListCustomerResponseSchema =
   createPaginatedResponseSchema(CustomerSchema);
 

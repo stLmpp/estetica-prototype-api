@@ -2,29 +2,22 @@ import { z } from 'zod';
 import { createZodDto } from 'nestjs-zod';
 import { PhoneType } from '../../../../shared/domain/phone-type.enum';
 import { MaritalStatus } from '../../../../shared/domain/marital-status.enum';
+import {
+  DateParamSchema,
+  PhoneNumberSchema,
+  ZipCodeSchema,
+} from '../../../../shared/model/common.model';
 
 export const CreateCustomerPhoneSchema = z.object({
   type: z.enum(PhoneType),
-  number: z
-    .string()
-    .trim()
-    .regex(/^\d{10,11}$/),
+  number: PhoneNumberSchema,
 });
 
 export const CreateCustomerSchema = z.object({
   name: z.string().trim().min(1).max(1024),
-  birthDate: z
-    .codec(z.iso.datetime(), z.date(), {
-      encode: (val) => val.toISOString(),
-      decode: (val) => new Date(val),
-    })
-    .optional(),
+  birthDate: DateParamSchema.optional(),
   address: z.string().trim().min(1).max(1024).optional(),
-  zipCode: z
-    .string()
-    .trim()
-    .regex(/^\d{8}$/)
-    .optional(),
+  zipCode: ZipCodeSchema.optional(),
   neighborhood: z.string().trim().min(1).max(256).optional(),
   city: z.string().trim().min(1).max(256).optional(),
   state: z.string().trim().min(1).max(256).optional(),

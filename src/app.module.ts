@@ -12,7 +12,8 @@ import { auth } from './auth/auth';
 import { GracefulShutdownModule } from '@tygra/nestjs-graceful-shutdown';
 import { CustomerModule } from './features/customer/customer.module';
 import { AllExceptionsFilter } from './core/filter/all-exception.filter';
-import { createZodValidationPipe, ZodSerializerInterceptor } from 'nestjs-zod';
+import { createZodValidationPipe } from 'nestjs-zod';
+import { CustomZodSerializerInterceptor } from './core/interceptor/custom-zod-serializer-interceptor';
 
 @Module({
   imports: [
@@ -70,7 +71,7 @@ import { createZodValidationPipe, ZodSerializerInterceptor } from 'nestjs-zod';
     },
     {
       provide: APP_INTERCEPTOR,
-      useClass: ZodSerializerInterceptor,
+      useClass: CustomZodSerializerInterceptor,
     },
   ],
 })

@@ -1,21 +1,6 @@
 import { exception } from '../shared/exception/exception';
 
 export const coreExceptions = {
-  invalidBody: exception({
-    code: 'INVALID_BODY',
-    message: 'Invalid request body',
-    status: 400,
-  }),
-  invalidQueryParameters: exception({
-    code: 'INVALID_QUERY_PARAMETERS',
-    message: 'Invalid query parameters',
-    status: 400,
-  }),
-  invalidPathParameters: exception({
-    code: 'INVALID_PATH_PARAMETERS',
-    message: 'Invalid path parameters',
-    status: 400,
-  }),
   invalidRequest: exception({
     code: 'INVALID_REQUEST',
     message: 'Invalid request',
@@ -25,5 +10,15 @@ export const coreExceptions = {
     code: 'INVALID_RESPONSE',
     message: 'Invalid response',
     status: 500,
+  }),
+  routeNotFound: exception({
+    code: 'ROUTE_NOT_FOUND',
+    status: 404,
+    message: 'Route not found',
+  }),
+  missingZodDto: exception({
+    code: 'MISSING_ZOD_DTO',
+    status: 500,
+    message: 'Missing Zod DTO schema declaration',
   }),
 };

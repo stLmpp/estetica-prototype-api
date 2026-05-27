@@ -7,7 +7,7 @@ export enum HealthStatus {
 }
 
 export const HealthSchema = z.object({
-  status: z.nativeEnum(HealthStatus),
+  status: z.enum(HealthStatus),
 });
 
 export class HealthResponse extends createZodDto(HealthSchema) {}

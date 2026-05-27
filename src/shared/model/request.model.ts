@@ -1,21 +1,12 @@
 import { z } from 'zod';
-import { createZodDto } from 'nestjs-zod';
+import { IntParamSchema } from './common.model';
 
 export const RequestPaginatedSchema = z.object({
-  page: z
-    .codec(z.string().trim().regex(/^\d+$/), z.number().int(), {
-      encode: (val) => String(val),
-      decode: (val) => Number(val),
-    })
-    .default(1),
+  page: IntParamSchema.default(1),
   limit: z
-    .codec(z.string().trim().regex(/^\d+$/), z.number().int(), {
-      encode: (val) => String(val),
+    .codec(z.enum(['10', '25', '50', '100']), z.int(), {
+      encode: (val) => String(val) as never,
       decode: (val) => Number(val),
     })
     .default(10),
 });
-
-export class RequestPaginatedModel extends createZodDto(
-  RequestPaginatedSchema,
-) {}
