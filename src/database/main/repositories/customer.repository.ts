@@ -33,18 +33,28 @@ export class CustomerRepository {
         .returning();
       const [customer] = await tx
         .insert(this.db.e.customer)
-        .values({ personId: person.id, jobName: entity.jobName })
+        .values({ personId: person!.id, jobName: entity.jobName })
         .returning();
       if (!phones.length) {
-        return Object.assign(customer, { phones: [], person });
+        return Object.assign(customer!, {
+          phones: [],
+          person: person!,
+        });
       }
       const insertedPhones = await tx
         .insert(this.db.e.personPhone)
         .values(
-          phones.map((phone) => Object.assign(phone, { personId: person.id })),
+          phones.map((phone) =>
+            Object.assign(phone, {
+              personId: person!.id,
+            }),
+          ),
         )
         .returning();
-      return Object.assign(customer, { phones: insertedPhones, person });
+      return Object.assign(customer!, {
+        phones: insertedPhones,
+        person: person!,
+      });
     });
   }
 
@@ -152,7 +162,7 @@ export class CustomerRepository {
       )
       .where(where)
       .execute()
-      .then(([{ count }]) => count ?? 0);
+      .then((results) => results[0]?.count ?? 0);
     return promiseAllObject({ customers, count });
   }
 

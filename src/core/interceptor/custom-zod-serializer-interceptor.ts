@@ -7,7 +7,6 @@ import {
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { Observable, switchMap } from 'rxjs';
-import { isZodDto } from 'nestjs-zod/dto';
 import { ZodDto, ZodSerializationException } from 'nestjs-zod';
 
 @Injectable()
@@ -17,34 +16,27 @@ export class CustomZodSerializerInterceptor implements NestInterceptor {
   intercept(context: ExecutionContext, next: CallHandler): Observable<unknown> {
     const responseSchema = this.getContextResponseSchema(context);
 
+    if (!responseSchema) {
+      return next.handle();
+    }
+
+    const schema = Array.isArray(responseSchema)
+      ? responseSchema[0].schema.array()
+      : responseSchema.schema;
+
     return next.handle().pipe(
       switchMap(async (res: unknown) => {
-        if (!responseSchema || res instanceof StreamableFile) {
+        if (res instanceof StreamableFile) {
           return res;
         }
 
-        if (Array.isArray(responseSchema)) {
-          const [dto] = responseSchema;
-          const schema = dto.schema;
+        const result = await schema.safeParseAsync(res);
 
-          const arrSchema = schema.array();
-
-          try {
-            return arrSchema.decode(res as never);
-          } catch (error) {
-            throw new ZodSerializationException(error);
-          }
+        if (result.success) {
+          return result.data;
         }
 
-        if (isZodDto(responseSchema)) {
-          try {
-            return responseSchema.schema.decode(res);
-          } catch (error) {
-            throw new ZodSerializationException(error);
-          }
-        }
-
-        return res;
+        throw new ZodSerializationException(result.error);
       }),
     );
   }
