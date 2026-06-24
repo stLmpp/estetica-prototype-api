@@ -65,7 +65,7 @@ export const mainRelations = defineRelations(mainEntities, (r) => ({
         },
       },
     }),
-    customerAnamneses: r.many.customerAnamnese({
+    customerAnamnesis: r.many.customerAnamnesis({
       where: {
         deletedAt: {
           isNull: true,
@@ -135,16 +135,16 @@ export const mainRelations = defineRelations(mainEntities, (r) => ({
     }),
   },
 
-  // --- ANAMNESE ---
-  anamneseField: {
-    anamneseFieldValidations: r.many.anamneseFieldValidation({
+  // --- ANAMNESIS ---
+  anamnesisField: {
+    anamnesisFieldValidations: r.many.anamnesisFieldValidation({
       where: {
         deletedAt: {
           isNull: true,
         },
       },
     }),
-    customerAnamneseFields: r.many.customerAnamneseField({
+    customerAnamnesisFields: r.many.customerAnamnesisField({
       where: {
         deletedAt: {
           isNull: true,
@@ -153,10 +153,10 @@ export const mainRelations = defineRelations(mainEntities, (r) => ({
     }),
   },
 
-  anamneseFieldValidation: {
-    anamneseField: r.one.anamneseField({
-      from: r.anamneseFieldValidation.anamneseFieldId,
-      to: r.anamneseField.id,
+  anamnesisFieldValidation: {
+    anamnesisField: r.one.anamnesisField({
+      from: r.anamnesisFieldValidation.anamnesisFieldId,
+      to: r.anamnesisField.id,
       where: {
         deletedAt: {
           isNull: true,
@@ -166,9 +166,9 @@ export const mainRelations = defineRelations(mainEntities, (r) => ({
     }),
   },
 
-  customerAnamnese: {
+  customerAnamnesis: {
     customer: r.one.customer({
-      from: r.customerAnamnese.customerId,
+      from: r.customerAnamnesis.customerId,
       to: r.customer.id,
       where: {
         deletedAt: {
@@ -177,7 +177,7 @@ export const mainRelations = defineRelations(mainEntities, (r) => ({
       },
       optional: false,
     }),
-    customerAnamneseFields: r.many.customerAnamneseField({
+    customerAnamnesisFields: r.many.customerAnamnesisField({
       where: {
         deletedAt: {
           isNull: true,
@@ -186,10 +186,10 @@ export const mainRelations = defineRelations(mainEntities, (r) => ({
     }),
   },
 
-  customerAnamneseField: {
-    customerAnamnese: r.one.customerAnamnese({
-      from: r.customerAnamneseField.customerAnamneseId,
-      to: r.customerAnamnese.id,
+  customerAnamnesisField: {
+    customerAnamnesis: r.one.customerAnamnesis({
+      from: r.customerAnamnesisField.customerAnamnesisId,
+      to: r.customerAnamnesis.id,
       where: {
         deletedAt: {
           isNull: true,
@@ -197,9 +197,9 @@ export const mainRelations = defineRelations(mainEntities, (r) => ({
       },
       optional: false,
     }),
-    anamneseField: r.one.anamneseField({
-      from: r.customerAnamneseField.anamneseFieldId,
-      to: r.anamneseField.id,
+    anamnesisField: r.one.anamnesisField({
+      from: r.customerAnamnesisField.anamnesisFieldId,
+      to: r.anamnesisField.id,
       where: {
         deletedAt: {
           isNull: true,

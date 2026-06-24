@@ -61,8 +61,19 @@ export class CustomerService {
     };
   }
 
+  @MainTransactional()
   async update(id: number, dto: UpdateCustomerDto) {
-    await this.customerRepository.update(id, dto);
+    const customer = await this.customerRepository.getById(id);
+    if (!customer) {
+      throw CustomerExceptions.customerNotFound([
+        { field: 'customerId', issue: `not found with value '${id}'` },
+      ]);
+    }
+    const { jobName, ...person } = dto;
+    await Promise.all([
+      this.customerRepository.update(id, { jobName }),
+      this.personRepository.update(customer.personId, person),
+    ]);
   }
 
   async listPaginated(dto: FilterCustomerDto) {
@@ -70,7 +81,8 @@ export class CustomerService {
   }
 
   async getById(id: number): Promise<GetCustomerResDto> {
-    const customer = await this.customerRepository.getById(id);
+    const customer =
+      await this.customerRepository.getByIdWithPersonPersonPhones(id);
     if (!customer) {
       throw CustomerExceptions.customerNotFound([
         { field: 'customerId', issue: `not found with value '${id}'` },

@@ -11,7 +11,6 @@ import {
 import { mainEntities } from '../main-entities';
 import { FilterCustomerDto } from '../../../features/customer/dto/input/list-customer.request';
 import { promiseAllObject } from '../../../shared/utils/promise-all-object';
-import { isObjectEmpty } from '../../../shared/utils/is-object-empty';
 import { Repository } from './repository';
 
 @Injectable()
@@ -27,49 +26,21 @@ export class CustomerRepository extends Repository {
   async update(
     id: number,
     {
-      person,
       jobName,
-    }: Partial<
-      Omit<InferInsertModel<typeof mainEntities.customer>, 'id'> & {
-        person: Partial<
-          Omit<InferInsertModel<typeof mainEntities.person>, 'id'>
-        >;
-      }
-    >,
+    }: Partial<Omit<InferInsertModel<typeof mainEntities.customer>, 'id'>>,
   ) {
-    await this.db.transaction(async (tx) => {
-      const promises: Promise<unknown>[] = [];
-      if (jobName) {
-        promises.push(
-          tx
-            .update(this.db.e.customer)
-            .set({ jobName })
-            .where(
-              and(
-                eq(this.db.e.customer.id, id),
-                isNull(this.db.e.customer.deletedAt),
-              ),
-            ),
-        );
-      }
-      if (person && !isObjectEmpty(person)) {
-        promises.push(
-          tx
-            .update(this.db.e.person)
-            .set(person)
-            .from(this.db.e.customer)
-            .where(
-              and(
-                eq(this.db.e.customer.id, id),
-                eq(this.db.e.customer.personId, this.db.e.person.id),
-                isNull(this.db.e.customer.deletedAt),
-                isNull(this.db.e.person.deletedAt),
-              ),
-            ),
-        );
-      }
-      await Promise.all(promises);
-    });
+    if (!jobName) {
+      return;
+    }
+    await this.db
+      .update(this.db.e.customer)
+      .set({ jobName })
+      .where(
+        and(
+          eq(this.db.e.customer.id, id),
+          isNull(this.db.e.customer.deletedAt),
+        ),
+      );
   }
 
   async listPaginated({
@@ -101,7 +72,6 @@ export class CustomerRepository extends Repository {
       eq(this.db.e.person.email, email!).if(email),
       exists(phoneSubQuery).if(phone),
       isNull(this.db.e.customer.deletedAt),
-      isNull(this.db.e.person.deletedAt),
     );
     const customers = this.db
       .select({
@@ -111,7 +81,10 @@ export class CustomerRepository extends Repository {
       .from(this.db.e.customer)
       .innerJoin(
         this.db.e.person,
-        eq(this.db.e.customer.personId, this.db.e.person.id),
+        and(
+          eq(this.db.e.customer.personId, this.db.e.person.id),
+          isNull(this.db.e.person.deletedAt),
+        ),
       )
       .where(where)
       .limit(limit)
@@ -133,6 +106,17 @@ export class CustomerRepository extends Repository {
   }
 
   async getById(id: number) {
+    return this.db.query.customer.findFirst({
+      where: {
+        id,
+        deletedAt: {
+          isNull: true,
+        },
+      },
+    });
+  }
+
+  async getByIdWithPersonPersonPhones(id: number) {
     return this.db.query.customer
       .findFirst({
         where: {

@@ -1,4 +1,4 @@
-export enum AnamneseFieldValidationType {
+export enum AnamnesisFieldValidationType {
   REQUIRED = 'required',
   MIN_LENGTH = 'minLength',
   MAX_LENGTH = 'maxLength',

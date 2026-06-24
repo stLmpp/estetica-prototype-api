@@ -19,6 +19,7 @@ import { createZodValidationPipe } from 'nestjs-zod';
 import { CustomZodSerializerInterceptor } from './core/interceptor/custom-zod-serializer-interceptor';
 import { ClsModule } from 'nestjs-cls';
 import { SessionInterceptor } from './core/interceptor/session.interceptor';
+import { AnamnesisFieldModule } from './features/anamnesis-field/anamnesis-field.module';
 
 @Module({
   imports: [
@@ -67,6 +68,7 @@ import { SessionInterceptor } from './core/interceptor/session.interceptor';
     // Features
     HealthModule,
     CustomerModule,
+    AnamnesisFieldModule,
   ],
   providers: [
     {

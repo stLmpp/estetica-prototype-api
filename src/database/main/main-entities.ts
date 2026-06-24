@@ -16,12 +16,13 @@ import { sql } from 'drizzle-orm';
 import { MaritalStatus } from '../../shared/domain/marital-status.enum';
 import { PhoneType } from '../../shared/domain/phone-type.enum';
 import { CatalogItemType } from '../../shared/domain/catalog-item-type.enum';
-import { AnamneseFieldType } from '../../shared/domain/anamnese-field.type';
-import { AnamneseFieldValidationType } from '../../shared/domain/anamnese-field-validation.type';
+import { AnamnesisFieldType } from '../../shared/domain/anamnesis-field.type';
+import { AnamnesisFieldValidationType } from '../../shared/domain/anamnesis-field-validation.enum';
 import { AppointmentStatus } from '../../shared/domain/appointment-staus.enum';
 import { ClsServiceManager } from 'nestjs-cls';
 import { type UserSession } from '@thallesp/nestjs-better-auth';
 import { safe } from '../../shared/utils/safe';
+import { CLS_SESSION_KEY } from '../../auth/constants';
 
 function bigint(name: string): ReturnType<typeof pgCoreBigint<'number'>> {
   return pgCoreBigint(name, { mode: 'number' });
@@ -30,7 +31,7 @@ function bigint(name: string): ReturnType<typeof pgCoreBigint<'number'>> {
 function getUserId() {
   const [error, userId] = safe(() => {
     const clsService = ClsServiceManager.getClsService();
-    const session: UserSession = clsService.get('session');
+    const session: UserSession = clsService.get(CLS_SESSION_KEY);
     return session.user.id;
   });
   if (error) {
@@ -175,14 +176,14 @@ export const followupItemEntity = pgTable(
   ],
 );
 
-export const anamneseFieldType = pgEnum(
-  'anamnese_field_type',
-  AnamneseFieldType,
+export const anamnesisFieldType = pgEnum(
+  'anamnesis_field_type',
+  AnamnesisFieldType,
 );
 
-export const anamneseFieldEntity = pgTable('anamnese_field', {
+export const anamnesisFieldEntity = pgTable('anamnesis_field', {
   ...baseEntity,
-  fieldType: anamneseFieldType('field_type').notNull(),
+  fieldType: anamnesisFieldType('field_type').notNull(),
   fieldArgs: json('field_args'),
   label: varchar('label', { length: 128 }).notNull(),
   extraLabels: json('extra_labels'),
@@ -190,29 +191,29 @@ export const anamneseFieldEntity = pgTable('anamnese_field', {
   displayOrder: integer('display_order').notNull(),
 });
 
-export const anamneseFieldValidationType = pgEnum(
-  'anamnese_field_validation_type',
-  AnamneseFieldValidationType,
+export const anamnesisFieldValidationType = pgEnum(
+  'anamnesis_field_validation_type',
+  AnamnesisFieldValidationType,
 );
 
-export const anamneseFieldValidationEntity = pgTable(
-  'anamnese_field_validation',
+export const anamnesisFieldValidationEntity = pgTable(
+  'anamnesis_field_validation',
   {
     ...baseEntity,
-    validationType: anamneseFieldValidationType('validation_type').notNull(),
+    validationType: anamnesisFieldValidationType('validation_type').notNull(),
     validationArgs: json('validation_args'),
-    anamneseFieldId: bigint('anamnese_field_id')
+    anamnesisFieldId: bigint('anamnesis_field_id')
       .notNull()
-      .references(() => anamneseFieldEntity.id),
+      .references(() => anamnesisFieldEntity.id),
     active: boolean('active').notNull(),
   },
   (t) => [
-    index().on(t.anamneseFieldId),
+    index().on(t.anamnesisFieldId),
   ],
 );
 
-export const customerAnamneseEntity = pgTable(
-  'customer_anamnese',
+export const customerAnamnesisEntity = pgTable(
+  'customer_anamnesis',
   {
     ...baseEntity,
     customerId: bigint('customer_id')
@@ -225,22 +226,22 @@ export const customerAnamneseEntity = pgTable(
   ],
 );
 
-export const customerAnamneseFieldEntity = pgTable(
-  'customer_anamnese_field',
+export const customerAnamnesisFieldEntity = pgTable(
+  'customer_anamnesis_field',
   {
     ...baseEntity,
-    customerAnamneseId: bigint('customer_anamnese_id')
+    customerAnamnesisId: bigint('customer_anamnesis_id')
       .notNull()
-      .references(() => customerAnamneseEntity.id),
-    anamneseFieldId: bigint('anamnese_field_id')
+      .references(() => customerAnamnesisEntity.id),
+    anamnesisFieldId: bigint('anamnesis_field_id')
       .notNull()
-      .references(() => anamneseFieldEntity.id),
+      .references(() => anamnesisFieldEntity.id),
     value: varchar('value', { length: 2048 }).notNull(),
     extraValues: json('extra_values'),
   },
   (t) => [
-    index().on(t.customerAnamneseId),
-    index().on(t.anamneseFieldId),
+    index().on(t.customerAnamnesisId),
+    index().on(t.anamnesisFieldId),
   ],
 );
 
@@ -301,10 +302,10 @@ export const mainEntities = {
   catalogItem: catalogItemEntity,
   customerFollowup: customerFollowupEntity,
   followupItem: followupItemEntity,
-  anamneseField: anamneseFieldEntity,
-  anamneseFieldValidation: anamneseFieldValidationEntity,
-  customerAnamnese: customerAnamneseEntity,
-  customerAnamneseField: customerAnamneseFieldEntity,
+  anamnesisField: anamnesisFieldEntity,
+  anamnesisFieldValidation: anamnesisFieldValidationEntity,
+  customerAnamnesis: customerAnamnesisEntity,
+  customerAnamnesisField: customerAnamnesisFieldEntity,
   appointment: appointmentEntity,
   appointmentItem: appointmentItemEntity,
 };

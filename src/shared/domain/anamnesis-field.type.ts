@@ -1,4 +1,4 @@
-export enum AnamneseFieldType {
+export enum AnamnesisFieldType {
   TEXT = 'TEXT',
   NUMBER = 'NUMBER',
   DATE = 'DATE',
