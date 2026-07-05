@@ -1,16 +1,16 @@
 import { betterAuth } from 'better-auth';
 import { AppConfig } from '../shared/config/app-config';
-import { admin, anonymous, openAPI } from 'better-auth/plugins';
+import { admin, anonymous, openAPI, organization } from 'better-auth/plugins';
 import { pinoLogger } from '../shared/logger/logger.config';
 import { LoggerService } from '../shared/logger/logger.service';
-import { getMainPool } from '../database/main/main-database-connection';
+import { getMigrationPool } from '../database/main/main-database-connection';
 
 const appConfig = AppConfig.instance;
 
 const logger = new LoggerService(pinoLogger, 'Auth');
 
 export const auth = betterAuth({
-  database: getMainPool(appConfig),
+  database: getMigrationPool(appConfig),
   logger: {
     log: (level, message, ...args) => {
       logger[level](message, { ...args });
@@ -21,8 +21,9 @@ export const auth = betterAuth({
     openAPI({
       path: 'openapi',
     }),
-    admin() as never,
+    admin(),
     anonymous(),
+    organization(),
   ],
   basePath: '/v1/auth',
   experimental: {
@@ -57,3 +58,5 @@ export const AuthRole = {
 } as const;
 
 export type AuthRole = (typeof AuthRole)[keyof typeof AuthRole];
+
+export type BetterAuthSession = typeof auth.$Infer.Session;

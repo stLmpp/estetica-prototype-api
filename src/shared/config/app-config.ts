@@ -78,5 +78,11 @@ export class AppConfig {
   })
   mainDatabaseUrl!: string;
 
+  @ConfigProperty({
+    name: 'MAIN_DATABASE_MIGRATION_URL',
+    required: true,
+  })
+  mainDatabaseMigrationUrl!: string;
+
   static readonly instance = new AppConfig();
 }

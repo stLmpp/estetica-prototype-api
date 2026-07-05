@@ -13,6 +13,7 @@ import {
   ZodSerializationException,
   ZodValidationException,
 } from 'nestjs-zod';
+import { DrizzleQueryError } from 'drizzle-orm';
 
 const NotFoundResponseSchema = z.object({
   message: z.string(),
@@ -74,6 +75,23 @@ export class AllExceptionsFilter extends BaseExceptionFilter {
         details.push(new ErrorDetailModel(`Route ${route} not found`, 'route'));
       }
       unknownException = coreExceptions.routeNotFound(details);
+    }
+
+    if (unknownException instanceof DrizzleQueryError) {
+      const cause = unknownException.cause;
+      if (
+        cause &&
+        typeof cause === 'object' &&
+        'code' in cause &&
+        cause.code === '42704'
+      ) {
+        unknownException = coreExceptions.databaseSessionNotSet([
+          {
+            field: '.',
+            issue: unknownException.message,
+          },
+        ]);
+      }
     }
 
     if (unknownException instanceof ResponseErrorModel) {

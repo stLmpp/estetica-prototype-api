@@ -6,11 +6,11 @@ import {
 import { ConfigModule } from '../../shared/config/config.module';
 import { CustomerRepository } from './repositories/customer.repository';
 import { ClsPluginTransactional } from '@nestjs-cls/transactional';
-import { TransactionalAdapterDrizzleOrm } from '@nestjs-cls/transactional-adapter-drizzle-orm';
 import { MAIN_DATABASE_CONNECTION_NAME } from './main-database-connection-name';
 import { PersonRepository } from './repositories/person.repository';
 import { CustomerPhoneRepository } from './repositories/customer-phone.repository';
 import { AnamnesisFieldRepository } from './repositories/anamnesis-field.repository';
+import { TransactionalAdapterDrizzleOrmCustom } from '../../core/TransactionAdapterDrizzleOrmCustom';
 
 const REPOSITORIES = [
   CustomerRepository,
@@ -32,7 +32,7 @@ export class MainDatabaseModule {}
 export const MainDatabaseClsTransactional = new ClsPluginTransactional({
   imports: [MainDatabaseModule],
   connectionName: MAIN_DATABASE_CONNECTION_NAME,
-  adapter: new TransactionalAdapterDrizzleOrm({
+  adapter: new TransactionalAdapterDrizzleOrmCustom({
     drizzleInstanceToken: MainDatasource,
   }),
 });

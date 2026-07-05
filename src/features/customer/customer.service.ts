@@ -62,7 +62,7 @@ export class CustomerService {
   }
 
   @MainTransactional()
-  async update(id: number, dto: UpdateCustomerDto) {
+  async update(id: string, dto: UpdateCustomerDto) {
     const customer = await this.customerRepository.getById(id);
     if (!customer) {
       throw CustomerExceptions.customerNotFound([
@@ -80,7 +80,7 @@ export class CustomerService {
     return this.customerRepository.listPaginated(dto);
   }
 
-  async getById(id: number): Promise<GetCustomerResDto> {
+  async getById(id: string): Promise<GetCustomerResDto> {
     const customer =
       await this.customerRepository.getByIdWithPersonPersonPhones(id);
     if (!customer) {

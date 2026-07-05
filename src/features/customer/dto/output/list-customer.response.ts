@@ -3,7 +3,7 @@ import { createZodDto } from 'nestjs-zod';
 import { createPaginatedResponseSchema } from '../../../../shared/model/response.model';
 
 export const CustomerSchema = z.object({
-  id: z.number(),
+  id: z.string(),
   name: z.string().trim().min(1).max(1024),
 });
 

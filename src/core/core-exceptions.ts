@@ -21,4 +21,16 @@ export const coreExceptions = {
     status: 500,
     message: 'Missing Zod DTO schema declaration',
   }),
+  unauthorized: exception({
+    code: 'UNAUTHORIZED',
+    status: 401,
+    message: 'Unauthorized',
+  }),
+  databaseSessionNotSet: exception({
+    code: 'DATABASE_SESSION_NOT_SET',
+    status: 500,
+    message: 'Database session not set',
+    error:
+      'Database session not set. Did you forgot to wrap into a transaction?',
+  }),
 };

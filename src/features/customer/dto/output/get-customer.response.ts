@@ -10,13 +10,13 @@ import {
 } from '../../../../shared/model/common.model';
 
 export const GetCustomerPhoneResSchema = z.object({
-  id: z.number(),
+  id: z.string(),
   type: z.enum(PhoneType),
   number: PhoneNumberSchema,
 });
 
 export const GetCustomerResSchema = z.object({
-  id: z.number(),
+  id: z.string(),
   name: z.string().trim().min(1).max(1024),
   birthDate: DateSchema.optional(),
   address: z.string().trim().min(1).max(1024).optional(),

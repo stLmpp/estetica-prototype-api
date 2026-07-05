@@ -16,7 +16,7 @@ importers:
         version: 3.2.1(@nestjs/common@11.1.27(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.27)(nestjs-cls@6.2.1(@nestjs/common@11.1.27(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.27)(reflect-metadata@0.2.2)(rxjs@7.8.2))(reflect-metadata@0.2.2)(rxjs@7.8.2)
       '@nestjs-cls/transactional-adapter-drizzle-orm':
         specifier: ~1.3.0
-        version: 1.3.0(@nestjs-cls/transactional@3.2.1(@nestjs/common@11.1.27(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.27)(nestjs-cls@6.2.1(@nestjs/common@11.1.27(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.27)(reflect-metadata@0.2.2)(rxjs@7.8.2))(reflect-metadata@0.2.2)(rxjs@7.8.2))(drizzle-orm@1.0.0-rc.3(@neondatabase/serverless@1.1.0)(@sinclair/typebox@0.34.49)(@types/pg@8.20.0)(pg@8.22.0)(zod@4.4.3))(nestjs-cls@6.2.1(@nestjs/common@11.1.27(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.27)(reflect-metadata@0.2.2)(rxjs@7.8.2))
+        version: 1.3.0(@nestjs-cls/transactional@3.2.1(@nestjs/common@11.1.27(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.27)(nestjs-cls@6.2.1(@nestjs/common@11.1.27(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.27)(reflect-metadata@0.2.2)(rxjs@7.8.2))(reflect-metadata@0.2.2)(rxjs@7.8.2))(drizzle-orm@1.0.0-rc.4(@neondatabase/serverless@1.1.0)(@sinclair/typebox@0.34.49)(@types/pg@8.20.0)(pg@8.22.0)(zod@4.4.3))(nestjs-cls@6.2.1(@nestjs/common@11.1.27(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.27)(reflect-metadata@0.2.2)(rxjs@7.8.2))
       '@nestjs/common':
         specifier: ~11.1.27
         version: 11.1.27(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2)
@@ -40,13 +40,13 @@ importers:
         version: 0.5.23
       '@thallesp/nestjs-better-auth':
         specifier: ~2.6.1
-        version: 2.6.1(@nestjs/common@11.1.27(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.27)(better-auth@1.6.20(drizzle-kit@1.0.0-rc.4-ca0f029)(drizzle-orm@1.0.0-rc.3(@neondatabase/serverless@1.1.0)(@sinclair/typebox@0.34.49)(@types/pg@8.20.0)(pg@8.22.0)(zod@4.4.3))(pg@8.22.0))(express@5.2.1)(qs@6.15.2)(typescript@6.0.3)
+        version: 2.6.1(@nestjs/common@11.1.27(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.27)(better-auth@1.6.20(drizzle-kit@1.0.0-rc.4-ca0f029)(drizzle-orm@1.0.0-rc.4(@neondatabase/serverless@1.1.0)(@sinclair/typebox@0.34.49)(@types/pg@8.20.0)(pg@8.22.0)(zod@4.4.3))(pg@8.22.0))(express@5.2.1)(qs@6.15.2)(typescript@6.0.3)
       '@tygra/nestjs-graceful-shutdown':
         specifier: ~2.0.0
         version: 2.0.0(@nestjs/common@11.1.27(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))
       better-auth:
         specifier: ~1.6.20
-        version: 1.6.20(drizzle-kit@1.0.0-rc.4-ca0f029)(drizzle-orm@1.0.0-rc.3(@neondatabase/serverless@1.1.0)(@sinclair/typebox@0.34.49)(@types/pg@8.20.0)(pg@8.22.0)(zod@4.4.3))(pg@8.22.0)
+        version: 1.6.20(drizzle-kit@1.0.0-rc.4-ca0f029)(drizzle-orm@1.0.0-rc.4(@neondatabase/serverless@1.1.0)(@sinclair/typebox@0.34.49)(@types/pg@8.20.0)(pg@8.22.0)(zod@4.4.3))(pg@8.22.0)
       compression:
         specifier: ~1.8.1
         version: 1.8.1
@@ -57,8 +57,8 @@ importers:
         specifier: ~17.4.2
         version: 17.4.2
       drizzle-orm:
-        specifier: 1.0.0-rc.3
-        version: 1.0.0-rc.3(@neondatabase/serverless@1.1.0)(@sinclair/typebox@0.34.49)(@types/pg@8.20.0)(pg@8.22.0)(zod@4.4.3)
+        specifier: 1.0.0-rc.4
+        version: 1.0.0-rc.4(@neondatabase/serverless@1.1.0)(@sinclair/typebox@0.34.49)(@types/pg@8.20.0)(pg@8.22.0)(zod@4.4.3)
       helmet:
         specifier: ~8.2.0
         version: 8.2.0
@@ -2635,12 +2635,20 @@ packages:
     resolution: {integrity: sha512-hM1K72ptIPOpJDScHo7cAF+K8A8Tr3q2yHvBJvOZWvLn2lN+G4RDUvG3rT3ohlSE2O3BN/s7g3e3JiQLStt8iQ==}
     hasBin: true
 
-  drizzle-orm@1.0.0-rc.3:
-    resolution: {integrity: sha512-akZOa5UxapFbdBG8IDkfBRpSZJpMHaOJtGgp7oi1oHaiU8S3KN92waHo2l5aRuv1D9tMGYpv3BQFOsiGcNjLTQ==}
+  drizzle-orm@1.0.0-rc.4:
+    resolution: {integrity: sha512-BT+pf+qoiYHqltoA88Jmf6ilGMXPlpfE0hEJKc2adRtMCAl25Swk/t5gXcWxZNAwdtf3F5gCd2FpeOyP/pT0Hw==}
     peerDependencies:
       '@aws-sdk/client-rds-data': '>=3'
       '@cloudflare/workers-types': '>=4'
-      '@effect/sql-pg': '>=4.0.0-beta.58 || >=4.0.0'
+      '@effect/sql-d1': '>=4.0.0-beta.83 || >=4.0.0'
+      '@effect/sql-libsql': '>=4.0.0-beta.83 || >=4.0.0'
+      '@effect/sql-mysql2': '>=4.0.0-beta.83 || >=4.0.0'
+      '@effect/sql-pg': '>=4.0.0-beta.83 || >=4.0.0'
+      '@effect/sql-pglite': '>=4.0.0-beta.83 || >=4.0.0'
+      '@effect/sql-sqlite-bun': '>=4.0.0-beta.83 || >=4.0.0'
+      '@effect/sql-sqlite-do': '>=4.0.0-beta.83 || >=4.0.0'
+      '@effect/sql-sqlite-node': '>=4.0.0-beta.83 || >=4.0.0'
+      '@effect/sql-sqlite-wasm': '>=4.0.0-beta.83 || >=4.0.0'
       '@electric-sql/pglite': '>=0.2.0'
       '@libsql/client': '>=0.10.0'
       '@libsql/client-wasm': '>=0.10.0'
@@ -2651,9 +2659,11 @@ packages:
       '@sinclair/typebox': '>=0.34.8'
       '@sqlitecloud/drivers': '>=1.0.653'
       '@tidbcloud/serverless': '*'
-      '@tursodatabase/database': '>=0.2.1'
-      '@tursodatabase/database-common': '>=0.2.1'
-      '@tursodatabase/database-wasm': '>=0.2.1'
+      '@tursodatabase/database': '>=0.6.0-pre.28 || >=0.6.0'
+      '@tursodatabase/database-common': '>=0.6.0-pre.28 || >=0.6.0'
+      '@tursodatabase/database-wasm': '>=0.6.0-pre.28 || >=0.6.0'
+      '@tursodatabase/serverless': '>=1.1.3'
+      '@tursodatabase/sync': '>=0.6.0-pre.28 || >=0.6.0'
       '@types/better-sqlite3': '*'
       '@types/mssql': ^9.1.4
       '@types/pg': '*'
@@ -2664,7 +2674,7 @@ packages:
       arktype: '>=2.0.0'
       better-sqlite3: '>=9.3.0'
       bun-types: '*'
-      effect: '>=4.0.0-beta.58 || >=4.0.0'
+      effect: '>=4.0.0-beta.83 || >=4.0.0'
       expo-sqlite: '>=14.0.0'
       mssql: ^11.0.1
       mysql2: '>=2'
@@ -2680,7 +2690,23 @@ packages:
         optional: true
       '@cloudflare/workers-types':
         optional: true
+      '@effect/sql-d1':
+        optional: true
+      '@effect/sql-libsql':
+        optional: true
+      '@effect/sql-mysql2':
+        optional: true
       '@effect/sql-pg':
+        optional: true
+      '@effect/sql-pglite':
+        optional: true
+      '@effect/sql-sqlite-bun':
+        optional: true
+      '@effect/sql-sqlite-do':
+        optional: true
+      '@effect/sql-sqlite-node':
+        optional: true
+      '@effect/sql-sqlite-wasm':
         optional: true
       '@electric-sql/pglite':
         optional: true
@@ -2707,6 +2733,10 @@ packages:
       '@tursodatabase/database-common':
         optional: true
       '@tursodatabase/database-wasm':
+        optional: true
+      '@tursodatabase/serverless':
+        optional: true
+      '@tursodatabase/sync':
         optional: true
       '@types/better-sqlite3':
         optional: true
@@ -5064,12 +5094,12 @@ snapshots:
       nanostores: 1.3.0
       zod: 4.4.3
 
-  '@better-auth/drizzle-adapter@1.6.20(@better-auth/core@1.6.20(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.1)(better-call@1.3.6(zod@4.4.3))(jose@6.2.3)(kysely@0.29.2)(nanostores@1.3.0))(@better-auth/utils@0.4.2)(drizzle-orm@1.0.0-rc.3(@neondatabase/serverless@1.1.0)(@sinclair/typebox@0.34.49)(@types/pg@8.20.0)(pg@8.22.0)(zod@4.4.3))':
+  '@better-auth/drizzle-adapter@1.6.20(@better-auth/core@1.6.20(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.1)(better-call@1.3.6(zod@4.4.3))(jose@6.2.3)(kysely@0.29.2)(nanostores@1.3.0))(@better-auth/utils@0.4.2)(drizzle-orm@1.0.0-rc.4(@neondatabase/serverless@1.1.0)(@sinclair/typebox@0.34.49)(@types/pg@8.20.0)(pg@8.22.0)(zod@4.4.3))':
     dependencies:
       '@better-auth/core': 1.6.20(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.1)(better-call@1.3.6(zod@4.4.3))(jose@6.2.3)(kysely@0.29.2)(nanostores@1.3.0)
       '@better-auth/utils': 0.4.2
     optionalDependencies:
-      drizzle-orm: 1.0.0-rc.3(@neondatabase/serverless@1.1.0)(@sinclair/typebox@0.34.49)(@types/pg@8.20.0)(pg@8.22.0)(zod@4.4.3)
+      drizzle-orm: 1.0.0-rc.4(@neondatabase/serverless@1.1.0)(@sinclair/typebox@0.34.49)(@types/pg@8.20.0)(pg@8.22.0)(zod@4.4.3)
 
   '@better-auth/kysely-adapter@1.6.20(@better-auth/core@1.6.20(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.1)(better-call@1.3.6(zod@4.4.3))(jose@6.2.3)(kysely@0.29.2)(nanostores@1.3.0))(@better-auth/utils@0.4.2)(kysely@0.29.2)':
     dependencies:
@@ -5817,10 +5847,10 @@ snapshots:
   '@neondatabase/serverless@1.1.0':
     optional: true
 
-  '@nestjs-cls/transactional-adapter-drizzle-orm@1.3.0(@nestjs-cls/transactional@3.2.1(@nestjs/common@11.1.27(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.27)(nestjs-cls@6.2.1(@nestjs/common@11.1.27(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.27)(reflect-metadata@0.2.2)(rxjs@7.8.2))(reflect-metadata@0.2.2)(rxjs@7.8.2))(drizzle-orm@1.0.0-rc.3(@neondatabase/serverless@1.1.0)(@sinclair/typebox@0.34.49)(@types/pg@8.20.0)(pg@8.22.0)(zod@4.4.3))(nestjs-cls@6.2.1(@nestjs/common@11.1.27(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.27)(reflect-metadata@0.2.2)(rxjs@7.8.2))':
+  '@nestjs-cls/transactional-adapter-drizzle-orm@1.3.0(@nestjs-cls/transactional@3.2.1(@nestjs/common@11.1.27(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.27)(nestjs-cls@6.2.1(@nestjs/common@11.1.27(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.27)(reflect-metadata@0.2.2)(rxjs@7.8.2))(reflect-metadata@0.2.2)(rxjs@7.8.2))(drizzle-orm@1.0.0-rc.4(@neondatabase/serverless@1.1.0)(@sinclair/typebox@0.34.49)(@types/pg@8.20.0)(pg@8.22.0)(zod@4.4.3))(nestjs-cls@6.2.1(@nestjs/common@11.1.27(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.27)(reflect-metadata@0.2.2)(rxjs@7.8.2))':
     dependencies:
       '@nestjs-cls/transactional': 3.2.1(@nestjs/common@11.1.27(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.27)(nestjs-cls@6.2.1(@nestjs/common@11.1.27(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.27)(reflect-metadata@0.2.2)(rxjs@7.8.2))(reflect-metadata@0.2.2)(rxjs@7.8.2)
-      drizzle-orm: 1.0.0-rc.3(@neondatabase/serverless@1.1.0)(@sinclair/typebox@0.34.49)(@types/pg@8.20.0)(pg@8.22.0)(zod@4.4.3)
+      drizzle-orm: 1.0.0-rc.4(@neondatabase/serverless@1.1.0)(@sinclair/typebox@0.34.49)(@types/pg@8.20.0)(pg@8.22.0)(zod@4.4.3)
       nestjs-cls: 6.2.1(@nestjs/common@11.1.27(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.27)(reflect-metadata@0.2.2)(rxjs@7.8.2)
 
   '@nestjs-cls/transactional@3.2.1(@nestjs/common@11.1.27(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.27)(nestjs-cls@6.2.1(@nestjs/common@11.1.27(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.27)(reflect-metadata@0.2.2)(rxjs@7.8.2))(reflect-metadata@0.2.2)(rxjs@7.8.2)':
@@ -6108,11 +6138,11 @@ snapshots:
     dependencies:
       '@swc/counter': 0.1.3
 
-  '@thallesp/nestjs-better-auth@2.6.1(@nestjs/common@11.1.27(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.27)(better-auth@1.6.20(drizzle-kit@1.0.0-rc.4-ca0f029)(drizzle-orm@1.0.0-rc.3(@neondatabase/serverless@1.1.0)(@sinclair/typebox@0.34.49)(@types/pg@8.20.0)(pg@8.22.0)(zod@4.4.3))(pg@8.22.0))(express@5.2.1)(qs@6.15.2)(typescript@6.0.3)':
+  '@thallesp/nestjs-better-auth@2.6.1(@nestjs/common@11.1.27(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.27)(better-auth@1.6.20(drizzle-kit@1.0.0-rc.4-ca0f029)(drizzle-orm@1.0.0-rc.4(@neondatabase/serverless@1.1.0)(@sinclair/typebox@0.34.49)(@types/pg@8.20.0)(pg@8.22.0)(zod@4.4.3))(pg@8.22.0))(express@5.2.1)(qs@6.15.2)(typescript@6.0.3)':
     dependencies:
       '@nestjs/common': 11.1.27(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2)
       '@nestjs/core': 11.1.27(@nestjs/common@11.1.27(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/platform-express@11.1.27)(reflect-metadata@0.2.2)(rxjs@7.8.2)
-      better-auth: 1.6.20(drizzle-kit@1.0.0-rc.4-ca0f029)(drizzle-orm@1.0.0-rc.3(@neondatabase/serverless@1.1.0)(@sinclair/typebox@0.34.49)(@types/pg@8.20.0)(pg@8.22.0)(zod@4.4.3))(pg@8.22.0)
+      better-auth: 1.6.20(drizzle-kit@1.0.0-rc.4-ca0f029)(drizzle-orm@1.0.0-rc.4(@neondatabase/serverless@1.1.0)(@sinclair/typebox@0.34.49)(@types/pg@8.20.0)(pg@8.22.0)(zod@4.4.3))(pg@8.22.0)
       typescript: 6.0.3
     optionalDependencies:
       express: 5.2.1
@@ -6801,10 +6831,10 @@ snapshots:
 
   baseline-browser-mapping@2.10.38: {}
 
-  better-auth@1.6.20(drizzle-kit@1.0.0-rc.4-ca0f029)(drizzle-orm@1.0.0-rc.3(@neondatabase/serverless@1.1.0)(@sinclair/typebox@0.34.49)(@types/pg@8.20.0)(pg@8.22.0)(zod@4.4.3))(pg@8.22.0):
+  better-auth@1.6.20(drizzle-kit@1.0.0-rc.4-ca0f029)(drizzle-orm@1.0.0-rc.4(@neondatabase/serverless@1.1.0)(@sinclair/typebox@0.34.49)(@types/pg@8.20.0)(pg@8.22.0)(zod@4.4.3))(pg@8.22.0):
     dependencies:
       '@better-auth/core': 1.6.20(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.1)(better-call@1.3.6(zod@4.4.3))(jose@6.2.3)(kysely@0.29.2)(nanostores@1.3.0)
-      '@better-auth/drizzle-adapter': 1.6.20(@better-auth/core@1.6.20(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.1)(better-call@1.3.6(zod@4.4.3))(jose@6.2.3)(kysely@0.29.2)(nanostores@1.3.0))(@better-auth/utils@0.4.2)(drizzle-orm@1.0.0-rc.3(@neondatabase/serverless@1.1.0)(@sinclair/typebox@0.34.49)(@types/pg@8.20.0)(pg@8.22.0)(zod@4.4.3))
+      '@better-auth/drizzle-adapter': 1.6.20(@better-auth/core@1.6.20(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.1)(better-call@1.3.6(zod@4.4.3))(jose@6.2.3)(kysely@0.29.2)(nanostores@1.3.0))(@better-auth/utils@0.4.2)(drizzle-orm@1.0.0-rc.4(@neondatabase/serverless@1.1.0)(@sinclair/typebox@0.34.49)(@types/pg@8.20.0)(pg@8.22.0)(zod@4.4.3))
       '@better-auth/kysely-adapter': 1.6.20(@better-auth/core@1.6.20(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.1)(better-call@1.3.6(zod@4.4.3))(jose@6.2.3)(kysely@0.29.2)(nanostores@1.3.0))(@better-auth/utils@0.4.2)(kysely@0.29.2)
       '@better-auth/memory-adapter': 1.6.20(@better-auth/core@1.6.20(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.1)(better-call@1.3.6(zod@4.4.3))(jose@6.2.3)(kysely@0.29.2)(nanostores@1.3.0))(@better-auth/utils@0.4.2)
       '@better-auth/mongo-adapter': 1.6.20(@better-auth/core@1.6.20(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.1)(better-call@1.3.6(zod@4.4.3))(jose@6.2.3)(kysely@0.29.2)(nanostores@1.3.0))(@better-auth/utils@0.4.2)
@@ -6822,7 +6852,7 @@ snapshots:
       zod: 4.4.3
     optionalDependencies:
       drizzle-kit: 1.0.0-rc.4-ca0f029
-      drizzle-orm: 1.0.0-rc.3(@neondatabase/serverless@1.1.0)(@sinclair/typebox@0.34.49)(@types/pg@8.20.0)(pg@8.22.0)(zod@4.4.3)
+      drizzle-orm: 1.0.0-rc.4(@neondatabase/serverless@1.1.0)(@sinclair/typebox@0.34.49)(@types/pg@8.20.0)(pg@8.22.0)(zod@4.4.3)
       pg: 8.22.0
     transitivePeerDependencies:
       - '@cloudflare/workers-types'
@@ -7157,7 +7187,7 @@ snapshots:
       get-tsconfig: 4.14.0
       jiti: 2.7.0
 
-  drizzle-orm@1.0.0-rc.3(@neondatabase/serverless@1.1.0)(@sinclair/typebox@0.34.49)(@types/pg@8.20.0)(pg@8.22.0)(zod@4.4.3):
+  drizzle-orm@1.0.0-rc.4(@neondatabase/serverless@1.1.0)(@sinclair/typebox@0.34.49)(@types/pg@8.20.0)(pg@8.22.0)(zod@4.4.3):
     optionalDependencies:
       '@neondatabase/serverless': 1.1.0
       '@sinclair/typebox': 0.34.49

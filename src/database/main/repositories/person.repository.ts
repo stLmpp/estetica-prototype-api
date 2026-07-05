@@ -15,7 +15,7 @@ export class PersonRepository extends Repository {
   }
 
   async update(
-    personId: number,
+    personId: string,
     person: Partial<Omit<InferInsertModel<typeof mainEntities.person>, 'id'>>,
   ) {
     if (isObjectEmpty(person)) {

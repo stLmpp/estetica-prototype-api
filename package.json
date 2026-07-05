@@ -40,7 +40,7 @@
     "compression": "~1.8.1",
     "dayjs": "~1.11.21",
     "dotenv": "~17.4.2",
-    "drizzle-orm": "1.0.0-rc.3",
+    "drizzle-orm": "1.0.0-rc.4",
     "helmet": "~8.2.0",
     "nestjs-cls": "~6.2.1",
     "nestjs-zod": "~5.4.0",

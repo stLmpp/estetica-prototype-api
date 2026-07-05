@@ -3,7 +3,6 @@ import {
   Controller,
   Get,
   Param,
-  ParseIntPipe,
   Patch,
   Post,
   Query,
@@ -35,7 +34,7 @@ export class CustomerController {
 
   @Patch(':customerId')
   async update(
-    @Param('customerId', ParseIntPipe) customerId: number,
+    @Param('customerId') customerId: string,
     @Body() body: UpdateCustomerRequest,
   ): Promise<void> {
     await this.customerService.update(customerId, body.customer);
@@ -60,7 +59,7 @@ export class CustomerController {
   @ResponseType(GetCustomerResponseModel)
   @Get(':customerId')
   async getById(
-    @Param('customerId', ParseIntPipe) customerId: number,
+    @Param('customerId') customerId: string,
   ): Promise<GetCustomerResponseModel> {
     const customer = await this.customerService.getById(customerId);
     return { data: { customer } };

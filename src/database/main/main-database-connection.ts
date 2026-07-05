@@ -19,6 +19,14 @@ export function getMainPool(appConfig: AppConfig) {
   }));
 }
 
+let migrationPool: pg.Pool | undefined = undefined;
+
+export function getMigrationPool(appConfig: AppConfig) {
+  return (migrationPool ??= new pg.Pool({
+    connectionString: appConfig.mainDatabaseMigrationUrl,
+  }));
+}
+
 export const MAIN_DATABASE_CONNECTION_POOL = 'MAIN_DATABASE_CONNECTION_POOL';
 
 export const MAIN_DATABASE_CONNECTION_POOL_PROVIDER: FactoryProvider = {

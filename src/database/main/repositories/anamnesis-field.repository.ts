@@ -15,7 +15,7 @@ export class AnamnesisFieldRepository extends Repository {
     return entity!;
   }
 
-  async update(id: number, anamnesisField: Partial<Insert>) {
+  async update(id: string, anamnesisField: Partial<Insert>) {
     await this.db
       .update(this.db.e.anamnesisField)
       .set(anamnesisField)

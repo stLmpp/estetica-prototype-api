@@ -1,12 +1,13 @@
 import {
-  bigint as pgCoreBigint,
+  type AnyPgColumn,
   boolean,
   date,
   index,
   integer,
-  json,
+  jsonb,
   numeric,
   pgEnum,
+  pgPolicy,
   pgTable,
   text,
   timestamp,
@@ -20,24 +21,45 @@ import { AnamnesisFieldType } from '../../shared/domain/anamnesis-field.type';
 import { AnamnesisFieldValidationType } from '../../shared/domain/anamnesis-field-validation.enum';
 import { AppointmentStatus } from '../../shared/domain/appointment-staus.enum';
 import { ClsServiceManager } from 'nestjs-cls';
-import { type UserSession } from '@thallesp/nestjs-better-auth';
 import { safe } from '../../shared/utils/safe';
-import { CLS_SESSION_KEY } from '../../auth/constants';
-
-function bigint(name: string): ReturnType<typeof pgCoreBigint<'number'>> {
-  return pgCoreBigint(name, { mode: 'number' });
-}
+import {
+  CLS_TENANT_ID_KEY,
+  CLS_USER_ID_KEY,
+  RLS_ROLE,
+} from '../../auth/constants';
 
 function getUserId() {
   const [error, userId] = safe(() => {
     const clsService = ClsServiceManager.getClsService();
-    const session: UserSession = clsService.get(CLS_SESSION_KEY);
-    return session.user.id;
+    const userId: string = clsService.get(CLS_USER_ID_KEY);
+    return userId;
   });
   if (error) {
     console.warn('Failed to retrieve user ID from session', error);
   }
   return userId ?? 'unknown';
+}
+
+function getTenantId() {
+  const [error, tenantId] = safe(() => {
+    const clsService = ClsServiceManager.getClsService();
+    const tenantId: string = clsService.get(CLS_TENANT_ID_KEY);
+    return tenantId;
+  });
+  if (error) {
+    console.warn('Failed to retrieve tenant ID from session', error);
+    throw error;
+  }
+  return tenantId;
+}
+
+function addAuthenticatedPolicy(table: { tenantId: AnyPgColumn }) {
+  return pgPolicy('tenancy', {
+    for: 'all',
+    to: RLS_ROLE,
+    using: sql`${table.tenantId} = current_setting('tenant.id')`,
+    withCheck: sql`${table.tenantId} = current_setting('tenant.id')`,
+  });
 }
 
 const baseEntityWithoutId = {
@@ -48,19 +70,29 @@ const baseEntityWithoutId = {
   lastUpdatedBy: varchar('last_updated_by', { length: 64 })
     .$default(() => getUserId())
     .$onUpdate(() => getUserId()),
+  tenantId: varchar('tenant_id', { length: 64 })
+    .notNull()
+    .$defaultFn(() => getTenantId()),
 };
 
-const baseEntity = {
-  id: bigint('id').primaryKey().generatedByDefaultAsIdentity(),
-  ...baseEntityWithoutId,
-};
+function baseEntity(prefix: string) {
+  if (prefix.length < 3 || prefix.length > 5) {
+    throw new Error('Prefix must be between 3 and 5 characters long');
+  }
+  return {
+    id: varchar('id', { length: 38 })
+      .primaryKey()
+      .default(sql`prefixed_uuid('${sql.raw(prefix)}'::text)`),
+    ...baseEntityWithoutId,
+  };
+}
 
 export const maritalStatus = pgEnum('marital_status', MaritalStatus);
 
 export const personEntity = pgTable(
   'person',
   {
-    ...baseEntity,
+    ...baseEntity('per'),
     name: varchar('name', { length: 1024 }).notNull(),
     birthDate: date('birth_date', { mode: 'date' }),
     address: varchar('address', { length: 1024 }),
@@ -73,34 +105,39 @@ export const personEntity = pgTable(
     userId: varchar('user_id', { length: 64 }), // TODO figure out how to do this
   },
   (t) => [
-    index().on(t.email),
+    index().on(t.tenantId, t.email),
     index('customer_name_trgm_index').using('gin', sql`${t.name} gin_trgm_ops`),
+    addAuthenticatedPolicy(t),
   ],
 );
 
 export const employeeEntity = pgTable(
   'employee',
   {
-    ...baseEntity,
-    personId: bigint('person_id')
+    ...baseEntity('emp'),
+    personId: varchar('person_id', { length: 38 })
       .notNull()
       .references(() => personEntity.id),
     role: varchar('role', { length: 256 }).notNull(),
   },
-  (t) => [index().on(t.personId)],
+  (t) => [
+    index().on(t.tenantId, t.personId),
+    addAuthenticatedPolicy(t),
+  ],
 );
 
 export const customerEntity = pgTable(
   'customer',
   {
-    ...baseEntity,
-    personId: bigint('person_id')
+    ...baseEntity('cus'),
+    personId: varchar('person_id', { length: 38 })
       .notNull()
       .references(() => personEntity.id),
     jobName: varchar('job_name', { length: 256 }),
   },
   (t) => [
-    index().on(t.personId),
+    index().on(t.tenantId, t.personId),
+    addAuthenticatedPolicy(t),
   ],
 );
 
@@ -109,16 +146,17 @@ export const phoneType = pgEnum('phone_type', PhoneType);
 export const personPhoneEntity = pgTable(
   'person_phone',
   {
-    ...baseEntity,
+    ...baseEntity('phon'),
     type: phoneType().notNull(),
     number: varchar('phone_number', { length: 12 }).notNull(),
-    personId: bigint('person_id')
+    personId: varchar('person_id', { length: 38 })
       .notNull()
       .references(() => personEntity.id),
   },
   (t) => [
-    index().on(t.personId),
-    index().on(t.number),
+    index().on(t.tenantId, t.personId),
+    index().on(t.tenantId, t.number),
+    addAuthenticatedPolicy(t),
   ],
 );
 
@@ -127,40 +165,42 @@ export const catalogItemType = pgEnum('catalog_item_type', CatalogItemType);
 export const catalogItemEntity = pgTable(
   'catalog_item',
   {
-    ...baseEntity,
+    ...baseEntity('citm'),
     itemType: catalogItemType('item_type').notNull(),
     name: varchar('name', { length: 256 }).notNull(),
     defaultPrice: numeric('default_price', { precision: 10, scale: 2 }),
     active: boolean('active').notNull(),
   },
   (t) => [
-    index().on(t.itemType),
+    index().on(t.tenantId, t.itemType),
+    addAuthenticatedPolicy(t),
   ],
 );
 
 export const customerFollowupEntity = pgTable(
   'customer_followup',
   {
-    ...baseEntity,
+    ...baseEntity('cfup'),
     text: text('text').notNull(),
-    customerId: bigint('customer_id')
+    customerId: varchar('customer_id', { length: 38 })
       .notNull()
       .references(() => customerEntity.id),
     date: timestamp('date').notNull(),
   },
   (t) => [
-    index().on(t.customerId),
+    index().on(t.tenantId, t.customerId),
+    addAuthenticatedPolicy(t),
   ],
 );
 
 export const followupItemEntity = pgTable(
   'followup_item',
   {
-    ...baseEntity,
-    followupId: bigint('followup_id')
+    ...baseEntity('cfupi'),
+    followupId: varchar('followup_id', { length: 38 })
       .notNull()
       .references(() => customerFollowupEntity.id),
-    catalogItemId: bigint('catalog_item_id').references(
+    catalogItemId: varchar('catalog_item_id', { length: 38 }).references(
       () => catalogItemEntity.id,
     ),
     description: varchar('description', { length: 2048 }).notNull(),
@@ -171,8 +211,9 @@ export const followupItemEntity = pgTable(
     quantity: integer('quantity').notNull(),
   },
   (t) => [
-    index().on(t.followupId),
-    index().on(t.catalogItemId),
+    index().on(t.tenantId, t.followupId),
+    index().on(t.tenantId, t.catalogItemId),
+    addAuthenticatedPolicy(t),
   ],
 );
 
@@ -181,15 +222,21 @@ export const anamnesisFieldType = pgEnum(
   AnamnesisFieldType,
 );
 
-export const anamnesisFieldEntity = pgTable('anamnesis_field', {
-  ...baseEntity,
-  fieldType: anamnesisFieldType('field_type').notNull(),
-  fieldArgs: json('field_args'),
-  label: varchar('label', { length: 128 }).notNull(),
-  extraLabels: json('extra_labels'),
-  active: boolean('active').notNull(),
-  displayOrder: integer('display_order').notNull(),
-});
+export const anamnesisFieldEntity = pgTable(
+  'anamnesis_field',
+  {
+    ...baseEntity('anf'),
+    fieldType: anamnesisFieldType('field_type').notNull(),
+    fieldArgs: jsonb('field_args'),
+    label: varchar('label', { length: 128 }).notNull(),
+    extraLabels: jsonb('extra_labels'),
+    active: boolean('active').notNull(),
+    displayOrder: integer('display_order').notNull(),
+  },
+  (t) => [
+    addAuthenticatedPolicy(t),
+  ],
+);
 
 export const anamnesisFieldValidationType = pgEnum(
   'anamnesis_field_validation_type',
@@ -199,49 +246,52 @@ export const anamnesisFieldValidationType = pgEnum(
 export const anamnesisFieldValidationEntity = pgTable(
   'anamnesis_field_validation',
   {
-    ...baseEntity,
+    ...baseEntity('anfv'),
     validationType: anamnesisFieldValidationType('validation_type').notNull(),
-    validationArgs: json('validation_args'),
-    anamnesisFieldId: bigint('anamnesis_field_id')
+    validationArgs: jsonb('validation_args'),
+    anamnesisFieldId: varchar('anamnesis_field_id', { length: 38 })
       .notNull()
       .references(() => anamnesisFieldEntity.id),
     active: boolean('active').notNull(),
   },
   (t) => [
-    index().on(t.anamnesisFieldId),
+    index().on(t.tenantId, t.anamnesisFieldId),
+    addAuthenticatedPolicy(t),
   ],
 );
 
 export const customerAnamnesisEntity = pgTable(
   'customer_anamnesis',
   {
-    ...baseEntity,
-    customerId: bigint('customer_id')
+    ...baseEntity('canm'),
+    customerId: varchar('customer_id', { length: 38 })
       .notNull()
       .references(() => customerEntity.id),
     date: timestamp('date').notNull(),
   },
   (t) => [
-    index().on(t.customerId),
+    index().on(t.tenantId, t.customerId),
+    addAuthenticatedPolicy(t),
   ],
 );
 
 export const customerAnamnesisFieldEntity = pgTable(
   'customer_anamnesis_field',
   {
-    ...baseEntity,
-    customerAnamnesisId: bigint('customer_anamnesis_id')
+    ...baseEntity('canmf'),
+    customerAnamnesisId: varchar('customer_anamnesis_id', { length: 38 })
       .notNull()
       .references(() => customerAnamnesisEntity.id),
-    anamnesisFieldId: bigint('anamnesis_field_id')
+    anamnesisFieldId: varchar('anamnesis_field_id', { length: 38 })
       .notNull()
       .references(() => anamnesisFieldEntity.id),
     value: varchar('value', { length: 2048 }).notNull(),
-    extraValues: json('extra_values'),
+    extraValues: jsonb('extra_values'),
   },
   (t) => [
-    index().on(t.customerAnamnesisId),
-    index().on(t.anamnesisFieldId),
+    index().on(t.tenantId, t.customerAnamnesisId),
+    index().on(t.tenantId, t.anamnesisFieldId),
+    addAuthenticatedPolicy(t),
   ],
 );
 
@@ -253,11 +303,11 @@ export const appointmentStatusEnum = pgEnum(
 export const appointmentEntity = pgTable(
   'appointment',
   {
-    ...baseEntity,
-    customerId: bigint('customer_id')
+    ...baseEntity('apt'),
+    customerId: varchar('customer_id', { length: 38 })
       .notNull()
       .references(() => customerEntity.id),
-    employeeId: bigint('employee_id')
+    employeeId: varchar('employee_id', { length: 38 })
       .notNull()
       .references(() => employeeEntity.id),
     startTime: timestamp('start_time').notNull(),
@@ -266,20 +316,21 @@ export const appointmentEntity = pgTable(
     notes: varchar('notes', { length: 2048 }),
   },
   (t) => [
-    index().on(t.customerId),
-    index().on(t.employeeId),
-    index().on(t.startTime),
+    index().on(t.tenantId, t.customerId),
+    index().on(t.tenantId, t.employeeId),
+    index().on(t.tenantId, t.startTime),
+    addAuthenticatedPolicy(t),
   ],
 );
 
 export const appointmentItemEntity = pgTable(
   'appointment_item',
   {
-    ...baseEntity,
-    appointmentId: bigint('appointment_id')
+    ...baseEntity('apti'),
+    appointmentId: varchar('appointment_id', { length: 38 })
       .notNull()
       .references(() => appointmentEntity.id),
-    catalogItemId: bigint('catalog_item_id')
+    catalogItemId: varchar('catalog_item_id', { length: 38 })
       .notNull()
       .references(() => catalogItemEntity.id),
     quantity: integer('quantity').default(1).notNull(),
@@ -289,8 +340,9 @@ export const appointmentItemEntity = pgTable(
     }),
   },
   (t) => [
-    index().on(t.appointmentId),
-    index().on(t.catalogItemId),
+    index().on(t.tenantId, t.appointmentId),
+    index().on(t.tenantId, t.catalogItemId),
+    addAuthenticatedPolicy(t),
   ],
 );
 

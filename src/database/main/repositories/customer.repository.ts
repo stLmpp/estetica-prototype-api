@@ -24,7 +24,7 @@ export class CustomerRepository extends Repository {
   }
 
   async update(
-    id: number,
+    id: string,
     {
       jobName,
     }: Partial<Omit<InferInsertModel<typeof mainEntities.customer>, 'id'>>,
@@ -105,7 +105,7 @@ export class CustomerRepository extends Repository {
     return promiseAllObject({ customers, count });
   }
 
-  async getById(id: number) {
+  async getById(id: string) {
     return this.db.query.customer.findFirst({
       where: {
         id,
@@ -116,7 +116,7 @@ export class CustomerRepository extends Repository {
     });
   }
 
-  async getByIdWithPersonPersonPhones(id: number) {
+  async getByIdWithPersonPersonPhones(id: string) {
     return this.db.query.customer
       .findFirst({
         where: {

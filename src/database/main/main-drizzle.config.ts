@@ -8,7 +8,7 @@ export default defineConfig({
   dialect: 'postgresql',
   schema: './src/database/main/main-entities.ts',
   dbCredentials: {
-    url: config.mainDatabaseUrl,
+    url: config.mainDatabaseMigrationUrl,
   },
   out: 'migrations/main',
 });
