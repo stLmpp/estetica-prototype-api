@@ -23,7 +23,9 @@ export const auth = betterAuth({
     }),
     admin(),
     anonymous(),
-    organization(),
+    organization({
+      schema: {},
+    }),
   ],
   basePath: '/v1/auth',
   experimental: {

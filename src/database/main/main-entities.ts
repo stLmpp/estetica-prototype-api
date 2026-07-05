@@ -102,7 +102,7 @@ export const personEntity = pgTable(
     state: varchar('state', { length: 256 }),
     maritalStatus: maritalStatus('marital_status'),
     email: varchar('email', { length: 1024 }),
-    userId: varchar('user_id', { length: 64 }), // TODO figure out how to do this
+    userId: varchar('user_id', { length: 64 }),
   },
   (t) => [
     index().on(t.tenantId, t.email),

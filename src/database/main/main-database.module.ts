@@ -10,7 +10,7 @@ import { MAIN_DATABASE_CONNECTION_NAME } from './main-database-connection-name';
 import { PersonRepository } from './repositories/person.repository';
 import { CustomerPhoneRepository } from './repositories/customer-phone.repository';
 import { AnamnesisFieldRepository } from './repositories/anamnesis-field.repository';
-import { TransactionalAdapterDrizzleOrmCustom } from '../../core/TransactionAdapterDrizzleOrmCustom';
+import { TransactionalAdapterDrizzleOrmCustom } from '../../core/transactional-adapter-drizzle-orm-custom';
 
 const REPOSITORIES = [
   CustomerRepository,
