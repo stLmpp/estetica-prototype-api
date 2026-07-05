@@ -76,13 +76,31 @@ export class AppConfig {
     name: 'MAIN_DATABASE_URL',
     required: true,
   })
-  mainDatabaseUrl!: string;
+  readonly mainDatabaseUrl!: string;
 
   @ConfigProperty({
     name: 'MAIN_DATABASE_MIGRATION_URL',
     required: true,
   })
-  mainDatabaseMigrationUrl!: string;
+  readonly mainDatabaseMigrationUrl!: string;
+
+  @ConfigProperty({
+    name: 'BETTER_AUTH_ADMIN_NAME',
+    defaultValue: 'admin',
+  })
+  readonly betterAuthAdminName!: string;
+
+  @ConfigProperty({
+    name: 'BETTER_AUTH_ADMIN_PASSWORD',
+    required: true,
+  })
+  readonly betterAuthAdminPassword!: string;
+
+  @ConfigProperty({
+    name: 'BETTER_AUTH_ADMIN_EMAIL',
+    required: true,
+  })
+  readonly betterAuthAdminEmail!: string;
 
   static readonly instance = new AppConfig();
 }

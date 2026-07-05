@@ -4,10 +4,34 @@ import { admin, anonymous, openAPI, organization } from 'better-auth/plugins';
 import { pinoLogger } from '../shared/logger/logger.config';
 import { LoggerService } from '../shared/logger/logger.service';
 import { getMigrationPool } from '../database/main/main-database-connection';
+import { z } from 'zod';
 
 const appConfig = AppConfig.instance;
 
 const logger = new LoggerService(pinoLogger, 'Auth');
+
+export const AuthRole = {
+  Admin: 'admin',
+  User: 'user',
+} as const;
+
+export type AuthRole = (typeof AuthRole)[keyof typeof AuthRole];
+
+export const AuthOrgRole = {
+  Owner: 'owner',
+  Admin: 'admin',
+  User: 'user',
+} as const;
+
+export type AuthOrgRole = (typeof AuthOrgRole)[keyof typeof AuthOrgRole];
+
+const organizationSchema = z
+  .object({
+    membershipLimit: z.number().positive(),
+  })
+  .catch({
+    membershipLimit: 1,
+  });
 
 export const auth = betterAuth({
   database: getMigrationPool(appConfig),
@@ -24,7 +48,27 @@ export const auth = betterAuth({
     admin(),
     anonymous(),
     organization({
-      schema: {},
+      requireEmailVerificationOnInvitation: false, // TODO
+      allowUserToCreateOrganization: (user) => user.role === AuthRole.Admin,
+      disableOrganizationDeletion: true,
+      schema: {
+        organization: {
+          additionalFields: {
+            membershipLimit: {
+              defaultValue: 1,
+              fieldName: 'membership_limit',
+              required: true,
+              type: 'number',
+              validator: {
+                input: z.int().positive(),
+              },
+            },
+          },
+        },
+      },
+      membershipLimit: (_, organization) => {
+        return organizationSchema.parse(organization).membershipLimit;
+      },
     }),
   ],
   basePath: '/v1/auth',
@@ -51,14 +95,10 @@ export const auth = betterAuth({
   },
   emailAndPassword: {
     enabled: true,
+    requireEmailVerification: false, // TODO
   },
 });
 
-export const AuthRole = {
-  Admin: 'admin',
-  User: 'user',
-} as const;
-
-export type AuthRole = (typeof AuthRole)[keyof typeof AuthRole];
-
 export type BetterAuthSession = typeof auth.$Infer.Session;
+export type BetterAuthUser = BetterAuthSession['user'];
+export type BetterAuthOrganization = typeof auth.$Infer.Organization;

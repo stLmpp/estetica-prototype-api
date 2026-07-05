@@ -39,8 +39,8 @@ importers:
         specifier: ~0.5.23
         version: 0.5.23
       '@thallesp/nestjs-better-auth':
-        specifier: ~2.6.1
-        version: 2.6.1(@nestjs/common@11.1.27(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.27)(better-auth@1.6.23(drizzle-kit@1.0.0-rc.4-ca0f029)(drizzle-orm@1.0.0-rc.4(@neondatabase/serverless@1.1.0)(@sinclair/typebox@0.34.49)(@types/pg@8.20.0)(pg@8.22.0)(zod@4.4.3))(pg@8.22.0))(express@5.2.1)(qs@6.15.2)(typescript@6.0.3)
+        specifier: ~2.7.0
+        version: 2.7.0(@nestjs/common@11.1.27(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.27)(better-auth@1.6.23(drizzle-kit@1.0.0-rc.4-ca0f029)(drizzle-orm@1.0.0-rc.4(@neondatabase/serverless@1.1.0)(@sinclair/typebox@0.34.49)(@types/pg@8.20.0)(pg@8.22.0)(zod@4.4.3))(pg@8.22.0))(express@5.2.1)(qs@6.15.2)(typescript@6.0.3)
       '@tygra/nestjs-graceful-shutdown':
         specifier: ~2.0.0
         version: 2.0.0(@nestjs/common@11.1.27(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))
@@ -1596,8 +1596,8 @@ packages:
   '@swc/types@0.1.27':
     resolution: {integrity: sha512-K6h3iUlqeM946U4sXFYeahefR1YBbXJvko+hv8WS8/0BNJ4OHiHRywMnQUJCqkR7Y9+hqQ1TvEpiKqUhz7NEFg==}
 
-  '@thallesp/nestjs-better-auth@2.6.1':
-    resolution: {integrity: sha512-SUfRXLMFtdLa+aL79LH8KkjC2uFkwwbwthymvYXqClWUf8vujUYXoc+es1puIn1OalQ45PiY2p3MPZdslcglKw==}
+  '@thallesp/nestjs-better-auth@2.7.0':
+    resolution: {integrity: sha512-Grq74scQ4AdEjrAr9mE8780u9N4fn+X/qz7DTHa/K37g+RPw+R3Yde4leRz/UIqsLx0o8p1B5wRGPnM65Q+ZsQ==}
     engines: {node: '>=22.22.1'}
     peerDependencies:
       '@nestjs/common': ^11.1.6
@@ -6186,7 +6186,7 @@ snapshots:
     dependencies:
       '@swc/counter': 0.1.3
 
-  '@thallesp/nestjs-better-auth@2.6.1(@nestjs/common@11.1.27(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.27)(better-auth@1.6.23(drizzle-kit@1.0.0-rc.4-ca0f029)(drizzle-orm@1.0.0-rc.4(@neondatabase/serverless@1.1.0)(@sinclair/typebox@0.34.49)(@types/pg@8.20.0)(pg@8.22.0)(zod@4.4.3))(pg@8.22.0))(express@5.2.1)(qs@6.15.2)(typescript@6.0.3)':
+  '@thallesp/nestjs-better-auth@2.7.0(@nestjs/common@11.1.27(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.27)(better-auth@1.6.23(drizzle-kit@1.0.0-rc.4-ca0f029)(drizzle-orm@1.0.0-rc.4(@neondatabase/serverless@1.1.0)(@sinclair/typebox@0.34.49)(@types/pg@8.20.0)(pg@8.22.0)(zod@4.4.3))(pg@8.22.0))(express@5.2.1)(qs@6.15.2)(typescript@6.0.3)':
     dependencies:
       '@nestjs/common': 11.1.27(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2)
       '@nestjs/core': 11.1.27(@nestjs/common@11.1.27(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/platform-express@11.1.27)(reflect-metadata@0.2.2)(rxjs@7.8.2)
@@ -8061,7 +8061,7 @@ snapshots:
       jest-regex-util: 30.4.0
       jest-util: 30.4.1
       jest-worker: 30.4.1
-      picomatch: 4.0.4
+      picomatch: 4.0.5
       walker: 1.0.8
     optionalDependencies:
       fsevents: 2.3.3
@@ -8208,7 +8208,7 @@ snapshots:
       chalk: 4.1.2
       ci-info: 4.4.0
       graceful-fs: 4.2.11
-      picomatch: 4.0.4
+      picomatch: 4.0.5
 
   jest-validate@30.4.1:
     dependencies:

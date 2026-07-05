@@ -15,16 +15,20 @@ import { FilterCustomerDto } from './dto/input/list-customer.request';
 import { ListCustomerResponseModel } from './dto/output/list-customer.response';
 import { GetCustomerResponseModel } from './dto/output/get-customer.response';
 import { ResponseType } from '../../shared/decorator/response-type.decorator';
+import { OrgRoles, RequireActiveOrg } from '@thallesp/nestjs-better-auth';
+import { AuthOrgRole } from '../../auth/auth';
 
 @Controller({
   path: 'customer',
   version: '1',
 })
+@RequireActiveOrg()
 export class CustomerController {
   constructor(private readonly customerService: CustomerService) {}
 
   @ResponseType(CreateCustomerResponseModel, 201)
   @Post()
+  @OrgRoles([AuthOrgRole.Admin])
   async create(
     @Body() body: CustomerCreateRequest,
   ): Promise<CreateCustomerResponseModel> {
@@ -33,6 +37,7 @@ export class CustomerController {
   }
 
   @Patch(':customerId')
+  @OrgRoles([AuthOrgRole.Admin])
   async update(
     @Param('customerId') customerId: string,
     @Body() body: UpdateCustomerRequest,
