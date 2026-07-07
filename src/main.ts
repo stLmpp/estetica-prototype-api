@@ -62,8 +62,11 @@ async function bootstrap() {
 
   server.setTimeout(appConfig.serverTimeoutMs);
 
-  logger.log(`Application is running on: ${await app.getUrl()}`, {
+  logger.log(`Application is running on: http://localhost:${appConfig.port}`, {
     port: appConfig.port,
   });
+  logger.log(
+    `OpenAPI server running on: http://localhost:${appConfig.port}/openapi`,
+  );
 }
 bootstrap();

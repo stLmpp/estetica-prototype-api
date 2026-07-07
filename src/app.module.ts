@@ -22,6 +22,7 @@ import { SessionInterceptor } from './core/interceptor/session.interceptor';
 import { AnamnesisFieldModule } from './features/anamnesis-field/anamnesis-field.module';
 import { safeAsync } from './shared/utils/safe';
 import { APIError, BASE_ERROR_CODES } from 'better-auth';
+import { LoggerService } from './shared/logger/logger.service';
 
 @Module({
   imports: [
@@ -101,7 +102,10 @@ export class AppModule implements OnModuleInit {
   constructor(
     private readonly appConfig: AppConfig,
     private readonly authService: AuthService<typeof auth>,
-  ) {}
+    private readonly logger: LoggerService,
+  ) {
+    logger.setContext(AppModule.name);
+  }
 
   async onModuleInit() {
     const [error] = await safeAsync(() =>
@@ -109,18 +113,20 @@ export class AppModule implements OnModuleInit {
         body: {
           email: this.appConfig.betterAuthAdminEmail,
           name: this.appConfig.betterAuthAdminName,
-          role: 'admin',
           password: this.appConfig.betterAuthAdminPassword,
+          role: 'admin',
         },
       }),
     );
     if (
-      error instanceof APIError &&
-      error.body?.code ===
-        BASE_ERROR_CODES.USER_ALREADY_EXISTS_USE_ANOTHER_EMAIL.code
+      !error ||
+      (error instanceof APIError &&
+        error.body?.code ===
+          BASE_ERROR_CODES.USER_ALREADY_EXISTS_USE_ANOTHER_EMAIL.code)
     ) {
       return;
     }
+    this.logger.error('Failed to create admin user', { error });
     throw new Error('Failed to create admin user', { cause: error });
   }
 }

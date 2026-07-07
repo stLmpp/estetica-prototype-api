@@ -1,10 +1,17 @@
-import { betterAuth } from 'better-auth';
+import { betterAuth, type ModelNames } from 'better-auth';
 import { AppConfig } from '../shared/config/app-config';
-import { admin, anonymous, openAPI, organization } from 'better-auth/plugins';
+import {
+  admin,
+  anonymous,
+  openAPI,
+  organization,
+  username,
+} from 'better-auth/plugins';
 import { pinoLogger } from '../shared/logger/logger.config';
 import { LoggerService } from '../shared/logger/logger.service';
 import { getMigrationPool } from '../database/main/main-database-connection';
 import { z } from 'zod';
+import { v7 as uuidv7 } from 'uuid';
 
 const appConfig = AppConfig.instance;
 
@@ -24,6 +31,20 @@ export const AuthOrgRole = {
 } as const;
 
 export type AuthOrgRole = (typeof AuthOrgRole)[keyof typeof AuthOrgRole];
+
+const generateIdPrefixMap: Record<ModelNames, string> = {
+  account: 'acc',
+  invitation: 'invit',
+  memeber: 'memb',
+  organization: 'org',
+  session: 'ses',
+  user: 'user',
+  'rate-limit': 'rtlmt',
+  verification: 'verif',
+  team: 'team',
+  'team-member': 'tmemb',
+  '': 'empt',
+};
 
 const organizationSchema = z
   .object({
@@ -46,7 +67,8 @@ export const auth = betterAuth({
       path: 'openapi',
     }),
     admin(),
-    anonymous(),
+    anonymous(), // TODO check if is necessary
+    username(),
     organization({
       requireEmailVerificationOnInvitation: false, // TODO
       allowUserToCreateOrganization: (user) => user.role === AuthRole.Admin,
@@ -91,11 +113,17 @@ export const auth = betterAuth({
     },
   },
   advanced: {
+    database: {
+      generateId: (options) => {
+        return `${generateIdPrefixMap[options.model]}_${uuidv7().replaceAll('-', '')}`;
+      },
+    },
     cookiePrefix: `${appConfig.appName}-better-auth`,
   },
   emailAndPassword: {
     enabled: true,
     requireEmailVerification: false, // TODO
+    disableSignUp: true,
   },
 });
 
