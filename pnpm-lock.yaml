@@ -47,6 +47,9 @@ importers:
       better-auth:
         specifier: ~1.6.23
         version: 1.6.23(drizzle-kit@1.0.0-rc.4-ca0f029)(drizzle-orm@1.0.0-rc.4(@neondatabase/serverless@1.1.0)(@sinclair/typebox@0.34.49)(@types/pg@8.20.0)(pg@8.22.0)(zod@4.4.3))(pg@8.22.0)
+      better-auth-localization:
+        specifier: ^3.0.0
+        version: 3.0.0(better-auth@1.6.23(drizzle-kit@1.0.0-rc.4-ca0f029)(drizzle-orm@1.0.0-rc.4(@neondatabase/serverless@1.1.0)(@sinclair/typebox@0.34.49)(@types/pg@8.20.0)(pg@8.22.0)(zod@4.4.3))(pg@8.22.0))
       compression:
         specifier: ~1.8.1
         version: 1.8.1
@@ -2223,6 +2226,18 @@ packages:
     resolution: {integrity: sha512-31/02mVB4yuQU6adKk5SlY6m+mxDwUq5KZkyYgnLrrKl7TEm1+3PyDtDBz2kOv/wxZz41GHsvV1A/u6RmiyBvw==}
     engines: {node: '>=6.0.0'}
     hasBin: true
+
+  better-auth-localization@3.0.0:
+    resolution: {integrity: sha512-JeKONv+GCNPYV8j5mjXbM/tDWse8kXrfIyEfDmvijFjuHInDWxp9iilAwdX3LnwRryAjmt+f9yeQ4avgXWAUAw==}
+    peerDependencies:
+      '@better-auth/api-key': ^1.5.0
+      '@better-auth/passkey': ^1.5.0
+      better-auth: ^1.5.0
+    peerDependenciesMeta:
+      '@better-auth/api-key':
+        optional: true
+      '@better-auth/passkey':
+        optional: true
 
   better-auth@1.6.23:
     resolution: {integrity: sha512-4vOaRd9UiKGKm9R+ej0jjU1es3MiJIiNc9Qq3VCnYqOZ4/nb5272QqTxWYoDxyUXl5x6A2x2we5KZKQO9teTQQ==}
@@ -6878,6 +6893,10 @@ snapshots:
   base64-js@1.5.1: {}
 
   baseline-browser-mapping@2.10.38: {}
+
+  better-auth-localization@3.0.0(better-auth@1.6.23(drizzle-kit@1.0.0-rc.4-ca0f029)(drizzle-orm@1.0.0-rc.4(@neondatabase/serverless@1.1.0)(@sinclair/typebox@0.34.49)(@types/pg@8.20.0)(pg@8.22.0)(zod@4.4.3))(pg@8.22.0)):
+    dependencies:
+      better-auth: 1.6.23(drizzle-kit@1.0.0-rc.4-ca0f029)(drizzle-orm@1.0.0-rc.4(@neondatabase/serverless@1.1.0)(@sinclair/typebox@0.34.49)(@types/pg@8.20.0)(pg@8.22.0)(zod@4.4.3))(pg@8.22.0)
 
   better-auth@1.6.23(drizzle-kit@1.0.0-rc.4-ca0f029)(drizzle-orm@1.0.0-rc.4(@neondatabase/serverless@1.1.0)(@sinclair/typebox@0.34.49)(@types/pg@8.20.0)(pg@8.22.0)(zod@4.4.3))(pg@8.22.0):
     dependencies:

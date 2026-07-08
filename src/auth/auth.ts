@@ -12,6 +12,8 @@ import { LoggerService } from '../shared/logger/logger.service';
 import { getMigrationPool } from '../database/main/main-database-connection';
 import { z } from 'zod';
 import { v7 as uuidv7 } from 'uuid';
+import { localization } from 'better-auth-localization';
+import { extraAuthEndPointsPlugin } from './extra-auth-end-points.plugin';
 
 const appConfig = AppConfig.instance;
 
@@ -92,6 +94,11 @@ export const auth = betterAuth({
         return organizationSchema.parse(organization).membershipLimit;
       },
     }),
+    localization({
+      defaultLocale: 'pt-BR',
+      fallbackLocale: 'default',
+    }),
+    extraAuthEndPointsPlugin(),
   ],
   basePath: '/v1/auth',
   experimental: {

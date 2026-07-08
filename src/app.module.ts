@@ -10,7 +10,7 @@ import { ConfigModule } from './shared/config/config.module';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { AppConfig } from './shared/config/app-config';
 import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
-import { AuthModule, AuthService } from '@thallesp/nestjs-better-auth';
+import { AuthModule as BetterAuthModule } from '@thallesp/nestjs-better-auth';
 import { auth } from './auth/auth';
 import { GracefulShutdownModule } from '@tygra/nestjs-graceful-shutdown';
 import { CustomerModule } from './features/customer/customer.module';
@@ -23,6 +23,8 @@ import { AnamnesisFieldModule } from './features/anamnesis-field/anamnesis-field
 import { safeAsync } from './shared/utils/safe';
 import { APIError, BASE_ERROR_CODES } from 'better-auth';
 import { LoggerService } from './shared/logger/logger.service';
+import { AuthModule } from './auth/auth.module';
+import { AuthService } from './auth/auth.service';
 
 @Module({
   imports: [
@@ -43,7 +45,7 @@ import { LoggerService } from './shared/logger/logger.service';
         ],
       }),
     }),
-    AuthModule.forRoot({
+    BetterAuthModule.forRoot({
       auth,
       bodyParser: {
         json: {
@@ -67,6 +69,7 @@ import { LoggerService } from './shared/logger/logger.service';
         MainDatabaseClsTransactional,
       ],
     }),
+    AuthModule,
 
     // Features
     HealthModule,
@@ -101,7 +104,7 @@ import { LoggerService } from './shared/logger/logger.service';
 export class AppModule implements OnModuleInit {
   constructor(
     private readonly appConfig: AppConfig,
-    private readonly authService: AuthService<typeof auth>,
+    private readonly authService: AuthService,
     private readonly logger: LoggerService,
   ) {
     logger.setContext(AppModule.name);
@@ -120,13 +123,21 @@ export class AppModule implements OnModuleInit {
     );
     if (
       !error ||
-      (error instanceof APIError &&
-        error.body?.code ===
-          BASE_ERROR_CODES.USER_ALREADY_EXISTS_USE_ANOTHER_EMAIL.code)
+      (isApiError(error) &&
+        error.body?.code === 'USER_ALREADY_EXISTS_USE_ANOTHER_EMAIL')
     ) {
       return;
     }
     this.logger.error('Failed to create admin user', { error });
-    throw new Error('Failed to create admin user', { cause: error });
   }
+}
+
+function isApiError(error: unknown): error is APIError {
+  return (
+    error instanceof APIError ||
+    (!!error &&
+      typeof error === 'object' &&
+      'name' in error &&
+      error.name === APIError.name)
+  );
 }
