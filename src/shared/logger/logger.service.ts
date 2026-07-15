@@ -1,6 +1,6 @@
 import { ConsoleLogger, Inject, Injectable, Scope } from '@nestjs/common';
 import type { Logger as PinoLogger } from 'pino';
-import { PINO_LOGGER } from './logger.config';
+import { PINO_LOGGER, pinoLogger } from './logger.config';
 
 @Injectable({ scope: Scope.TRANSIENT })
 export class LoggerService extends ConsoleLogger {
@@ -100,5 +100,9 @@ export class LoggerService extends ConsoleLogger {
 
   private withContext(context?: string): PinoLogger {
     return context ? this.logger.child({ context }) : this.logger;
+  }
+
+  static create(context?: string) {
+    return new LoggerService(pinoLogger, context);
   }
 }

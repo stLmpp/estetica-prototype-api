@@ -7,17 +7,17 @@ import {
   organization,
   username,
 } from 'better-auth/plugins';
-import { pinoLogger } from '../shared/logger/logger.config';
 import { LoggerService } from '../shared/logger/logger.service';
 import { getMigrationPool } from '../database/main/main-database-connection';
 import { z } from 'zod';
 import { v7 as uuidv7 } from 'uuid';
 import { localization } from 'better-auth-localization';
 import { extraAuthEndPointsPlugin } from './extra-auth-end-points.plugin';
+import { BetterAuthRedisSecondaryStorage } from '../shared/redis/better-auth-redis-secondary-storage';
 
 const appConfig = AppConfig.instance;
 
-const logger = new LoggerService(pinoLogger, 'Auth');
+const logger = LoggerService.create('Auth');
 
 export const AuthRole = {
   Admin: 'admin',
@@ -37,7 +37,7 @@ export type AuthOrgRole = (typeof AuthOrgRole)[keyof typeof AuthOrgRole];
 const generateIdPrefixMap: Record<ModelNames, string> = {
   account: 'acc',
   invitation: 'invit',
-  memeber: 'memb',
+  member: 'memb',
   organization: 'org',
   session: 'ses',
   user: 'user',
@@ -64,6 +64,7 @@ export const auth = betterAuth({
     },
   },
   appName: appConfig.appName,
+  trustedOrigins: appConfig.betterAuthTrustedOrigins,
   plugins: [
     openAPI({
       path: 'openapi',
@@ -132,6 +133,7 @@ export const auth = betterAuth({
     requireEmailVerification: false, // TODO
     disableSignUp: true,
   },
+  secondaryStorage: BetterAuthRedisSecondaryStorage.getInstance(),
 });
 
 export type BetterAuthSession = typeof auth.$Infer.Session;

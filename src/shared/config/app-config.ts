@@ -102,5 +102,12 @@ export class AppConfig {
   })
   readonly betterAuthAdminEmail!: string;
 
+  @ConfigProperty({
+    name: 'BETTER_AUTH_TRUSTED_ORIGINS',
+    required: true,
+    type: 'list',
+  })
+  readonly betterAuthTrustedOrigins!: string[];
+
   static readonly instance = new AppConfig();
 }

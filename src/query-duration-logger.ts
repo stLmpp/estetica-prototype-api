@@ -1,9 +1,8 @@
 import { LoggerService } from './shared/logger/logger.service';
-import { pinoLogger } from './shared/logger/logger.config';
 import pg from 'pg';
 import prettyMilliseconds from 'pretty-ms';
 
-const logger = new LoggerService(pinoLogger, 'Database');
+const logger = LoggerService.create('Database');
 
 const originalSubmit = pg.Query.prototype.submit;
 pg.Query.prototype.submit = function (...args) {

@@ -21,10 +21,11 @@ import { ClsModule } from 'nestjs-cls';
 import { SessionInterceptor } from './core/interceptor/session.interceptor';
 import { AnamnesisFieldModule } from './features/anamnesis-field/anamnesis-field.module';
 import { safeAsync } from './shared/utils/safe';
-import { APIError, BASE_ERROR_CODES } from 'better-auth';
+import { APIError } from 'better-auth';
 import { LoggerService } from './shared/logger/logger.service';
 import { AuthModule } from './auth/auth.module';
 import { AuthService } from './auth/auth.service';
+import { LoggingInterceptor } from './core/interceptor/logging.interceptor';
 
 @Module({
   imports: [
@@ -98,6 +99,10 @@ import { AuthService } from './auth/auth.service';
     {
       provide: APP_INTERCEPTOR,
       useClass: SessionInterceptor,
+    },
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: LoggingInterceptor,
     },
   ],
 })
