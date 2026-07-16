@@ -14,6 +14,7 @@ import {
   ZodValidationException,
 } from 'nestjs-zod';
 import { DrizzleQueryError } from 'drizzle-orm';
+import { ThrottlerException } from '@nestjs/throttler';
 
 const NotFoundResponseSchema = z.object({
   message: z.string(),
@@ -83,7 +84,7 @@ export class AllExceptionsFilter extends BaseExceptionFilter {
         cause &&
         typeof cause === 'object' &&
         'code' in cause &&
-        cause.code === '42704'
+        cause.code === '42704' // TODO enum
       ) {
         unknownException = coreExceptions.databaseSessionNotSet([
           {
@@ -92,6 +93,10 @@ export class AllExceptionsFilter extends BaseExceptionFilter {
           },
         ]);
       }
+    }
+
+    if (unknownException instanceof ThrottlerException) {
+      unknownException = coreExceptions.tooManyRequests();
     }
 
     if (unknownException instanceof ResponseErrorModel) {

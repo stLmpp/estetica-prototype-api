@@ -1,8 +1,8 @@
 import { z } from 'zod';
 
 export const PaginationMetadataSchema = z.object({
-  total: z.int().positive(),
-  page: z.int().positive(),
+  total: z.int().min(0),
+  page: z.int().min(0),
   limit: z.int().positive(),
 });
 

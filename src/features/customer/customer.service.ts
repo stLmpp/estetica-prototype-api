@@ -76,10 +76,12 @@ export class CustomerService {
     ]);
   }
 
+  @MainTransactional()
   async listPaginated(dto: FilterCustomerDto) {
     return this.customerRepository.listPaginated(dto);
   }
 
+  @MainTransactional()
   async getById(id: string): Promise<GetCustomerResDto> {
     const customer =
       await this.customerRepository.getByIdWithPersonPersonPhones(id);

@@ -33,4 +33,9 @@ export const coreExceptions = {
     error:
       'Database session not set. Did you forgot to wrap into a transaction?',
   }),
+  tooManyRequests: exception({
+    code: 'TOO_MANY_REQUESTS',
+    status: 429,
+    message: 'Too many requests',
+  }),
 };
