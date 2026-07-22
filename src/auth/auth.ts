@@ -11,7 +11,6 @@ import { LoggerService } from '../shared/logger/logger.service';
 import { getMigrationPool } from '../database/main/main-database-connection';
 import { z } from 'zod';
 import { v7 as uuidv7 } from 'uuid';
-import { localization } from 'better-auth-localization';
 import { extraAuthEndPointsPlugin } from './extra-auth-end-points.plugin';
 import { BetterAuthRedisSecondaryStorage } from '../shared/redis/better-auth-redis-secondary-storage';
 
@@ -63,6 +62,7 @@ export const auth = betterAuth({
       logger[level](message, { ...args });
     },
   },
+  hooks: {},
   appName: appConfig.appName,
   trustedOrigins: appConfig.betterAuthTrustedOrigins,
   plugins: [
@@ -94,10 +94,6 @@ export const auth = betterAuth({
       membershipLimit: (_, organization) => {
         return organizationSchema.parse(organization).membershipLimit;
       },
-    }),
-    localization({
-      defaultLocale: 'pt-BR',
-      fallbackLocale: 'default',
     }),
     extraAuthEndPointsPlugin(),
   ],

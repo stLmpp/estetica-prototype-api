@@ -38,7 +38,6 @@
     "@tygra/nestjs-graceful-shutdown": "~2.0.0",
     "@upstash/redis": "^1.38.0",
     "better-auth": "~1.6.23",
-    "better-auth-localization": "^3.0.0",
     "compression": "~1.8.1",
     "dayjs": "~1.11.21",
     "dotenv": "~17.4.2",

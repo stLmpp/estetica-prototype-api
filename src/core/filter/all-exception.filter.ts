@@ -15,6 +15,8 @@ import {
 } from 'nestjs-zod';
 import { DrizzleQueryError } from 'drizzle-orm';
 import { ThrottlerException } from '@nestjs/throttler';
+import { isAPIError } from 'better-auth/api';
+import { exception } from '../../shared/exception/exception';
 
 const NotFoundResponseSchema = z.object({
   message: z.string(),
@@ -97,6 +99,18 @@ export class AllExceptionsFilter extends BaseExceptionFilter {
 
     if (unknownException instanceof ThrottlerException) {
       unknownException = coreExceptions.tooManyRequests();
+    }
+
+    console.log({ unknownException });
+
+    if (isAPIError(unknownException)) {
+      const authException = exception({
+        code: unknownException.body?.code ?? 'UNKNOWN_AUTH_ERROR',
+        message: unknownException.body?.message ?? unknownException.message,
+        status: unknownException.statusCode,
+        error: unknownException.message,
+      });
+      unknownException = authException();
     }
 
     if (unknownException instanceof ResponseErrorModel) {

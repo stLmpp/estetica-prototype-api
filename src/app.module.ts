@@ -21,11 +21,12 @@ import { ClsModule } from 'nestjs-cls';
 import { SessionInterceptor } from './core/interceptor/session.interceptor';
 import { AnamnesisFieldModule } from './features/anamnesis-field/anamnesis-field.module';
 import { safeAsync } from './shared/utils/safe';
-import { APIError } from 'better-auth';
+import { isAPIError } from 'better-auth/api';
 import { LoggerService } from './shared/logger/logger.service';
 import { AuthModule } from './auth/auth.module';
 import { AuthService } from './auth/auth.service';
 import { LoggingInterceptor } from './core/interceptor/logging.interceptor';
+import { ErrorAfterHook } from './auth/error-after-hook';
 
 @Module({
   imports: [
@@ -78,6 +79,7 @@ import { LoggingInterceptor } from './core/interceptor/logging.interceptor';
     AnamnesisFieldModule,
   ],
   providers: [
+    ErrorAfterHook,
     {
       provide: APP_GUARD,
       useClass: ThrottlerGuard,
@@ -128,21 +130,11 @@ export class AppModule implements OnModuleInit {
     );
     if (
       !error ||
-      (isApiError(error) &&
+      (isAPIError(error) &&
         error.body?.code === 'USER_ALREADY_EXISTS_USE_ANOTHER_EMAIL')
     ) {
       return;
     }
     this.logger.error('Failed to create admin user', { error });
   }
-}
-
-function isApiError(error: unknown): error is APIError {
-  return (
-    error instanceof APIError ||
-    (!!error &&
-      typeof error === 'object' &&
-      'name' in error &&
-      error.name === APIError.name)
-  );
 }
