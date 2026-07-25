@@ -1,5 +1,5 @@
 import { betterAuth, type ModelNames } from 'better-auth';
-import { AppConfig } from '../shared/config/app-config';
+import { AppEnv } from '../core/config/app-env';
 import {
   admin,
   anonymous,
@@ -7,14 +7,14 @@ import {
   organization,
   username,
 } from 'better-auth/plugins';
-import { LoggerService } from '../shared/logger/logger.service';
+import { LoggerService } from '../core/logger/logger.service';
 import { getMigrationPool } from '../database/main/main-database-connection';
 import { z } from 'zod';
 import { v7 as uuidv7 } from 'uuid';
 import { extraAuthEndPointsPlugin } from './extra-auth-end-points.plugin';
-import { BetterAuthRedisSecondaryStorage } from '../shared/redis/better-auth-redis-secondary-storage';
+import { BetterAuthRedisSecondaryStorage } from '../core/redis/better-auth-redis-secondary-storage';
 
-const appConfig = AppConfig.instance;
+const appEnv = AppEnv.instance;
 
 const logger = LoggerService.create('Auth');
 
@@ -56,15 +56,15 @@ const organizationSchema = z
   });
 
 export const auth = betterAuth({
-  database: getMigrationPool(appConfig),
+  database: getMigrationPool(appEnv),
   logger: {
     log: (level, message, ...args) => {
       logger[level](message, { ...args });
     },
   },
   hooks: {},
-  appName: appConfig.appName,
-  trustedOrigins: appConfig.betterAuthTrustedOrigins,
+  appName: appEnv.appName,
+  trustedOrigins: appEnv.betterAuthTrustedOrigins,
   plugins: [
     openAPI({
       path: 'openapi',
@@ -101,11 +101,11 @@ export const auth = betterAuth({
   experimental: {
     joins: true,
   },
-  baseURL: `http://localhost:${appConfig.port}`,
-  secret: appConfig.betterAuthSecret,
+  baseURL: `http://localhost:${appEnv.port}`,
+  secret: appEnv.betterAuthSecret,
   rateLimit: {
-    max: appConfig.throttlerLimit,
-    window: appConfig.throttlerTtlMs / 1000,
+    max: appEnv.throttlerLimit,
+    window: appEnv.throttlerTtlMs / 1000,
   },
   session: {
     cookieCache: {
@@ -113,7 +113,7 @@ export const auth = betterAuth({
       maxAge: 5 * 60,
       strategy: 'jwt',
       refreshCache: false,
-      version: String(appConfig.betterAuthCookieCacheVersion),
+      version: String(appEnv.betterAuthCookieCacheVersion),
     },
   },
   advanced: {
@@ -122,7 +122,7 @@ export const auth = betterAuth({
         return `${generateIdPrefixMap[options.model]}_${uuidv7().replaceAll('-', '')}`;
       },
     },
-    cookiePrefix: `${appConfig.appName}-better-auth`,
+    cookiePrefix: `${appEnv.appName}-better-auth`,
   },
   emailAndPassword: {
     enabled: true,

@@ -12,18 +12,18 @@ import {
   timeout,
   TimeoutError,
 } from 'rxjs';
-import { AppConfig } from '../../shared/config/app-config';
+import { AppEnv } from '../config/app-env';
 
 @Injectable()
 export class TimeoutInterceptor implements NestInterceptor {
-  constructor(private readonly appConfig: AppConfig) {}
+  constructor(private readonly appEnv: AppEnv) {}
 
   intercept(
     _: ExecutionContext,
     next: CallHandler,
   ): Observable<any> | Promise<Observable<any>> {
     return next.handle().pipe(
-      timeout(this.appConfig.requestTimeoutMs),
+      timeout(this.appEnv.requestTimeoutMs),
       catchError((error: Error) => {
         if (error instanceof TimeoutError) {
           return throwError(() => new RequestTimeoutException());

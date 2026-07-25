@@ -5,10 +5,10 @@ import {
   MainDatabaseModule,
 } from './database/main/main-database.module';
 import { HealthModule } from './features/health/health.module';
-import { LoggerModule } from './shared/logger/logger.module';
-import { ConfigModule } from './shared/config/config.module';
+import { LoggerModule } from './core/logger/logger.module';
+import { EnvironmentModule } from './core/config/environment.module';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
-import { AppConfig } from './shared/config/app-config';
+import { AppEnv } from './core/config/app-env';
 import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
 import { AuthModule as BetterAuthModule } from '@thallesp/nestjs-better-auth';
 import { auth } from './auth/auth';
@@ -22,28 +22,28 @@ import { SessionInterceptor } from './core/interceptor/session.interceptor';
 import { AnamnesisFieldModule } from './features/anamnesis-field/anamnesis-field.module';
 import { safeAsync } from './shared/utils/safe';
 import { isAPIError } from 'better-auth/api';
-import { LoggerService } from './shared/logger/logger.service';
+import { LoggerService } from './core/logger/logger.service';
 import { AuthModule } from './auth/auth.module';
 import { AuthService } from './auth/auth.service';
 import { LoggingInterceptor } from './core/interceptor/logging.interceptor';
 import { ErrorAfterHook } from './auth/error-after-hook';
 import { Environment } from './shared/environment.enum';
 
-const appConfig = AppConfig.instance;
+const appEnv = AppEnv.instance;
 
 const CORE_MODULES: ModuleMetadata['imports'] = [
   ScheduleModule.forRoot(),
-  ConfigModule,
+  EnvironmentModule,
   MainDatabaseModule,
   LoggerModule,
   ThrottlerModule.forRootAsync({
-    imports: [ConfigModule],
-    inject: [AppConfig],
-    useFactory: (config: AppConfig) => ({
+    imports: [EnvironmentModule],
+    inject: [AppEnv],
+    useFactory: (appEnv: AppEnv) => ({
       throttlers: [
         {
-          ttl: config.throttlerTtlMs,
-          limit: config.throttlerLimit,
+          ttl: appEnv.throttlerTtlMs,
+          limit: appEnv.throttlerLimit,
         },
       ],
     }),
@@ -74,7 +74,7 @@ const CORE_MODULES: ModuleMetadata['imports'] = [
   AuthModule,
 ];
 
-if (appConfig.environment === Environment.Production) {
+if (appEnv.environment === Environment.Production) {
   CORE_MODULES.push(GracefulShutdownModule.forRoot());
 }
 
@@ -87,6 +87,7 @@ if (appConfig.environment === Environment.Production) {
     HealthModule,
     CustomerModule,
     AnamnesisFieldModule,
+    EnvironmentModule,
   ],
   providers: [
     ErrorAfterHook,
@@ -120,7 +121,7 @@ if (appConfig.environment === Environment.Production) {
 })
 export class AppModule implements OnModuleInit {
   constructor(
-    private readonly appConfig: AppConfig,
+    private readonly appEnv: AppEnv,
     private readonly authService: AuthService,
     private readonly logger: LoggerService,
   ) {
@@ -131,9 +132,9 @@ export class AppModule implements OnModuleInit {
     const [error] = await safeAsync(() =>
       this.authService.api.createUser({
         body: {
-          email: this.appConfig.betterAuthAdminEmail,
-          name: this.appConfig.betterAuthAdminName,
-          password: this.appConfig.betterAuthAdminPassword,
+          email: this.appEnv.betterAuthAdminEmail,
+          name: this.appEnv.betterAuthAdminName,
+          password: this.appEnv.betterAuthAdminPassword,
           role: 'admin',
         },
       }),

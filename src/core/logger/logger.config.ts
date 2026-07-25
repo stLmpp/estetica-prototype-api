@@ -1,14 +1,14 @@
 import path from 'node:path';
 import { type Logger, type LoggerOptions, pino } from 'pino';
-import { AppConfig } from '../config/app-config';
-import { Environment } from '../environment.enum';
+import { AppEnv } from '../config/app-env';
+import { Environment } from '../../shared/environment.enum';
 
 export const PINO_LOGGER = 'PINO_LOGGER';
 
-export function createPinoLogger(config: AppConfig): Logger {
-  const logLevel = config.logLevel;
-  const logDir = path.join(process.cwd(), config.logDir);
-  const isProduction = config.environment === Environment.Production;
+export function createPinoLogger(appEnv: AppEnv): Logger {
+  const logLevel = appEnv.logLevel;
+  const logDir = path.join(process.cwd(), appEnv.logDir);
+  const isProduction = appEnv.environment === Environment.Production;
 
   const options: LoggerOptions = {
     level: logLevel,
@@ -42,4 +42,4 @@ export function createPinoLogger(config: AppConfig): Logger {
   return pino(options);
 }
 
-export const pinoLogger = createPinoLogger(AppConfig.instance);
+export const pinoLogger = createPinoLogger(AppEnv.instance);

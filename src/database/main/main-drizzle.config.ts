@@ -1,14 +1,14 @@
 import '../../config';
 import { defineConfig } from 'drizzle-kit';
-import { AppConfig } from '../../shared/config/app-config';
+import { AppEnv } from '../../core/config/app-env';
 
-const config = AppConfig.instance;
+const appEnv = AppEnv.instance;
 
 export default defineConfig({
   dialect: 'postgresql',
   schema: './src/database/main/main-entities.ts',
   dbCredentials: {
-    url: config.mainDatabaseMigrationUrl,
+    url: appEnv.mainDatabaseMigrationUrl,
   },
   out: 'migrations/main',
 });

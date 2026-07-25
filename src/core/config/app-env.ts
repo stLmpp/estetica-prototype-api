@@ -1,113 +1,113 @@
-import { ConfigProperty } from './config-property.decorator';
-import { Environment } from '../environment.enum';
-import { safe } from '../utils/safe';
+import { EnvProperty } from './env-property.decorator';
+import { Environment } from '../../shared/environment.enum';
+import { safe } from '../../shared/utils/safe';
 
-export class AppConfig {
+export class AppEnv {
   constructor() {
     const errors: string[] = [];
     for (const key of Object.keys(this)) {
-      const [error] = safe(() => void this[key as keyof AppConfig]);
+      const [error] = safe(() => void this[key as keyof AppEnv]);
       if (error) {
         errors.push(`${key}: ${String(error)}`);
       }
     }
     if (errors.length) {
-      throw new Error(`Errors initializing AppConfig: ${errors.join(', ')}`);
+      throw new Error(`Errors initializing AppEnv: ${errors.join(', ')}`);
     }
   }
 
-  @ConfigProperty({
+  @EnvProperty({
     name: 'ENVIRONMENT',
     defaultValue: Environment.Development,
   })
   readonly environment!: Environment;
 
-  @ConfigProperty({ name: 'PORT', defaultValue: 3000, type: 'number' })
+  @EnvProperty({ name: 'PORT', defaultValue: 3000, type: 'number' })
   readonly port!: number;
 
-  @ConfigProperty({ name: 'LOG_LEVEL', defaultValue: 'info' })
+  @EnvProperty({ name: 'LOG_LEVEL', defaultValue: 'info' })
   readonly logLevel!: string;
 
-  @ConfigProperty({ name: 'LOG_DIR', defaultValue: 'logs' })
+  @EnvProperty({ name: 'LOG_DIR', defaultValue: 'logs' })
   readonly logDir!: string;
 
-  @ConfigProperty({
+  @EnvProperty({
     name: 'THROTTLER_TTL_MS',
     type: 'number',
     defaultValue: 60_000,
   })
   readonly throttlerTtlMs!: number;
 
-  @ConfigProperty({
+  @EnvProperty({
     name: 'THROTTLER_LIMIT',
     type: 'number',
     defaultValue: 10,
   })
   readonly throttlerLimit!: number;
 
-  @ConfigProperty({ name: 'APP_NAME', defaultValue: 'estetica-prototype-api' })
+  @EnvProperty({ name: 'APP_NAME', defaultValue: 'estetica-prototype-api' })
   readonly appName!: string;
 
-  @ConfigProperty({ name: 'BETTER_AUTH_SECRET', required: true })
+  @EnvProperty({ name: 'BETTER_AUTH_SECRET', required: true })
   readonly betterAuthSecret!: string;
 
-  @ConfigProperty({
+  @EnvProperty({
     name: 'BETTER_AUTH_COOKIE_CACHE_VERSION',
     type: 'number',
     defaultValue: 1,
   })
   readonly betterAuthCookieCacheVersion!: number;
 
-  @ConfigProperty({
+  @EnvProperty({
     name: 'SERVER_TIMEOUT_MS',
     type: 'number',
     defaultValue: 60_000,
   })
   readonly serverTimeoutMs!: number;
 
-  @ConfigProperty({
+  @EnvProperty({
     name: 'REQUEST_TIMEOUT_MS',
     type: 'number',
     defaultValue: 30_000,
   })
   readonly requestTimeoutMs!: number;
 
-  @ConfigProperty({
+  @EnvProperty({
     name: 'MAIN_DATABASE_URL',
     required: true,
   })
   readonly mainDatabaseUrl!: string;
 
-  @ConfigProperty({
+  @EnvProperty({
     name: 'MAIN_DATABASE_MIGRATION_URL',
     required: true,
   })
   readonly mainDatabaseMigrationUrl!: string;
 
-  @ConfigProperty({
+  @EnvProperty({
     name: 'BETTER_AUTH_ADMIN_NAME',
     defaultValue: 'admin',
   })
   readonly betterAuthAdminName!: string;
 
-  @ConfigProperty({
+  @EnvProperty({
     name: 'BETTER_AUTH_ADMIN_PASSWORD',
     required: true,
   })
   readonly betterAuthAdminPassword!: string;
 
-  @ConfigProperty({
+  @EnvProperty({
     name: 'BETTER_AUTH_ADMIN_EMAIL',
     required: true,
   })
   readonly betterAuthAdminEmail!: string;
 
-  @ConfigProperty({
+  @EnvProperty({
     name: 'BETTER_AUTH_TRUSTED_ORIGINS',
     required: true,
     type: 'list',
   })
   readonly betterAuthTrustedOrigins!: string[];
 
-  static readonly instance = new AppConfig();
+  static readonly instance = new AppEnv();
 }

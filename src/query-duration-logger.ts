@@ -1,4 +1,4 @@
-import { LoggerService } from './shared/logger/logger.service';
+import { LoggerService } from './core/logger/logger.service';
 import pg from 'pg';
 import prettyMilliseconds from 'pretty-ms';
 

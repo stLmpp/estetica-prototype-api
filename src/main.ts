@@ -7,11 +7,11 @@ import compression from 'compression';
 import helmet from 'helmet';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { VersioningType } from '@nestjs/common';
-import { LoggerService } from './shared/logger/logger.service';
+import { LoggerService } from './core/logger/logger.service';
 import dayjs from 'dayjs';
 import customParseFormat from 'dayjs/plugin/customParseFormat';
 import utc from 'dayjs/plugin/utc';
-import { AppConfig } from './shared/config/app-config';
+import { AppEnv } from './core/config/app-env';
 import { setupGracefulShutdown } from '@tygra/nestjs-graceful-shutdown';
 import { type NestExpressApplication } from '@nestjs/platform-express';
 import { getAuthOpenApi } from './core/openapi/auth-openapi';
@@ -32,7 +32,7 @@ async function bootstrap() {
     type: VersioningType.URI,
   });
   await SwaggerModule.loadPluginMetadata(metadata);
-  const appConfig = app.get(AppConfig);
+  const appEnv = app.get(AppEnv);
   const openapiConfig = new DocumentBuilder()
     .setTitle('WebGestor API')
     .setDescription('WebGestor API')
@@ -57,19 +57,19 @@ async function bootstrap() {
     },
   );
 
-  if (appConfig.environment === Environment.Production) {
+  if (appEnv.environment === Environment.Production) {
     setupGracefulShutdown({ app });
   }
 
-  const server = await app.listen(appConfig.port);
+  const server = await app.listen(appEnv.port);
 
-  server.setTimeout(appConfig.serverTimeoutMs);
+  server.setTimeout(appEnv.serverTimeoutMs);
 
-  logger.log(`Application is running on: http://localhost:${appConfig.port}`, {
-    port: appConfig.port,
+  logger.log(`Application is running on: http://localhost:${appEnv.port}`, {
+    port: appEnv.port,
   });
   logger.log(
-    `OpenAPI server running on: http://localhost:${appConfig.port}/openapi`,
+    `OpenAPI server running on: http://localhost:${appEnv.port}/openapi`,
   );
 }
 bootstrap();

@@ -1,39 +1,36 @@
-import { safe } from '../utils/safe';
+import { safe } from '../../shared/utils/safe';
 import { type ZodType } from 'zod';
 
-interface ConfigPropertyOptionsBase {
+export type EnvPropertyOptions = {
   name: string;
   required?: boolean;
-}
+} & (
+  | {
+      type?: undefined;
+      defaultValue?: string;
+    }
+  | {
+      type: 'number';
+      defaultValue?: number;
+    }
+  | {
+      type: 'boolean';
+      defaultValue?: boolean;
+    }
+  | {
+      type: 'json';
+      defaultValue?: unknown;
+      typeGetter?: () => ZodType;
+    }
+  | {
+      type: 'list';
+      defaultValue?: Array<string | number | boolean>;
+      separator?: string;
+      listType?: 'string' | 'number' | 'boolean';
+    }
+);
 
-export type ConfigPropertyOptions = ConfigPropertyOptionsBase &
-  (
-    | {
-        type?: undefined;
-        defaultValue?: string;
-      }
-    | {
-        type: 'number';
-        defaultValue?: number;
-      }
-    | {
-        type: 'boolean';
-        defaultValue?: boolean;
-      }
-    | {
-        type: 'json';
-        defaultValue?: unknown;
-        typeGetter?: () => ZodType;
-      }
-    | {
-        type: 'list';
-        defaultValue?: Array<string | number | boolean>;
-        separator?: string;
-        listType?: 'string' | 'number' | 'boolean';
-      }
-  );
-
-export interface ConfigPropertyMetadata {
+export interface EnvPropertyMetadata {
   name: string;
   required: boolean;
   type: 'string' | 'number' | 'boolean' | 'json' | 'list';
@@ -43,15 +40,15 @@ export interface ConfigPropertyMetadata {
   listType?: 'string' | 'number' | 'boolean';
 }
 
-const DEFAULT_VALUES: ConfigPropertyMetadata = {
+const DEFAULT_VALUES: EnvPropertyMetadata = {
   name: '',
   required: false,
   type: 'string',
 };
 
 const typeParser: Record<
-  ConfigPropertyMetadata['type'],
-  (value: string, metadata: ConfigPropertyMetadata) => any
+  EnvPropertyMetadata['type'],
+  (value: string, metadata: EnvPropertyMetadata) => any
 > = {
   number: (value, { name }) => {
     const number = Number(value);
@@ -97,7 +94,7 @@ const cache = new Map<string, any>();
 
 function getCacheKey(
   propertyKey: string | symbol,
-  config: ConfigPropertyMetadata,
+  config: EnvPropertyMetadata,
 ) {
   return `${String(propertyKey)}-${config.name}-${config.type}-${String(config.defaultValue)}`;
 }
@@ -112,8 +109,8 @@ function isEnvValueDefined(value: string | undefined): value is string {
 
 export const ENV_PREFIX = '';
 
-function parseValue(config: ConfigPropertyMetadata): any {
-  const { name, defaultValue, required, type } = config;
+function parseValue(metadata: EnvPropertyMetadata): any {
+  const { name, defaultValue, required, type } = metadata;
   const value = process.env[ENV_PREFIX + name];
   const isValueDefined = isEnvValueDefined(value);
   if (!isValueDefined && required && defaultValue === undefined) {
@@ -122,18 +119,16 @@ function parseValue(config: ConfigPropertyMetadata): any {
   if (!isValueDefined) {
     return defaultValue;
   }
-  return typeParser[type](value.trim(), config);
+  return typeParser[type](value.trim(), metadata);
 }
 
-export function ConfigProperty(
-  options: ConfigPropertyOptions,
-): PropertyDecorator {
+export function EnvProperty(options: EnvPropertyOptions): PropertyDecorator {
   return (target, propertyKey) => {
     Object.defineProperty(target, propertyKey, {
       enumerable: true,
       configurable: false,
       get: function (): any {
-        const config: ConfigPropertyMetadata = {
+        const config: EnvPropertyMetadata = {
           ...DEFAULT_VALUES,
           ...options,
         };

@@ -1,6 +1,6 @@
 import { applyDecorators, type FactoryProvider } from '@nestjs/common';
-import { AppConfig } from '../../shared/config/app-config';
-import { LoggerService } from '../../shared/logger/logger.service';
+import { AppEnv } from '../../core/config/app-env';
+import { LoggerService } from '../../core/logger/logger.service';
 import { drizzle } from 'drizzle-orm/node-postgres';
 import { getClazz } from '../../shared/utils/get-clazz';
 import { mainEntities } from './main-entities';
@@ -13,17 +13,17 @@ import { type TransactionalAdapterDrizzleOrm } from '@nestjs-cls/transactional-a
 
 let pool: pg.Pool | undefined = undefined;
 
-export function getMainPool(appConfig: AppConfig) {
+export function getMainPool(appEnv: AppEnv) {
   return (pool ??= new pg.Pool({
-    connectionString: appConfig.mainDatabaseUrl,
+    connectionString: appEnv.mainDatabaseUrl,
   }));
 }
 
 let migrationPool: pg.Pool | undefined = undefined;
 
-export function getMigrationPool(appConfig: AppConfig) {
+export function getMigrationPool(appEnv: AppEnv) {
   return (migrationPool ??= new pg.Pool({
-    connectionString: appConfig.mainDatabaseMigrationUrl,
+    connectionString: appEnv.mainDatabaseMigrationUrl,
   }));
 }
 
@@ -31,7 +31,7 @@ export const MAIN_DATABASE_CONNECTION_POOL = 'MAIN_DATABASE_CONNECTION_POOL';
 
 export const MAIN_DATABASE_CONNECTION_POOL_PROVIDER: FactoryProvider = {
   provide: MAIN_DATABASE_CONNECTION_POOL,
-  inject: [AppConfig],
+  inject: [AppEnv],
   useFactory: getMainPool,
 };
 

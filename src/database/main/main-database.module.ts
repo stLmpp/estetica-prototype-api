@@ -3,7 +3,7 @@ import {
   MAIN_DATABASE_PROVIDERS,
   MainDatasource,
 } from './main-database-connection';
-import { ConfigModule } from '../../shared/config/config.module';
+import { EnvironmentModule } from '../../core/config/environment.module';
 import { CustomerRepository } from './repositories/customer.repository';
 import { ClsPluginTransactional } from '@nestjs-cls/transactional';
 import { MAIN_DATABASE_CONNECTION_NAME } from './main-database-connection-name';
@@ -24,7 +24,7 @@ const REPOSITORIES = [
     ...MAIN_DATABASE_PROVIDERS,
     ...REPOSITORIES,
   ],
-  imports: [ConfigModule],
+  imports: [EnvironmentModule],
   exports: [...REPOSITORIES, MainDatasource],
 })
 export class MainDatabaseModule {}

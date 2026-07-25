@@ -7,7 +7,7 @@ import {
 } from '../../shared/model/response-error.model';
 import { z, ZodError } from 'zod';
 import { coreExceptions } from '../core-exceptions';
-import { LoggerService } from '../../shared/logger/logger.service';
+import { LoggerService } from '../logger/logger.service';
 import {
   ZodSchemaDeclarationException,
   ZodSerializationException,
