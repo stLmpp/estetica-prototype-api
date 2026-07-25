@@ -16,6 +16,7 @@ import { setupGracefulShutdown } from '@tygra/nestjs-graceful-shutdown';
 import { type NestExpressApplication } from '@nestjs/platform-express';
 import { getAuthOpenApi } from './core/openapi/auth-openapi';
 import { generateOpenApi } from './core/openapi/generate-open-api';
+import { Environment } from './shared/environment.enum';
 
 dayjs.extend(customParseFormat);
 dayjs.extend(utc);
@@ -56,7 +57,9 @@ async function bootstrap() {
     },
   );
 
-  setupGracefulShutdown({ app });
+  if (appConfig.environment === Environment.Production) {
+    setupGracefulShutdown({ app });
+  }
 
   const server = await app.listen(appConfig.port);
 

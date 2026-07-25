@@ -1,4 +1,4 @@
-import { Module, OnModuleInit } from '@nestjs/common';
+import { Module, ModuleMetadata, OnModuleInit } from '@nestjs/common';
 import { ScheduleModule } from '@nestjs/schedule';
 import {
   MainDatabaseClsTransactional,
@@ -27,51 +27,61 @@ import { AuthModule } from './auth/auth.module';
 import { AuthService } from './auth/auth.service';
 import { LoggingInterceptor } from './core/interceptor/logging.interceptor';
 import { ErrorAfterHook } from './auth/error-after-hook';
+import { Environment } from './shared/environment.enum';
+
+const appConfig = AppConfig.instance;
+
+const CORE_MODULES: ModuleMetadata['imports'] = [
+  ScheduleModule.forRoot(),
+  ConfigModule,
+  MainDatabaseModule,
+  LoggerModule,
+  ThrottlerModule.forRootAsync({
+    imports: [ConfigModule],
+    inject: [AppConfig],
+    useFactory: (config: AppConfig) => ({
+      throttlers: [
+        {
+          ttl: config.throttlerTtlMs,
+          limit: config.throttlerLimit,
+        },
+      ],
+    }),
+  }),
+  BetterAuthModule.forRoot({
+    auth,
+    bodyParser: {
+      json: {
+        limit: '2mb',
+      },
+      urlencoded: {
+        enabled: true,
+        extended: true,
+        limit: '2mb',
+      },
+      rawBody: true,
+    },
+  }),
+  ClsModule.forRoot({
+    global: true,
+    middleware: {
+      mount: true,
+    },
+    plugins: [
+      MainDatabaseClsTransactional,
+    ],
+  }),
+  AuthModule,
+];
+
+if (appConfig.environment === Environment.Production) {
+  CORE_MODULES.push(GracefulShutdownModule.forRoot());
+}
 
 @Module({
   imports: [
     // Core
-    ScheduleModule.forRoot(),
-    ConfigModule,
-    MainDatabaseModule,
-    LoggerModule,
-    ThrottlerModule.forRootAsync({
-      imports: [ConfigModule],
-      inject: [AppConfig],
-      useFactory: (config: AppConfig) => ({
-        throttlers: [
-          {
-            ttl: config.throttlerTtlMs,
-            limit: config.throttlerLimit,
-          },
-        ],
-      }),
-    }),
-    BetterAuthModule.forRoot({
-      auth,
-      bodyParser: {
-        json: {
-          limit: '2mb',
-        },
-        urlencoded: {
-          enabled: true,
-          extended: true,
-          limit: '2mb',
-        },
-        rawBody: true,
-      },
-    }),
-    GracefulShutdownModule.forRoot(),
-    ClsModule.forRoot({
-      global: true,
-      middleware: {
-        mount: true,
-      },
-      plugins: [
-        MainDatabaseClsTransactional,
-      ],
-    }),
-    AuthModule,
+    ...CORE_MODULES,
 
     // Features
     HealthModule,
