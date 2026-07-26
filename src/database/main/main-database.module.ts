@@ -11,12 +11,14 @@ import { PersonRepository } from './repositories/person.repository';
 import { CustomerPhoneRepository } from './repositories/customer-phone.repository';
 import { AnamnesisFieldRepository } from './repositories/anamnesis-field.repository';
 import { TransactionalAdapterDrizzleOrmCustom } from '../../core/transactional-adapter-drizzle-orm-custom';
+import { ConfigRepository } from './repositories/config.repository';
 
 const REPOSITORIES = [
   CustomerRepository,
   PersonRepository,
   CustomerPhoneRepository,
   AnamnesisFieldRepository,
+  ConfigRepository,
 ];
 
 @Module({

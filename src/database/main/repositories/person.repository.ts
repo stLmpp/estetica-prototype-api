@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { Repository } from './repository';
-import { and, eq, InferInsertModel, isNull } from 'drizzle-orm';
+import { and, eq, InferInsertModel } from 'drizzle-orm';
 import { mainEntities } from '../main-entities';
 import { isObjectEmpty } from '../../../shared/utils/is-object-empty';
 
@@ -24,11 +24,6 @@ export class PersonRepository extends Repository {
     await this.db
       .update(this.db.e.person)
       .set(person)
-      .where(
-        and(
-          eq(this.db.e.person.id, personId),
-          isNull(this.db.e.person.deletedAt),
-        ),
-      );
+      .where(and(eq(this.db.e.person.id, personId)));
   }
 }

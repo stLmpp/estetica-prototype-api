@@ -1,13 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import {
-  and,
-  eq,
-  exists,
-  ilike,
-  InferInsertModel,
-  isNull,
-  sql,
-} from 'drizzle-orm';
+import { and, eq, exists, ilike, InferInsertModel, sql } from 'drizzle-orm';
 import { mainEntities } from '../main-entities';
 import { FilterCustomerDto } from '../../../features/customer/dto/input/list-customer.request';
 import { promiseAllObject } from '../../../shared/utils/promise-all-object';
@@ -35,12 +27,7 @@ export class CustomerRepository extends Repository {
     await this.db
       .update(this.db.e.customer)
       .set({ jobName })
-      .where(
-        and(
-          eq(this.db.e.customer.id, id),
-          isNull(this.db.e.customer.deletedAt),
-        ),
-      );
+      .where(and(eq(this.db.e.customer.id, id)));
   }
 
   async listPaginated({
@@ -61,9 +48,6 @@ export class CustomerRepository extends Repository {
         and(
           eq(this.db.e.personPhone.personId, this.db.e.person.id),
           eq(this.db.e.personPhone.number, phone!).if(phone),
-          isNull(this.db.e.personPhone.deletedAt),
-          isNull(this.db.e.person.deletedAt),
-          isNull(this.db.e.customer.deletedAt),
         ),
       );
     const where = and(
@@ -71,7 +55,6 @@ export class CustomerRepository extends Repository {
       eq(this.db.e.person.birthDate, birthDate!).if(birthDate),
       eq(this.db.e.person.email, email!).if(email),
       exists(phoneSubQuery).if(phone),
-      isNull(this.db.e.customer.deletedAt),
     );
     const customers = this.db
       .select({
@@ -81,10 +64,7 @@ export class CustomerRepository extends Repository {
       .from(this.db.e.customer)
       .innerJoin(
         this.db.e.person,
-        and(
-          eq(this.db.e.customer.personId, this.db.e.person.id),
-          isNull(this.db.e.person.deletedAt),
-        ),
+        and(eq(this.db.e.customer.personId, this.db.e.person.id)),
       )
       .where(where)
       .limit(limit)
@@ -109,9 +89,6 @@ export class CustomerRepository extends Repository {
     return this.db.query.customer.findFirst({
       where: {
         id,
-        deletedAt: {
-          isNull: true,
-        },
       },
     });
   }
@@ -121,9 +98,6 @@ export class CustomerRepository extends Repository {
       .findFirst({
         where: {
           id,
-          deletedAt: {
-            isNull: true,
-          },
         },
         columns: {
           id: true,

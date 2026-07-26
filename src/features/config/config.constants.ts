@@ -1,0 +1,1 @@
+export const CONFIG_GLOBAL_PLACEHOLDER = 'GLOBAL';

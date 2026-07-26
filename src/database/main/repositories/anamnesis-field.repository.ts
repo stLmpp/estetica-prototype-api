@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { Repository } from './repository';
-import { and, eq, InferInsertModel, isNull } from 'drizzle-orm';
+import { and, eq, InferInsertModel } from 'drizzle-orm';
 import { mainEntities } from '../main-entities';
 
 type Insert = Omit<InferInsertModel<typeof mainEntities.anamnesisField>, 'id'>;
@@ -19,11 +19,6 @@ export class AnamnesisFieldRepository extends Repository {
     await this.db
       .update(this.db.e.anamnesisField)
       .set(anamnesisField)
-      .where(
-        and(
-          eq(this.db.e.anamnesisField.id, id),
-          isNull(this.db.e.anamnesisField.deletedAt),
-        ),
-      );
+      .where(and(eq(this.db.e.anamnesisField.id, id)));
   }
 }

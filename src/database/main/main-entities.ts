@@ -11,7 +11,7 @@ import {
   pgTable,
   text,
   timestamp,
-  unique,
+  uniqueIndex,
   varchar,
 } from 'drizzle-orm/pg-core';
 import { sql } from 'drizzle-orm';
@@ -28,6 +28,7 @@ import {
   CLS_USER_ID_KEY,
   RLS_ROLE,
 } from '../../auth/constants';
+import { ConfigType } from '../../shared/domain/config-type.enum';
 
 function getUserId() {
   const [error, userId] = safe(() => {
@@ -57,9 +58,17 @@ function getTenantId() {
 function addAuthenticatedPolicy(table: { tenantId: AnyPgColumn }) {
   return pgPolicy('tenancy', {
     for: 'all',
-    to: RLS_ROLE,
     using: sql`${table.tenantId} = current_setting('tenant.id')`,
     withCheck: sql`${table.tenantId} = current_setting('tenant.id')`,
+  });
+}
+
+function addDeletedAtPolicy(table: { deletedAt: AnyPgColumn }) {
+  return pgPolicy('deleted_at', {
+    for: 'all',
+    to: RLS_ROLE,
+    using: sql`${table.deletedAt} IS NULL`,
+    withCheck: sql`true`,
   });
 }
 
@@ -106,9 +115,14 @@ export const personEntity = pgTable(
     userId: varchar('user_id', { length: 64 }),
   },
   (t) => [
-    index().on(t.tenantId, t.email),
-    index('customer_name_trgm_index').using('gin', sql`${t.name} gin_trgm_ops`),
+    index()
+      .on(t.tenantId, t.email)
+      .where(sql`${t.deletedAt} IS NULL`),
+    index('customer_name_trgm_index')
+      .using('gin', sql`${t.name} gin_trgm_ops`)
+      .where(sql`${t.deletedAt} IS NULL`),
     addAuthenticatedPolicy(t),
+    addDeletedAtPolicy(t),
   ],
 );
 
@@ -122,8 +136,11 @@ export const employeeEntity = pgTable(
     role: varchar('role', { length: 256 }).notNull(),
   },
   (t) => [
-    index().on(t.tenantId, t.personId),
+    index()
+      .on(t.tenantId, t.personId)
+      .where(sql`${t.deletedAt} IS NULL`),
     addAuthenticatedPolicy(t),
+    addDeletedAtPolicy(t),
   ],
 );
 
@@ -137,8 +154,11 @@ export const customerEntity = pgTable(
     jobName: varchar('job_name', { length: 256 }),
   },
   (t) => [
-    index().on(t.tenantId, t.personId),
+    index()
+      .on(t.tenantId, t.personId)
+      .where(sql`${t.deletedAt} IS NULL`),
     addAuthenticatedPolicy(t),
+    addDeletedAtPolicy(t),
   ],
 );
 
@@ -155,9 +175,14 @@ export const personPhoneEntity = pgTable(
       .references(() => personEntity.id),
   },
   (t) => [
-    index().on(t.tenantId, t.personId),
-    index().on(t.tenantId, t.number),
+    index()
+      .on(t.tenantId, t.personId)
+      .where(sql`${t.deletedAt} IS NULL`),
+    index()
+      .on(t.tenantId, t.number)
+      .where(sql`${t.deletedAt} IS NULL`),
     addAuthenticatedPolicy(t),
+    addDeletedAtPolicy(t),
   ],
 );
 
@@ -173,8 +198,11 @@ export const catalogItemEntity = pgTable(
     active: boolean('active').notNull(),
   },
   (t) => [
-    index().on(t.tenantId, t.itemType),
+    index()
+      .on(t.tenantId, t.itemType)
+      .where(sql`${t.deletedAt} IS NULL`),
     addAuthenticatedPolicy(t),
+    addDeletedAtPolicy(t),
   ],
 );
 
@@ -189,8 +217,11 @@ export const customerFollowupEntity = pgTable(
     date: timestamp('date').notNull(),
   },
   (t) => [
-    index().on(t.tenantId, t.customerId),
+    index()
+      .on(t.tenantId, t.customerId)
+      .where(sql`${t.deletedAt} IS NULL`),
     addAuthenticatedPolicy(t),
+    addDeletedAtPolicy(t),
   ],
 );
 
@@ -212,9 +243,14 @@ export const followupItemEntity = pgTable(
     quantity: integer('quantity').notNull(),
   },
   (t) => [
-    index().on(t.tenantId, t.followupId),
-    index().on(t.tenantId, t.catalogItemId),
+    index()
+      .on(t.tenantId, t.followupId)
+      .where(sql`${t.deletedAt} IS NULL`),
+    index()
+      .on(t.tenantId, t.catalogItemId)
+      .where(sql`${t.deletedAt} IS NULL`),
     addAuthenticatedPolicy(t),
+    addDeletedAtPolicy(t),
   ],
 );
 
@@ -236,6 +272,7 @@ export const anamnesisFieldEntity = pgTable(
   },
   (t) => [
     addAuthenticatedPolicy(t),
+    addDeletedAtPolicy(t),
   ],
 );
 
@@ -256,8 +293,11 @@ export const anamnesisFieldValidationEntity = pgTable(
     active: boolean('active').notNull(),
   },
   (t) => [
-    index().on(t.tenantId, t.anamnesisFieldId),
+    index()
+      .on(t.tenantId, t.anamnesisFieldId)
+      .where(sql`${t.deletedAt} IS NULL`),
     addAuthenticatedPolicy(t),
+    addDeletedAtPolicy(t),
   ],
 );
 
@@ -271,8 +311,11 @@ export const customerAnamnesisEntity = pgTable(
     date: timestamp('date').notNull(),
   },
   (t) => [
-    index().on(t.tenantId, t.customerId),
+    index()
+      .on(t.tenantId, t.customerId)
+      .where(sql`${t.deletedAt} IS NULL`),
     addAuthenticatedPolicy(t),
+    addDeletedAtPolicy(t),
   ],
 );
 
@@ -290,9 +333,14 @@ export const customerAnamnesisFieldEntity = pgTable(
     extraValues: jsonb('extra_values'),
   },
   (t) => [
-    index().on(t.tenantId, t.customerAnamnesisId),
-    index().on(t.tenantId, t.anamnesisFieldId),
+    index()
+      .on(t.tenantId, t.customerAnamnesisId)
+      .where(sql`${t.deletedAt} IS NULL`),
+    index()
+      .on(t.tenantId, t.anamnesisFieldId)
+      .where(sql`${t.deletedAt} IS NULL`),
     addAuthenticatedPolicy(t),
+    addDeletedAtPolicy(t),
   ],
 );
 
@@ -317,10 +365,17 @@ export const appointmentEntity = pgTable(
     notes: varchar('notes', { length: 2048 }),
   },
   (t) => [
-    index().on(t.tenantId, t.customerId),
-    index().on(t.tenantId, t.employeeId),
-    index().on(t.tenantId, t.startTime),
+    index()
+      .on(t.tenantId, t.customerId)
+      .where(sql`${t.deletedAt} IS NULL`),
+    index()
+      .on(t.tenantId, t.employeeId)
+      .where(sql`${t.deletedAt} IS NULL`),
+    index()
+      .on(t.tenantId, t.startTime)
+      .where(sql`${t.deletedAt} IS NULL`),
     addAuthenticatedPolicy(t),
+    addDeletedAtPolicy(t),
   ],
 );
 
@@ -341,11 +396,18 @@ export const appointmentItemEntity = pgTable(
     }),
   },
   (t) => [
-    index().on(t.tenantId, t.appointmentId),
-    index().on(t.tenantId, t.catalogItemId),
+    index()
+      .on(t.tenantId, t.appointmentId)
+      .where(sql`${t.deletedAt} IS NULL`),
+    index()
+      .on(t.tenantId, t.catalogItemId)
+      .where(sql`${t.deletedAt} IS NULL`),
     addAuthenticatedPolicy(t),
+    addDeletedAtPolicy(t),
   ],
 );
+
+export const configTypeEnum = pgEnum('config_type', ConfigType);
 
 export const configEntity = pgTable(
   'config',
@@ -356,16 +418,19 @@ export const configEntity = pgTable(
     description: varchar('description', { length: 2048 }),
     version: integer('version').notNull(),
     inactivatedAt: timestamp('inactivated_at'),
-    userId: varchar('user_id', { length: 64 }),
-    tenantId: varchar('organization_id', { length: 64 }),
+    userId: varchar('user_id', { length: 64 }).notNull(),
+    tenantId: varchar('organization_id', { length: 64 }).notNull(),
+    value: text('value').notNull(),
+    type: configTypeEnum('type').notNull(),
   },
   (t) => [
-    unique().on(t.tenantId, t.userId, t.name, t.version).nullsNotDistinct(),
-    index().on(t.tenantId, t.name),
-    index().on(t.tenantId, t.name, t.version),
-    index().on(t.tenantId, t.userId, t.name),
-    index().on(t.userId, t.name),
-    index().on(t.userId, t.name, t.version),
+    uniqueIndex()
+      .on(t.tenantId, t.userId, t.name, t.version)
+      .where(sql`${t.deletedAt} IS NULL`),
+    index()
+      .on(t.tenantId, t.userId, t.name)
+      .where(sql`${t.deletedAt} IS NULL`),
+    addDeletedAtPolicy(t),
   ],
 );
 
