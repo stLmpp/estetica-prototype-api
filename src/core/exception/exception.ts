@@ -2,7 +2,7 @@ import {
   type ErrorDetailModel,
   ErrorModel,
   ResponseErrorModel,
-} from '../model/response-error.model';
+} from '../../shared/model/response-error.model';
 import { type SetOptional } from 'type-fest';
 
 export interface ExceptionFactory {

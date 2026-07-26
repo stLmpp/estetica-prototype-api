@@ -28,6 +28,11 @@ import { AuthService } from './auth/auth.service';
 import { LoggingInterceptor } from './core/interceptor/logging.interceptor';
 import { ErrorAfterHook } from './auth/error-after-hook';
 import { Environment } from './shared/environment.enum';
+import { ConfigModule } from './features/config/config.module';
+import {
+  ResponseErrorModel,
+  ResponseErrorSchema,
+} from './shared/model/response-error.model';
 
 const appEnv = AppEnv.instance;
 
@@ -87,7 +92,7 @@ if (appEnv.environment === Environment.Production) {
     HealthModule,
     CustomerModule,
     AnamnesisFieldModule,
-    EnvironmentModule,
+    ConfigModule,
   ],
   providers: [
     ErrorAfterHook,
@@ -119,7 +124,7 @@ if (appEnv.environment === Environment.Production) {
     },
   ],
 })
-export class AppModule implements OnModuleInit {
+class AppModule implements OnModuleInit {
   constructor(
     private readonly appEnv: AppEnv,
     private readonly authService: AuthService,
@@ -127,6 +132,9 @@ export class AppModule implements OnModuleInit {
   ) {
     logger.setContext(AppModule.name);
   }
+
+  private readonly USER_ALREADY_EXISTS_USE_ANOTHER_EMAIL =
+    'USER_ALREADY_EXISTS_USE_ANOTHER_EMAIL';
 
   async onModuleInit() {
     const [error] = await safeAsync(() =>
@@ -139,13 +147,16 @@ export class AppModule implements OnModuleInit {
         },
       }),
     );
-    if (
-      !error ||
-      (isAPIError(error) &&
-        error.body?.code === 'USER_ALREADY_EXISTS_USE_ANOTHER_EMAIL')
-    ) {
+    const code = isAPIError(error)
+      ? ResponseErrorModel.is(error.body)
+        ? error.body.error.code
+        : error.body?.code
+      : null;
+    if (!error || code === this.USER_ALREADY_EXISTS_USE_ANOTHER_EMAIL) {
       return;
     }
     this.logger.error('Failed to create admin user', { error });
   }
 }
+
+export default AppModule;

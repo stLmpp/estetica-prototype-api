@@ -11,6 +11,7 @@ import {
   pgTable,
   text,
   timestamp,
+  unique,
   varchar,
 } from 'drizzle-orm/pg-core';
 import { sql } from 'drizzle-orm';
@@ -346,6 +347,28 @@ export const appointmentItemEntity = pgTable(
   ],
 );
 
+export const configEntity = pgTable(
+  'config',
+  {
+    ...baseEntity('cfg'),
+    name: varchar('name', { length: 256 }).notNull(),
+    displayName: varchar('display_name', { length: 256 }).notNull(),
+    description: varchar('description', { length: 2048 }),
+    version: integer('version').notNull(),
+    inactivatedAt: timestamp('inactivated_at'),
+    userId: varchar('user_id', { length: 64 }),
+    tenantId: varchar('organization_id', { length: 64 }),
+  },
+  (t) => [
+    unique().on(t.tenantId, t.userId, t.name, t.version).nullsNotDistinct(),
+    index().on(t.tenantId, t.name),
+    index().on(t.tenantId, t.name, t.version),
+    index().on(t.tenantId, t.userId, t.name),
+    index().on(t.userId, t.name),
+    index().on(t.userId, t.name, t.version),
+  ],
+);
+
 export const mainEntities = {
   person: personEntity,
   employee: employeeEntity,
@@ -360,4 +383,5 @@ export const mainEntities = {
   customerAnamnesisField: customerAnamnesisFieldEntity,
   appointment: appointmentEntity,
   appointmentItem: appointmentItemEntity,
+  config: configEntity,
 };

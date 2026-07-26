@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { z } from 'zod';
 
 export class ErrorDetailModel {
   constructor(issue: string, field: string) {
@@ -21,6 +22,10 @@ export class ErrorDetailModel {
     maxLength: 1024,
   })
   readonly field: string;
+
+  static is(error: unknown): error is ErrorDetailModel {
+    return ErrorDetailModelSchema.safeParse(error).success;
+  }
 }
 
 export class ErrorModel {
@@ -65,6 +70,10 @@ export class ErrorModel {
     description: 'The details of the error',
   })
   readonly details?: ErrorDetailModel[];
+
+  static is(error: unknown): error is ErrorModel {
+    return ErrorModelSchema.safeParse(error).success;
+  }
 }
 
 export class ResponseErrorModel extends Error {
@@ -93,4 +102,32 @@ export class ResponseErrorModel extends Error {
       statusCode: this.statusCode,
     };
   }
+
+  static is(error: unknown): error is ResponseErrorModel {
+    return ResponseErrorSchema.safeParse(error).success;
+  }
 }
+
+export const ErrorDetailModelSchema = z
+  .object({
+    code: z.string().min(2).max(64),
+    message: z.string().min(1).max(1024),
+    error: z.string().min(1).max(1024),
+  })
+  .strict();
+
+export const ErrorModelSchema = z
+  .object({
+    code: z.string().min(2).max(64),
+    message: z.string().min(1).max(1024),
+    error: z.string().min(1).max(1024),
+    details: z.array(ErrorDetailModelSchema).optional(),
+  })
+  .strict();
+
+export const ResponseErrorSchema = z
+  .object({
+    error: ErrorModelSchema,
+    statusCode: z.number().int().min(400).max(599),
+  })
+  .strict();

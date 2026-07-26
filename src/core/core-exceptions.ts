@@ -1,4 +1,4 @@
-import { exception } from '../shared/exception/exception';
+import { exception } from './exception/exception';
 
 export const coreExceptions = {
   invalidRequest: exception({

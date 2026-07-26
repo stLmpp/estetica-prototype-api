@@ -1,4 +1,4 @@
-import { exception } from '../../shared/exception/exception';
+import { exception } from '../../core/exception/exception';
 
 export const CustomerExceptions = {
   customerNotFound: exception({

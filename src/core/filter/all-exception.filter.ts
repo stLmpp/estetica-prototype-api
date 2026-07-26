@@ -16,7 +16,7 @@ import {
 import { DrizzleQueryError } from 'drizzle-orm';
 import { ThrottlerException } from '@nestjs/throttler';
 import { isAPIError } from 'better-auth/api';
-import { exception } from '../../shared/exception/exception';
+import { exception } from '../exception/exception';
 
 const NotFoundResponseSchema = z.object({
   message: z.string(),

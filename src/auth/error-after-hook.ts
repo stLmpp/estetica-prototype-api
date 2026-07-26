@@ -5,7 +5,7 @@ import {
   Hook,
 } from '@thallesp/nestjs-better-auth';
 import { isAPIError } from 'better-auth/api';
-import { exception } from '../shared/exception/exception';
+import { exception } from '../core/exception/exception';
 
 @Injectable()
 @Hook()

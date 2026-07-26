@@ -2,7 +2,7 @@ import './config';
 import './query-duration-logger';
 import metadata from './metadata';
 import { NestFactory } from '@nestjs/core';
-import { AppModule } from './app.module';
+import AppModule from './app.module';
 import compression from 'compression';
 import helmet from 'helmet';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
