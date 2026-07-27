@@ -1,7 +1,7 @@
 {
   "version": "8",
   "dialect": "postgres",
-  "id": "50c79ed5-811f-457a-a10d-fb0ae17f8046",
+  "id": "5980499a-0823-4dca-a50d-2780c02f5a84",
   "prevIds": [
     "4db6d13f-31b5-4905-8183-acd0f352dcd7"
   ],
@@ -49,6 +49,17 @@
         "Serviço"
       ],
       "name": "catalog_item_type",
+      "entityType": "enums",
+      "schema": "public"
+    },
+    {
+      "values": [
+        "STRING",
+        "NUMBER",
+        "BOOLEAN",
+        "JSON"
+      ],
+      "name": "config_type",
       "entityType": "enums",
       "schema": "public"
     },
@@ -1089,6 +1100,32 @@
       "generated": null,
       "identity": null,
       "name": "user_id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "config"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "value",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "config"
+    },
+    {
+      "type": "config_type",
+      "typeSchema": "public",
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "type",
       "entityType": "columns",
       "schema": "public",
       "table": "config"

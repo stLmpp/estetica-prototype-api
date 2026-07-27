@@ -10,6 +10,7 @@ export const PublishConfigSchema = z.object({
   tenantId: z.string().trim().min(1).max(64).optional(),
   value: z.string().trim().min(1).max(65_536),
   type: z.enum(ConfigType),
+  group: z.string().trim().min(1).max(256).optional(),
 });
 
 export class PublishConfigDto extends createZodDto(PublishConfigSchema, {

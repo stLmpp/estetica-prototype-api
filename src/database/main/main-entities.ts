@@ -413,8 +413,9 @@ export const configEntity = pgTable(
   'config',
   {
     ...baseEntity('cfg'),
-    name: varchar('name', { length: 256 }).notNull(),
-    displayName: varchar('display_name', { length: 256 }).notNull(),
+    name: varchar('name', { length: 64 }).notNull(),
+    displayName: varchar('display_name', { length: 128 }).notNull(),
+    group: varchar('group', { length: 64 }).notNull(),
     description: varchar('description', { length: 2048 }),
     version: integer('version').notNull(),
     inactivatedAt: timestamp('inactivated_at'),
@@ -425,10 +426,13 @@ export const configEntity = pgTable(
   },
   (t) => [
     uniqueIndex()
-      .on(t.tenantId, t.userId, t.name, t.version)
+      .on(t.group, t.tenantId, t.userId, t.name, t.version)
       .where(sql`${t.deletedAt} IS NULL`),
     index()
-      .on(t.tenantId, t.userId, t.name)
+      .on(t.group, t.tenantId, t.userId, t.name)
+      .where(sql`${t.deletedAt} IS NULL`),
+    index()
+      .on(t.group, t.tenantId, t.userId)
       .where(sql`${t.deletedAt} IS NULL`),
     addDeletedAtPolicy(t),
   ],

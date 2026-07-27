@@ -2,6 +2,7 @@ CREATE TYPE "anamnesis_field_type" AS ENUM('TEXT', 'NUMBER', 'DATE', 'CHECKBOX',
 CREATE TYPE "anamnesis_field_validation_type" AS ENUM('required', 'minLength', 'maxLength', 'minValue', 'maxValue', 'pattern');--> statement-breakpoint
 CREATE TYPE "appointment_status" AS ENUM('Agendado', 'Concluído', 'Cancelado', 'Não compareceu');--> statement-breakpoint
 CREATE TYPE "catalog_item_type" AS ENUM('Produto', 'Serviço');--> statement-breakpoint
+CREATE TYPE "config_type" AS ENUM('STRING', 'NUMBER', 'BOOLEAN', 'JSON');--> statement-breakpoint
 CREATE TYPE "marital_status" AS ENUM('Casado(a)', 'Solteiro(a)', 'Divorciado(a)', 'Viúvo(a)');--> statement-breakpoint
 CREATE TYPE "phone_type" AS ENUM('Celular', 'Residencial', 'Trabalho');--> statement-breakpoint
 CREATE TABLE "anamnesis_field" (
@@ -96,7 +97,9 @@ CREATE TABLE "config" (
 	"description" varchar(2048),
 	"version" integer NOT NULL,
 	"inactivated_at" timestamp,
-	"user_id" varchar(64) NOT NULL
+	"user_id" varchar(64) NOT NULL,
+	"value" text NOT NULL,
+	"type" "config_type" NOT NULL
 );
 --> statement-breakpoint
 ALTER TABLE "config" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint

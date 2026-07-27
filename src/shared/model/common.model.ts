@@ -39,3 +39,12 @@ export const ZipCodeSchema = z
   .string()
   .trim()
   .regex(/^\d{8}$/);
+
+export const BooleanParamSchema = z.codec(
+  z.enum(['true', 'false', '', 'y', 'n', 'yes', 'no']),
+  z.boolean(),
+  {
+    encode: (val) => String(val) as never,
+    decode: (val) => val === 'true' || val === 'y' || val === 'yes',
+  },
+);

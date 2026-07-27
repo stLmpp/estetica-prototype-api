@@ -7,6 +7,7 @@ import { Redis } from '@upstash/redis';
 import { PublishConfigResDto } from './dto/output/publish-config.response';
 import { InferSelectModel } from 'drizzle-orm';
 import { mainEntities } from '../../database/main/main-entities';
+import { FilterConfigDto } from './dto/input/list-config.request';
 
 @Injectable()
 export class ConfigService {
@@ -15,8 +16,13 @@ export class ConfigService {
     private readonly redis: Redis,
   ) {}
 
-  private createKey(name: string, userId: string, tenantId: string) {
-    return `tenant:${tenantId}:user:${userId}:config:${name}`;
+  private createKey(
+    group: string,
+    name: string,
+    userId: string,
+    tenantId: string,
+  ) {
+    return `tenant:${tenantId}:user:${userId}:group:${group}:config:${name}`;
   }
 
   @MainTransactional()
@@ -25,8 +31,10 @@ export class ConfigService {
   ): Promise<[config: PublishConfigResDto, old?: PublishConfigResDto]> {
     const userId = config.userId ?? CONFIG_GLOBAL_PLACEHOLDER;
     const tenantId = config.tenantId ?? CONFIG_GLOBAL_PLACEHOLDER;
+    const group = config.group ?? CONFIG_GLOBAL_PLACEHOLDER;
     const entity =
       await this.configRepository.getLatestVersionByNameAndUserIdAndTenantId(
+        group,
         config.name,
         userId,
         tenantId,
@@ -43,21 +51,36 @@ export class ConfigService {
           description: config.description,
           value: config.value,
           type: config.type,
+          group,
         })
         .then((results) => results.at(0)!),
       entity && this.configRepository.inactivate(entity.id),
       entity &&
         this.redis.del(
-          this.createKey(entity.name, entity.userId, entity.tenantId),
+          this.createKey(
+            entity.group,
+            entity.name,
+            entity.userId,
+            entity.tenantId,
+          ),
         ),
     ]);
     return [
       this.mapEntityToDto(newEntity),
-      entity ? this.mapEntityToDto(entity) : undefined,
+      entity && this.mapEntityToDto(entity),
     ];
   }
 
+  async listPaginated(dto: FilterConfigDto) {
+    const { configs, count } = await this.configRepository.listPaginated(dto);
+    return {
+      configs: configs.map(this.mapEntityToDto),
+      count,
+    };
+  }
+
   private mapEntityToDto(
+    this: void,
     entity: InferSelectModel<typeof mainEntities.config>,
   ): PublishConfigResDto {
     return {
@@ -71,6 +94,7 @@ export class ConfigService {
       tenantId: entity.tenantId,
       value: entity.value,
       type: entity.type,
+      group: entity.group,
     };
   }
 }

@@ -25,6 +25,7 @@ export const PublishConfigResSchema = z.object({
   inactivatedAt: DatetimeSchema.optional(),
   value: z.string().trim().min(1).max(65_536),
   type: z.enum(ConfigType),
+  group: z.string().trim().min(1).max(256),
 });
 
 export type PublishConfigResDto = z.input<typeof PublishConfigResSchema>;
