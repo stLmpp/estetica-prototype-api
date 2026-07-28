@@ -38,4 +38,9 @@ export const coreExceptions = {
     status: 429,
     message: 'Too many requests',
   }),
+  forbidden: exception({
+    code: 'FORBIDDEN',
+    status: 403,
+    message: 'Forbidden',
+  }),
 };

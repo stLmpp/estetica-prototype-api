@@ -1,24 +1,22 @@
-import { createPaginatedResponseSchema } from '../../../../shared/model/response.model';
+import {
+  createPaginatedResponseSchema,
+  createResponseSchema,
+} from '../../../../shared/model/response.model';
 import { createZodDto } from 'nestjs-zod';
 import { z } from 'zod';
-import { ConfigType } from '../../../../shared/domain/config-type.enum';
+import { ConfigModelSchema } from '../../model/config.model';
 
-export const ConfigSchema = z.object({
-  id: z.string(),
-  name: z.string().trim().min(1).max(64),
-  displayName: z.string().trim().min(1).max(128),
-  group: z.string().trim().min(1).max(64),
-  version: z.int().positive(),
-  description: z.string().trim().min(1).max(2048).optional(),
-  userId: z.string().trim().min(1).max(64),
-  tenantId: z.string().trim().min(1).max(64),
-  value: z.string().trim(),
-  type: z.enum(ConfigType),
-});
+export const ListConfigResponse = createResponseSchema(
+  z.object({
+    configs: z.array(ConfigModelSchema),
+  }),
+);
 
-export const ListConfigResponseSchema =
-  createPaginatedResponseSchema(ConfigSchema);
+export const ListConfigPaginatedResponseSchema =
+  createPaginatedResponseSchema(ConfigModelSchema);
 
-export class ListConfigResponseModel extends createZodDto(
-  ListConfigResponseSchema,
+export class ListConfigPaginatedResponseModel extends createZodDto(
+  ListConfigPaginatedResponseSchema,
 ) {}
+
+export class ListConfigResponseModel extends createZodDto(ListConfigResponse) {}

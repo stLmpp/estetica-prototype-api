@@ -15,7 +15,6 @@ import { auth } from './auth/auth';
 import { GracefulShutdownModule } from '@tygra/nestjs-graceful-shutdown';
 import { CustomerModule } from './features/customer/customer.module';
 import { AllExceptionsFilter } from './core/filter/all-exception.filter';
-import { createZodValidationPipe } from 'nestjs-zod';
 import { CustomZodSerializerInterceptor } from './core/interceptor/custom-zod-serializer-interceptor';
 import { ClsModule } from 'nestjs-cls';
 import { SessionInterceptor } from './core/interceptor/session.interceptor';
@@ -29,10 +28,8 @@ import { LoggingInterceptor } from './core/interceptor/logging.interceptor';
 import { ErrorAfterHook } from './auth/error-after-hook';
 import { Environment } from './shared/environment.enum';
 import { ConfigModule } from './features/config/config.module';
-import {
-  ResponseErrorModel,
-  ResponseErrorSchema,
-} from './shared/model/response-error.model';
+import { ResponseErrorModel } from './shared/model/response-error.model';
+import { ZodValidationPipe } from 'nestjs-zod';
 
 const appEnv = AppEnv.instance;
 
@@ -106,9 +103,7 @@ if (appEnv.environment === Environment.Production) {
     },
     {
       provide: APP_PIPE,
-      useClass: createZodValidationPipe({
-        strictSchemaDeclaration: true,
-      }),
+      useClass: ZodValidationPipe,
     },
     {
       provide: APP_INTERCEPTOR,

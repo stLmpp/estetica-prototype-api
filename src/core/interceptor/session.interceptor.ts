@@ -7,7 +7,11 @@ import {
 import { Observable } from 'rxjs';
 import { ClsService } from 'nestjs-cls';
 import { Request } from 'express';
-import { CLS_TENANT_ID_KEY, CLS_USER_ID_KEY } from '../../auth/constants';
+import {
+  CLS_SESSION_ROLE_KEY,
+  CLS_TENANT_ID_KEY,
+  CLS_USER_ID_KEY,
+} from '../../auth/constants';
 import { BetterAuthSession } from '../../auth/auth';
 import { coreExceptions } from '../core-exceptions';
 import { Reflector } from '@nestjs/core';
@@ -40,6 +44,7 @@ export class SessionInterceptor implements NestInterceptor {
     }
     this.clsService.set(CLS_TENANT_ID_KEY, tenantId);
     this.clsService.set(CLS_USER_ID_KEY, session.user.id);
+    this.clsService.set(CLS_SESSION_ROLE_KEY, session.user.role);
     return next.handle();
   }
 }

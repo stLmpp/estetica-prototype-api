@@ -7,7 +7,7 @@ import { promiseAllObject } from '../../../shared/utils/promise-all-object';
 
 @Injectable()
 export class ConfigRepository extends Repository {
-  getLatestVersionByNameAndUserIdAndTenantId(
+  getLatestVersionByGroupAndNameAndUserIdAndTenantId(
     group: string,
     name: string,
     userId: string,
@@ -24,6 +24,32 @@ export class ConfigRepository extends Repository {
         version: 'desc',
       },
     });
+  }
+
+  async getFirstByGroupAndNameAndUserIdAndTenantIdAndVersion(
+    group: string,
+    name: string,
+    userId: string,
+    tenantId: string,
+    version: number | 'latest',
+  ) {
+    const where = [
+      eq(this.db.e.config.group, group),
+      eq(this.db.e.config.name, name),
+      eq(this.db.e.config.userId, userId),
+      eq(this.db.e.config.tenantId, tenantId),
+    ];
+    if (version === 'latest') {
+      where.push(isNull(this.db.e.config.inactivatedAt));
+    } else {
+      where.push(eq(this.db.e.config.version, version));
+    }
+    const [entity] = await this.db
+      .select()
+      .from(this.db.e.config)
+      .where(and(...where))
+      .limit(1);
+    return entity;
   }
 
   async inactivate(id: string) {

@@ -1,4 +1,12 @@
-import { Body, Controller, Get, Post, Query } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  ParseIntPipe,
+  Post,
+  Query,
+} from '@nestjs/common';
 import { Roles } from '@thallesp/nestjs-better-auth';
 import { AuthRole } from '../../auth/auth';
 import { PublishConfigRequest } from './dto/input/publish-config.request';
@@ -6,7 +14,14 @@ import { PublishConfigResponseModel } from './dto/output/publish-config.response
 import { ConfigService } from './config.service';
 import { ResponseType } from '../../shared/decorator/response-type.decorator';
 import { FilterConfigDto } from './dto/input/list-config.request';
-import { ListConfigResponseModel } from './dto/output/list-config.response';
+import {
+  ListConfigPaginatedResponseModel,
+  ListConfigResponseModel,
+} from './dto/output/list-config.response';
+import { GetConfigResponse } from './dto/output/get-config.response';
+import { z } from 'zod';
+import { ZodValidationPipe } from 'nestjs-zod';
+import { GetConfigRequest } from './dto/input/get-config.request';
 
 @Controller({
   path: 'config',
@@ -31,11 +46,11 @@ export class ConfigController {
     };
   }
 
-  @ResponseType(ListConfigResponseModel)
+  @ResponseType(ListConfigPaginatedResponseModel)
   @Get()
   async listPaginated(
     @Query() query: FilterConfigDto,
-  ): Promise<ListConfigResponseModel> {
+  ): Promise<ListConfigPaginatedResponseModel> {
     const { configs, count } = await this.configService.listPaginated(query);
     return {
       data: {
@@ -45,6 +60,33 @@ export class ConfigController {
         total: count,
         limit: query.limit,
         page: query.page,
+      },
+    };
+  }
+
+  @ResponseType(ListConfigResponseModel)
+  @Get('group/:group')
+  async listGroup(
+    @Param('group', new ZodValidationPipe(z.string().trim().min(1).max(64)))
+    group: string,
+  ): Promise<ListConfigResponseModel> {
+    const configs = await this.configService.listGroup(group);
+    return {
+      data: {
+        configs,
+      },
+    };
+  }
+
+  @ResponseType(GetConfigResponse)
+  @Get('query-one')
+  async getConfig(
+    @Query() query: GetConfigRequest,
+  ): Promise<GetConfigResponse> {
+    const config = await this.configService.get(query);
+    return {
+      data: {
+        config,
       },
     };
   }
