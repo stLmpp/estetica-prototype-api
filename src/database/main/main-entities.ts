@@ -11,6 +11,7 @@ import {
   pgTable,
   text,
   timestamp,
+  unique,
   uniqueIndex,
   varchar,
 } from 'drizzle-orm/pg-core';
@@ -420,7 +421,6 @@ export const configEntity = pgTable(
     version: integer('version').notNull(),
     inactivatedAt: timestamp('inactivated_at'),
     userId: varchar('user_id', { length: 64 }).notNull(),
-    tenantId: varchar('organization_id', { length: 64 }).notNull(),
     value: text('value').notNull(),
     type: configTypeEnum('type').notNull(),
   },
@@ -435,6 +435,130 @@ export const configEntity = pgTable(
       .on(t.group, t.tenantId, t.userId)
       .where(sql`${t.deletedAt} IS NULL`),
     addDeletedAtPolicy(t),
+  ],
+);
+
+export const authAccountEntity = pgTable(
+  'auth_account',
+  {
+    id: text().primaryKey(),
+    accountId: text().notNull(),
+    providerId: text().notNull(),
+    userId: text()
+      .notNull()
+      .references(() => authUserEntity.id, { onDelete: 'cascade' }),
+    accessToken: text(),
+    refreshToken: text(),
+    idToken: text(),
+    accessTokenExpiresAt: timestamp({ withTimezone: true }),
+    refreshTokenExpiresAt: timestamp({ withTimezone: true }),
+    scope: text(),
+    password: text(),
+    createdAt: timestamp({ withTimezone: true })
+      .default(sql`CURRENT_TIMESTAMP`)
+      .notNull(),
+    updatedAt: timestamp({ withTimezone: true }).notNull(),
+  },
+  (table) => [
+    index('auth_account_userId_idx').using(
+      'btree',
+      table.userId.asc().nullsLast(),
+    ),
+  ],
+);
+
+export const authInvitationEntity = pgTable(
+  'auth_invitation',
+  {
+    id: text().primaryKey(),
+    organizationId: text()
+      .notNull()
+      .references(() => authOrganizationEntity.id, { onDelete: 'cascade' }),
+    email: text().notNull(),
+    role: text(),
+    status: text().notNull(),
+    expiresAt: timestamp({ withTimezone: true }).notNull(),
+    createdAt: timestamp({ withTimezone: true })
+      .default(sql`CURRENT_TIMESTAMP`)
+      .notNull(),
+    inviterId: text()
+      .notNull()
+      .references(() => authUserEntity.id, { onDelete: 'cascade' }),
+  },
+  (table) => [
+    index('auth_invitation_email_idx').using(
+      'btree',
+      table.email.asc().nullsLast(),
+    ),
+    index('auth_invitation_organizationId_idx').using(
+      'btree',
+      table.organizationId.asc().nullsLast(),
+    ),
+  ],
+);
+
+export const authMemberEntity = pgTable(
+  'auth_member',
+  {
+    id: text().primaryKey(),
+    organizationId: text()
+      .notNull()
+      .references(() => authOrganizationEntity.id, { onDelete: 'cascade' }),
+    userId: text()
+      .notNull()
+      .references(() => authUserEntity.id, { onDelete: 'cascade' }),
+    role: text().notNull(),
+    createdAt: timestamp({ withTimezone: true }).notNull(),
+  },
+  (table) => [
+    index('auth_member_organizationId_idx').using(
+      'btree',
+      table.organizationId.asc().nullsLast(),
+    ),
+    index('auth_member_userId_idx').using(
+      'btree',
+      table.userId.asc().nullsLast(),
+    ),
+  ],
+);
+
+export const authOrganizationEntity = pgTable(
+  'auth_organization',
+  {
+    id: text().primaryKey(),
+    name: text().notNull(),
+    slug: text().notNull(),
+    logo: text(),
+    createdAt: timestamp({ withTimezone: true }).notNull(),
+    metadata: text(),
+    membershipLimit: integer('membership_limit').notNull(),
+  },
+  (table) => [
+    unique('auth_organization_slug_key').on(table.slug),
+  ],
+);
+
+export const authUserEntity = pgTable(
+  'auth_user',
+  {
+    id: text().primaryKey(),
+    name: text().notNull(),
+    email: text().notNull(),
+    emailVerified: boolean().notNull(),
+    image: text(),
+    createdAt: timestamp({ withTimezone: true })
+      .default(sql`CURRENT_TIMESTAMP`)
+      .notNull(),
+    updatedAt: timestamp({ withTimezone: true })
+      .default(sql`CURRENT_TIMESTAMP`)
+      .notNull(),
+    role: text(),
+    banned: boolean(),
+    banReason: text(),
+    banExpires: timestamp({ withTimezone: true }),
+  },
+  (table) => [
+    unique('auth_user_email_key').on(table.email),
   ],
 );
 
@@ -453,4 +577,9 @@ export const mainEntities = {
   appointment: appointmentEntity,
   appointmentItem: appointmentItemEntity,
   config: configEntity,
+  authAccount: authAccountEntity,
+  authInvitation: authInvitationEntity,
+  authMember: authMemberEntity,
+  authOrganization: authOrganizationEntity,
+  authUser: authUserEntity,
 };

@@ -12,6 +12,8 @@ import { CustomerPhoneRepository } from './repositories/customer-phone.repositor
 import { AnamnesisFieldRepository } from './repositories/anamnesis-field.repository';
 import { TransactionalAdapterDrizzleOrmCustom } from '../../core/transactional-adapter-drizzle-orm-custom';
 import { ConfigRepository } from './repositories/config.repository';
+import { AuthOrganizationRepository } from './repositories/auth-organization.repository';
+import { AuthUserRepository } from './repositories/auth-user.repository';
 
 const REPOSITORIES = [
   CustomerRepository,
@@ -19,6 +21,8 @@ const REPOSITORIES = [
   CustomerPhoneRepository,
   AnamnesisFieldRepository,
   ConfigRepository,
+  AuthOrganizationRepository,
+  AuthUserRepository,
 ];
 
 @Module({

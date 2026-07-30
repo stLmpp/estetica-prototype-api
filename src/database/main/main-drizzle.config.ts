@@ -11,4 +11,5 @@ export default defineConfig({
     url: appEnv.mainDatabaseMigrationUrl,
   },
   out: 'migrations/main',
+  tablesFilter: ['auth_*'],
 });

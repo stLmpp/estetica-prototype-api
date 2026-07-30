@@ -1,12 +1,6 @@
 import { betterAuth, type ModelNames } from 'better-auth';
 import { AppEnv } from '../core/config/app-env';
-import {
-  admin,
-  anonymous,
-  openAPI,
-  organization,
-  username,
-} from 'better-auth/plugins';
+import { admin, openAPI, organization } from 'better-auth/plugins';
 import { LoggerService } from '../core/logger/logger.service';
 import { getMigrationPool } from '../database/main/main-database-connection';
 import { z } from 'zod';
@@ -44,6 +38,7 @@ const generateIdPrefixMap: Record<ModelNames, string> = {
   verification: 'verif',
   team: 'team',
   'team-member': 'tmemb',
+  apikey: 'akey',
   '': 'empt',
 };
 
@@ -70,14 +65,13 @@ export const auth = betterAuth({
       path: 'openapi',
     }),
     admin(),
-    anonymous(), // TODO check if is necessary
-    username(),
     organization({
       requireEmailVerificationOnInvitation: false, // TODO
       allowUserToCreateOrganization: (user) => user.role === AuthRole.Admin,
       disableOrganizationDeletion: true,
       schema: {
         organization: {
+          modelName: 'auth_organization',
           additionalFields: {
             membershipLimit: {
               defaultValue: 1,
@@ -89,6 +83,21 @@ export const auth = betterAuth({
               },
             },
           },
+        },
+        team: {
+          modelName: 'auth_team',
+        },
+        member: {
+          modelName: 'auth_member',
+        },
+        invitation: {
+          modelName: 'auth_invitation',
+        },
+        teamMember: {
+          modelName: 'auth_team_member',
+        },
+        organizationRole: {
+          modelName: 'auth_organization_role',
         },
       },
       membershipLimit: (_, organization) => {
@@ -108,6 +117,7 @@ export const auth = betterAuth({
     window: appEnv.throttlerTtlMs / 1000,
   },
   session: {
+    modelName: 'auth_session',
     cookieCache: {
       enabled: true,
       maxAge: 5 * 60,
@@ -116,9 +126,19 @@ export const auth = betterAuth({
       version: String(appEnv.betterAuthCookieCacheVersion),
     },
   },
+  user: {
+    modelName: 'auth_user',
+  },
+  account: {
+    modelName: 'auth_account',
+  },
+  verification: {
+    modelName: 'auth_verification',
+  },
   advanced: {
     database: {
       generateId: (options) => {
+        // console.log(options);
         return `${generateIdPrefixMap[options.model]}_${uuidv7().replaceAll('-', '')}`;
       },
     },

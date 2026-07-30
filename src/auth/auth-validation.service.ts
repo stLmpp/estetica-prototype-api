@@ -9,10 +9,17 @@ import {
 import { ClsService } from 'nestjs-cls';
 import { AuthRole } from './auth';
 import { coreExceptions } from '../core/core-exceptions';
+import { authExceptions } from './auth-exceptions';
+import { AuthOrganizationRepository } from '../database/main/repositories/auth-organization.repository';
+import { AuthUserRepository } from '../database/main/repositories/auth-user.repository';
 
 @Injectable()
 export class AuthValidationService {
-  constructor(private readonly clsService: ClsService) {}
+  constructor(
+    private readonly clsService: ClsService,
+    private readonly authOrganizationRepository: AuthOrganizationRepository,
+    private readonly authUserRepository: AuthUserRepository,
+  ) {}
 
   assertSessionHasAccess(tenantId: string, userId: string) {
     if (tenantId === GLOBAL_TENANT && userId === GLOBAL_USER) {
@@ -37,5 +44,25 @@ export class AuthValidationService {
       return;
     }
     throw coreExceptions.forbidden();
+  }
+
+  async assertTenantExists(tenantId: string) {
+    if (tenantId === GLOBAL_TENANT) {
+      return;
+    }
+    const org = await this.authOrganizationRepository.findFirstById(tenantId);
+    if (!org) {
+      throw authExceptions.tenantNotFound();
+    }
+  }
+
+  async assertUserExists(userId: string) {
+    if (userId === GLOBAL_USER) {
+      return;
+    }
+    const user = await this.authUserRepository.findFirstById(userId);
+    if (!user) {
+      throw authExceptions.userNotFound();
+    }
   }
 }

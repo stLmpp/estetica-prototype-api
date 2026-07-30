@@ -1,6 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { PublishConfigDto } from './dto/input/publish-config.request';
-import { ConfigRepository } from '../../database/main/repositories/config.repository';
+import {
+  ConfigRepository,
+  PossibleConfigParams,
+} from '../../database/main/repositories/config.repository';
 import { CONFIG_GROUP_GLOBAL } from './config.constants';
 import { MainTransactional } from '../../database/main/main-database-connection';
 import { Redis } from '@upstash/redis';
@@ -12,6 +15,7 @@ import { GetConfigRequest } from './dto/input/get-config.request';
 import { AuthValidationService } from '../../auth/auth-validation.service';
 import { ConfigExceptions } from './config-exceptions';
 import { ConfigModel } from './model/config.model';
+import { GetGroupRequest } from './dto/input/get-group.request';
 
 @Injectable()
 export class ConfigService {
@@ -36,9 +40,14 @@ export class ConfigService {
   ): Promise<[config: ConfigModel, old?: ConfigModel]> {
     const userId = config.userId ?? GLOBAL_USER;
     const tenantId = config.tenantId ?? GLOBAL_TENANT;
+    await Promise.all([
+      this.authValidationService.assertTenantExists(tenantId),
+      this.authValidationService.assertUserExists(userId),
+    ]);
+    this.authValidationService.assertSessionHasAccess(tenantId, userId);
     const group = config.group ?? CONFIG_GROUP_GLOBAL;
     const entity =
-      await this.configRepository.getLatestVersionByGroupAndNameAndUserIdAndTenantId(
+      await this.configRepository.findFirstLatestVersionByGroupAndNameAndUserIdAndTenantId(
         group,
         config.name,
         userId,
@@ -77,7 +86,7 @@ export class ConfigService {
   }
 
   async listPaginated(dto: FilterConfigDto) {
-    const { configs, count } = await this.configRepository.listPaginated(dto);
+    const { configs, count } = await this.configRepository.findPaginated(dto);
     return {
       configs: configs.map(this.mapEntityToDto),
       count,
@@ -86,7 +95,7 @@ export class ConfigService {
 
   async get(dto: GetConfigRequest) {
     this.authValidationService.assertSessionHasAccess(dto.tenantId, dto.userId);
-    const combinations = [
+    const combinations: PossibleConfigParams[] = [
       {
         order: 1,
         userId: dto.userId,
@@ -137,23 +146,33 @@ export class ConfigService {
       },
     ];
 
-    const applicableCombinations = combinations
-      .filter((combo) => {
-        const isUserIdMatch =
-          dto.userId === combo.userId || combo.userId === GLOBAL_USER;
-        const isTenantIdMatch =
-          dto.tenantId === combo.tenantId || combo.tenantId === GLOBAL_TENANT;
-        const isGroupMatch =
-          dto.group === combo.group || combo.group === CONFIG_GROUP_GLOBAL;
+    const applicableCombinations = combinations.filter((combo) => {
+      const isUserIdMatch =
+        dto.userId === combo.userId || combo.userId === GLOBAL_USER;
+      const isTenantIdMatch =
+        dto.tenantId === combo.tenantId || combo.tenantId === GLOBAL_TENANT;
+      const isGroupMatch =
+        dto.group === combo.group || combo.group === CONFIG_GROUP_GLOBAL;
 
-        return isUserIdMatch && isTenantIdMatch && isGroupMatch;
-      })
-      .sort((a, b) => a.order - b.order);
+      return isUserIdMatch && isTenantIdMatch && isGroupMatch;
+    });
+
+    const config = await this.configRepository.findFirstByParams({
+      name: dto.name,
+      version: dto.version,
+      params: applicableCombinations,
+    });
 
     if (!config) {
       throw ConfigExceptions.configNotFound();
     }
     return this.mapEntityToDto(config);
+  }
+
+  async listGroup(dto: GetGroupRequest) {
+    this.authValidationService.assertSessionHasAccess(dto.tenantId, dto.userId);
+    const configs = await this.configRepository.findByGroup(dto);
+    return configs.map(this.mapEntityToDto);
   }
 
   private mapEntityToDto(

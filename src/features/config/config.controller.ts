@@ -22,6 +22,7 @@ import { GetConfigResponse } from './dto/output/get-config.response';
 import { z } from 'zod';
 import { ZodValidationPipe } from 'nestjs-zod';
 import { GetConfigRequest } from './dto/input/get-config.request';
+import { GetGroupRequest } from './dto/input/get-group.request';
 
 @Controller({
   path: 'config',
@@ -65,12 +66,11 @@ export class ConfigController {
   }
 
   @ResponseType(ListConfigResponseModel)
-  @Get('group/:group')
+  @Get('query-group')
   async listGroup(
-    @Param('group', new ZodValidationPipe(z.string().trim().min(1).max(64)))
-    group: string,
+    @Query() query: GetGroupRequest,
   ): Promise<ListConfigResponseModel> {
-    const configs = await this.configService.listGroup(group);
+    const configs = await this.configService.listGroup(query);
     return {
       data: {
         configs,
