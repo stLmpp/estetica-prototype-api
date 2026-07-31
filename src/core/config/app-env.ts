@@ -34,7 +34,7 @@ export class AppEnv {
   @EnvProperty({
     name: 'THROTTLER_TTL_MS',
     type: 'number',
-    defaultValue: 60_000,
+    defaultValue: Temporal.Duration.from({ minutes: 1 }).milliseconds,
   })
   readonly throttlerTtlMs!: number;
 
@@ -61,14 +61,14 @@ export class AppEnv {
   @EnvProperty({
     name: 'SERVER_TIMEOUT_MS',
     type: 'number',
-    defaultValue: 60_000,
+    defaultValue: Temporal.Duration.from({ minutes: 1 }).milliseconds,
   })
   readonly serverTimeoutMs!: number;
 
   @EnvProperty({
     name: 'REQUEST_TIMEOUT_MS',
     type: 'number',
-    defaultValue: 30_000,
+    defaultValue: Temporal.Duration.from({ seconds: 30 }).milliseconds,
   })
   readonly requestTimeoutMs!: number;
 
@@ -108,6 +108,14 @@ export class AppEnv {
     type: 'list',
   })
   readonly betterAuthTrustedOrigins!: string[];
+
+  @EnvProperty({
+    name: 'CONFIG_CACHE_EXPIRE_SECONDS',
+    required: false,
+    type: 'number',
+    defaultValue: Temporal.Duration.from({ days: 1 }).seconds,
+  })
+  readonly configCacheExpireSeconds!: number;
 
   static readonly instance = new AppEnv();
 }

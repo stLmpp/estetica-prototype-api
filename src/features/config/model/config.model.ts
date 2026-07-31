@@ -11,7 +11,8 @@ export const ConfigModelSchema = z.object({
   userId: z.string().trim().min(1).max(64),
   tenantId: z.string().trim().min(1).max(64),
   inactivatedAt: DatetimeSchema.optional(),
-  value: z.string().trim().min(1).max(65_536),
+  value: z.string().trim(),
+  valueParsed: z.unknown().optional(),
   type: z.enum(ConfigType),
   group: z.string().trim().min(1).max(256),
 });

@@ -45,6 +45,7 @@ export const BooleanParamSchema = z.codec(
   z.boolean(),
   {
     encode: (val) => String(val) as never,
-    decode: (val) => val === 'true' || val === 'y' || val === 'yes',
+    decode: (val) =>
+      val === 'true' || val === 'y' || val === 'yes' || val === '',
   },
 );

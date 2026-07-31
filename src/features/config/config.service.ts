@@ -16,6 +16,10 @@ import { AuthValidationService } from '../../auth/auth-validation.service';
 import { ConfigExceptions } from './config-exceptions';
 import { ConfigModel } from './model/config.model';
 import { GetGroupRequest } from './dto/input/get-group.request';
+import { ConfigType } from '../../shared/domain/config-type.enum';
+import { BooleanParamSchema } from '../../shared/model/common.model';
+import { safe } from '../../shared/utils/safe';
+import { AppEnv } from '../../core/config/app-env';
 
 @Injectable()
 export class ConfigService {
@@ -23,6 +27,7 @@ export class ConfigService {
     private readonly configRepository: ConfigRepository,
     private readonly redis: Redis,
     private readonly authValidationService: AuthValidationService,
+    private readonly appEnv: AppEnv,
   ) {}
 
   private createKey(
@@ -40,6 +45,7 @@ export class ConfigService {
   ): Promise<[config: ConfigModel, old?: ConfigModel]> {
     const userId = config.userId ?? GLOBAL_USER;
     const tenantId = config.tenantId ?? GLOBAL_TENANT;
+    this.assertValueIsParseable(config.type, config.value);
     await Promise.all([
       this.authValidationService.assertTenantExists(tenantId),
       this.authValidationService.assertUserExists(userId),
@@ -88,13 +94,25 @@ export class ConfigService {
   async listPaginated(dto: FilterConfigDto) {
     const { configs, count } = await this.configRepository.findPaginated(dto);
     return {
-      configs: configs.map(this.mapEntityToDto),
+      configs: configs.map((config) => this.mapEntityToDto(config)),
       count,
     };
   }
 
   async get(dto: GetConfigRequest) {
     this.authValidationService.assertSessionHasAccess(dto.tenantId, dto.userId);
+
+    const key = this.createKey(dto.group, dto.name, dto.userId, dto.tenantId);
+
+    const configCache = await this.redis.get<ConfigModel>(key);
+
+    if (
+      configCache &&
+      (dto.version === 'latest' || configCache.version === dto.version)
+    ) {
+      return configCache;
+    }
+
     const combinations: PossibleConfigParams[] = [
       {
         order: 1,
@@ -166,18 +184,25 @@ export class ConfigService {
     if (!config) {
       throw ConfigExceptions.configNotFound();
     }
-    return this.mapEntityToDto(config);
+
+    const response = this.mapEntityToDto(config, dto.parseValue);
+
+    void this.redis.set(key, response, {
+      ex: this.appEnv.configCacheExpireSeconds,
+    });
+
+    return response;
   }
 
   async listGroup(dto: GetGroupRequest) {
     this.authValidationService.assertSessionHasAccess(dto.tenantId, dto.userId);
     const configs = await this.configRepository.findByGroup(dto);
-    return configs.map(this.mapEntityToDto);
+    return configs.map((config) => this.mapEntityToDto(config, dto.parseValue));
   }
 
   private mapEntityToDto(
-    this: void,
     entity: InferSelectModel<typeof mainEntities.config>,
+    parseValue = false,
   ): ConfigModel {
     return {
       displayName: entity.displayName,
@@ -189,8 +214,83 @@ export class ConfigService {
       userId: entity.userId,
       tenantId: entity.tenantId,
       value: entity.value,
+      valueParsed: parseValue
+        ? this.safeParseValue(entity.type, entity.value)
+        : undefined,
       type: entity.type,
       group: entity.group,
     };
+  }
+
+  private readonly mapParse: Record<
+    ConfigType,
+    {
+      parse: (value: string) => unknown;
+      fallback: unknown;
+    }
+  > = {
+    [ConfigType.STRING]: {
+      parse: (value) => value,
+      fallback: '',
+    },
+    [ConfigType.NUMBER]: {
+      parse: (value) => {
+        const number = Number(value);
+        if (isNaN(number)) {
+          throw new Error(
+            `Failed to parse ${ConfigType.NUMBER} with value ${value}`,
+          );
+        }
+        return number;
+      },
+      fallback: 0,
+    },
+    [ConfigType.BOOLEAN]: {
+      parse: (value) => {
+        const result = BooleanParamSchema.safeParse(value);
+        if (!result.success) {
+          throw new Error(
+            `Failed to parse ${ConfigType.BOOLEAN} with value ${value}`,
+          );
+        }
+        return result.data;
+      },
+      fallback: false,
+    },
+    [ConfigType.JSON]: {
+      parse: (value) => {
+        const [error, json] = safe(() => JSON.parse(value));
+        if (error) {
+          throw new Error(
+            `Failed to parse ${ConfigType.JSON} with value ${value}`,
+          );
+        }
+        return json;
+      },
+      fallback: null,
+    },
+  };
+
+  private safeParseValue(type: ConfigType, value: string): unknown {
+    const [error, parsed] = safe(() => this.mapParse[type].parse(value.trim()));
+    if (error) {
+      return this.mapParse[type].fallback;
+    }
+    return parsed;
+  }
+
+  private assertValueIsParseable(type: ConfigType, value: string) {
+    const [error] = safe(() => this.mapParse[type].parse(value.trim()));
+    if (error) {
+      throw ConfigExceptions.valueNotParseable(
+        `Value ${value} not parseable to ${type}`,
+        [
+          {
+            field: 'value',
+            issue: error.message,
+          },
+        ],
+      );
+    }
   }
 }

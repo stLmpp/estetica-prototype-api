@@ -10,7 +10,7 @@
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "allowSyntheticDefaultImports": true,
-    "target": "ES2023",
+    "target": "ES2025",
     "sourceMap": true,
     "outDir": "./dist",
     "incremental": true,
@@ -23,7 +23,8 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedIndexedAccess": true,
     "types": ["node"],
-    "useDefineForClassFields": false
+    "useDefineForClassFields": false,
+    "lib": ["ES2025", "ESNext.Temporal"]
   },
   "exclude": [
     "opensrc"

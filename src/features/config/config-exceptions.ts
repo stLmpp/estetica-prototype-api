@@ -6,4 +6,9 @@ export const ConfigExceptions = {
     message: 'Config not found',
     status: 404,
   }),
+  valueNotParseable: exception({
+    code: 'VALUE_NOT_PARSEABLE',
+    message: 'Value is not parseable',
+    status: 400,
+  }),
 } as const;
