@@ -30,6 +30,7 @@ import { Environment } from './shared/environment.enum';
 import { ConfigModule } from './features/config/config.module';
 import { ResponseErrorModel } from './shared/model/response-error.model';
 import { ZodValidationPipe } from 'nestjs-zod';
+import { CatalogItemModule } from './features/catalog-item/catalog-item.module';
 
 const appEnv = AppEnv.instance;
 
@@ -90,6 +91,7 @@ if (appEnv.environment === Environment.Production) {
     CustomerModule,
     AnamnesisFieldModule,
     ConfigModule,
+    CatalogItemModule,
   ],
   providers: [
     ErrorAfterHook,

@@ -14,6 +14,7 @@ import { TransactionalAdapterDrizzleOrmCustom } from '../../core/transactional-a
 import { ConfigRepository } from './repositories/config.repository';
 import { AuthOrganizationRepository } from './repositories/auth-organization.repository';
 import { AuthUserRepository } from './repositories/auth-user.repository';
+import { CatalogItemRepository } from './repositories/catalog-item.repository';
 
 const REPOSITORIES = [
   CustomerRepository,
@@ -23,6 +24,7 @@ const REPOSITORIES = [
   ConfigRepository,
   AuthOrganizationRepository,
   AuthUserRepository,
+  CatalogItemRepository,
 ];
 
 @Module({
