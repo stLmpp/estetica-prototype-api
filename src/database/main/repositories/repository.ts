@@ -5,7 +5,7 @@ import {
 } from '@nestjs-cls/transactional';
 import { MAIN_DATABASE_CONNECTION_NAME } from '../main-database-connection-name';
 import { TransactionalAdapterDrizzleOrm } from '@nestjs-cls/transactional-adapter-drizzle-orm';
-import { mainEntities } from '../main-entities';
+import { allEntities } from '../all-entities';
 
 export abstract class Repository {
   public constructor(
@@ -17,7 +17,7 @@ export abstract class Repository {
 
   protected get db() {
     const tx = this.txHost.tx;
-    tx.e ??= mainEntities;
+    tx.e ??= allEntities;
     return tx;
   }
 }

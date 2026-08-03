@@ -29,7 +29,7 @@ export class CatalogItemController {
 
   @ResponseType(CreateCatalogItemResponseModel, 201)
   @Post()
-  @OrgRoles([AuthOrgRole.Admin])
+  @OrgRoles([AuthOrgRole.Admin, AuthOrgRole.Owner])
   async create(
     @Body() body: CreateCatalogItemRequest,
   ): Promise<CreateCatalogItemResponseModel> {
@@ -38,7 +38,7 @@ export class CatalogItemController {
   }
 
   @Patch(':catalogItemId')
-  @OrgRoles([AuthOrgRole.Admin])
+  @OrgRoles([AuthOrgRole.Admin, AuthOrgRole.Owner])
   async update(
     @Param('catalogItemId') catalogItemId: string,
     @Body() body: UpdateCatalogItemRequest,
@@ -47,7 +47,7 @@ export class CatalogItemController {
   }
 
   @Delete(':catalogItemId')
-  @OrgRoles([AuthOrgRole.Admin])
+  @OrgRoles([AuthOrgRole.Admin, AuthOrgRole.Owner])
   async delete(@Param('catalogItemId') catalogItemId: string): Promise<void> {
     await this.catalogItemService.delete(catalogItemId);
   }

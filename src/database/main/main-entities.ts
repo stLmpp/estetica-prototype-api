@@ -11,7 +11,6 @@ import {
   pgTable,
   text,
   timestamp,
-  unique,
   uniqueIndex,
   varchar,
 } from 'drizzle-orm/pg-core';
@@ -24,11 +23,7 @@ import { AnamnesisFieldValidationType } from '../../shared/domain/anamnesis-fiel
 import { AppointmentStatus } from '../../shared/domain/appointment-staus.enum';
 import { ClsServiceManager } from 'nestjs-cls';
 import { safe } from '../../shared/utils/safe';
-import {
-  CLS_TENANT_ID_KEY,
-  CLS_USER_ID_KEY,
-  RLS_ROLE,
-} from '../../auth/constants';
+import { CLS_TENANT_ID_KEY, CLS_USER_ID_KEY } from '../../auth/constants';
 import { ConfigType } from '../../shared/domain/config-type.enum';
 
 function getUserId() {
@@ -64,19 +59,35 @@ function addAuthenticatedPolicy(table: { tenantId: AnyPgColumn }) {
   });
 }
 
-function addDeletedAtPolicy(table: { deletedAt: AnyPgColumn }) {
-  return pgPolicy('deleted_at', {
-    for: 'all',
-    to: RLS_ROLE,
-    using: sql`${table.deletedAt} IS NULL`,
-    withCheck: sql`true`,
-  });
+function addDeletedAtPolicies(table: {
+  deletedAt: AnyPgColumn;
+  isDeleted: AnyPgColumn;
+}) {
+  return [
+    pgPolicy('deleted_write_policy', {
+      as: 'restrictive',
+      for: 'update',
+      using: sql`${table.isDeleted} = false`,
+      withCheck: sql`${table.isDeleted} = false`,
+    }),
+    pgPolicy('deleted_delete_policy', {
+      as: 'restrictive',
+      for: 'delete',
+      using: sql`false`,
+    }),
+    pgPolicy('deleted_read_policy', {
+      as: 'restrictive',
+      for: 'select',
+      using: sql`${table.isDeleted} = false`,
+    }),
+  ];
 }
 
 const baseEntityWithoutId = {
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
   deletedAt: timestamp('deleted_at'),
+  isDeleted: boolean('is_deleted').default(false),
   createdBy: varchar('created_by', { length: 64 }).$default(() => getUserId()),
   lastUpdatedBy: varchar('last_updated_by', { length: 64 })
     .$default(() => getUserId())
@@ -100,7 +111,7 @@ function baseEntity(prefix: string) {
 
 export const maritalStatus = pgEnum('marital_status', MaritalStatus);
 
-export const personEntity = pgTable(
+export const personEntity = pgTable.withRLS(
   'person',
   {
     ...baseEntity('per'),
@@ -118,16 +129,16 @@ export const personEntity = pgTable(
   (t) => [
     index()
       .on(t.tenantId, t.email)
-      .where(sql`${t.deletedAt} IS NULL`),
+      .where(sql`${t.isDeleted} = false`),
     index('customer_name_trgm_index')
       .using('gin', sql`${t.name} gin_trgm_ops`)
-      .where(sql`${t.deletedAt} IS NULL`),
+      .where(sql`${t.isDeleted} = false`),
     addAuthenticatedPolicy(t),
-    addDeletedAtPolicy(t),
+    ...addDeletedAtPolicies(t),
   ],
 );
 
-export const employeeEntity = pgTable(
+export const employeeEntity = pgTable.withRLS(
   'employee',
   {
     ...baseEntity('emp'),
@@ -139,13 +150,13 @@ export const employeeEntity = pgTable(
   (t) => [
     index()
       .on(t.tenantId, t.personId)
-      .where(sql`${t.deletedAt} IS NULL`),
+      .where(sql`${t.isDeleted} = false`),
     addAuthenticatedPolicy(t),
-    addDeletedAtPolicy(t),
+    ...addDeletedAtPolicies(t),
   ],
 );
 
-export const customerEntity = pgTable(
+export const customerEntity = pgTable.withRLS(
   'customer',
   {
     ...baseEntity('cus'),
@@ -157,15 +168,15 @@ export const customerEntity = pgTable(
   (t) => [
     index()
       .on(t.tenantId, t.personId)
-      .where(sql`${t.deletedAt} IS NULL`),
+      .where(sql`${t.isDeleted} = false`),
     addAuthenticatedPolicy(t),
-    addDeletedAtPolicy(t),
+    ...addDeletedAtPolicies(t),
   ],
 );
 
 export const phoneType = pgEnum('phone_type', PhoneType);
 
-export const personPhoneEntity = pgTable(
+export const personPhoneEntity = pgTable.withRLS(
   'person_phone',
   {
     ...baseEntity('phon'),
@@ -178,18 +189,18 @@ export const personPhoneEntity = pgTable(
   (t) => [
     index()
       .on(t.tenantId, t.personId)
-      .where(sql`${t.deletedAt} IS NULL`),
+      .where(sql`${t.isDeleted} = false`),
     index()
       .on(t.tenantId, t.number)
-      .where(sql`${t.deletedAt} IS NULL`),
+      .where(sql`${t.isDeleted} = false`),
     addAuthenticatedPolicy(t),
-    addDeletedAtPolicy(t),
+    ...addDeletedAtPolicies(t),
   ],
 );
 
 export const catalogItemType = pgEnum('catalog_item_type', CatalogItemType);
 
-export const catalogItemEntity = pgTable(
+export const catalogItemEntity = pgTable.withRLS(
   'catalog_item',
   {
     ...baseEntity('citm'),
@@ -201,13 +212,13 @@ export const catalogItemEntity = pgTable(
   (t) => [
     index()
       .on(t.tenantId, t.itemType)
-      .where(sql`${t.deletedAt} IS NULL`),
+      .where(sql`${t.isDeleted} = false`),
     addAuthenticatedPolicy(t),
-    addDeletedAtPolicy(t),
+    ...addDeletedAtPolicies(t),
   ],
 );
 
-export const customerFollowupEntity = pgTable(
+export const customerFollowupEntity = pgTable.withRLS(
   'customer_followup',
   {
     ...baseEntity('cfup'),
@@ -220,13 +231,13 @@ export const customerFollowupEntity = pgTable(
   (t) => [
     index()
       .on(t.tenantId, t.customerId)
-      .where(sql`${t.deletedAt} IS NULL`),
+      .where(sql`${t.isDeleted} = false`),
     addAuthenticatedPolicy(t),
-    addDeletedAtPolicy(t),
+    ...addDeletedAtPolicies(t),
   ],
 );
 
-export const followupItemEntity = pgTable(
+export const followupItemEntity = pgTable.withRLS(
   'followup_item',
   {
     ...baseEntity('cfupi'),
@@ -246,12 +257,12 @@ export const followupItemEntity = pgTable(
   (t) => [
     index()
       .on(t.tenantId, t.followupId)
-      .where(sql`${t.deletedAt} IS NULL`),
+      .where(sql`${t.isDeleted} = false`),
     index()
       .on(t.tenantId, t.catalogItemId)
-      .where(sql`${t.deletedAt} IS NULL`),
+      .where(sql`${t.isDeleted} = false`),
     addAuthenticatedPolicy(t),
-    addDeletedAtPolicy(t),
+    ...addDeletedAtPolicies(t),
   ],
 );
 
@@ -260,7 +271,7 @@ export const anamnesisFieldType = pgEnum(
   AnamnesisFieldType,
 );
 
-export const anamnesisFieldEntity = pgTable(
+export const anamnesisFieldEntity = pgTable.withRLS(
   'anamnesis_field',
   {
     ...baseEntity('anf'),
@@ -273,7 +284,7 @@ export const anamnesisFieldEntity = pgTable(
   },
   (t) => [
     addAuthenticatedPolicy(t),
-    addDeletedAtPolicy(t),
+    ...addDeletedAtPolicies(t),
   ],
 );
 
@@ -282,7 +293,7 @@ export const anamnesisFieldValidationType = pgEnum(
   AnamnesisFieldValidationType,
 );
 
-export const anamnesisFieldValidationEntity = pgTable(
+export const anamnesisFieldValidationEntity = pgTable.withRLS(
   'anamnesis_field_validation',
   {
     ...baseEntity('anfv'),
@@ -296,13 +307,13 @@ export const anamnesisFieldValidationEntity = pgTable(
   (t) => [
     index()
       .on(t.tenantId, t.anamnesisFieldId)
-      .where(sql`${t.deletedAt} IS NULL`),
+      .where(sql`${t.isDeleted} = false`),
     addAuthenticatedPolicy(t),
-    addDeletedAtPolicy(t),
+    ...addDeletedAtPolicies(t),
   ],
 );
 
-export const customerAnamnesisEntity = pgTable(
+export const customerAnamnesisEntity = pgTable.withRLS(
   'customer_anamnesis',
   {
     ...baseEntity('canm'),
@@ -314,13 +325,13 @@ export const customerAnamnesisEntity = pgTable(
   (t) => [
     index()
       .on(t.tenantId, t.customerId)
-      .where(sql`${t.deletedAt} IS NULL`),
+      .where(sql`${t.isDeleted} = false`),
     addAuthenticatedPolicy(t),
-    addDeletedAtPolicy(t),
+    ...addDeletedAtPolicies(t),
   ],
 );
 
-export const customerAnamnesisFieldEntity = pgTable(
+export const customerAnamnesisFieldEntity = pgTable.withRLS(
   'customer_anamnesis_field',
   {
     ...baseEntity('canmf'),
@@ -336,12 +347,12 @@ export const customerAnamnesisFieldEntity = pgTable(
   (t) => [
     index()
       .on(t.tenantId, t.customerAnamnesisId)
-      .where(sql`${t.deletedAt} IS NULL`),
+      .where(sql`${t.isDeleted} = false`),
     index()
       .on(t.tenantId, t.anamnesisFieldId)
-      .where(sql`${t.deletedAt} IS NULL`),
+      .where(sql`${t.isDeleted} = false`),
     addAuthenticatedPolicy(t),
-    addDeletedAtPolicy(t),
+    ...addDeletedAtPolicies(t),
   ],
 );
 
@@ -350,7 +361,7 @@ export const appointmentStatusEnum = pgEnum(
   AppointmentStatus,
 );
 
-export const appointmentEntity = pgTable(
+export const appointmentEntity = pgTable.withRLS(
   'appointment',
   {
     ...baseEntity('apt'),
@@ -368,19 +379,19 @@ export const appointmentEntity = pgTable(
   (t) => [
     index()
       .on(t.tenantId, t.customerId)
-      .where(sql`${t.deletedAt} IS NULL`),
+      .where(sql`${t.isDeleted} = false`),
     index()
       .on(t.tenantId, t.employeeId)
-      .where(sql`${t.deletedAt} IS NULL`),
+      .where(sql`${t.isDeleted} = false`),
     index()
       .on(t.tenantId, t.startTime)
-      .where(sql`${t.deletedAt} IS NULL`),
+      .where(sql`${t.isDeleted} = false`),
     addAuthenticatedPolicy(t),
-    addDeletedAtPolicy(t),
+    ...addDeletedAtPolicies(t),
   ],
 );
 
-export const appointmentItemEntity = pgTable(
+export const appointmentItemEntity = pgTable.withRLS(
   'appointment_item',
   {
     ...baseEntity('apti'),
@@ -399,18 +410,18 @@ export const appointmentItemEntity = pgTable(
   (t) => [
     index()
       .on(t.tenantId, t.appointmentId)
-      .where(sql`${t.deletedAt} IS NULL`),
+      .where(sql`${t.isDeleted} = false`),
     index()
       .on(t.tenantId, t.catalogItemId)
-      .where(sql`${t.deletedAt} IS NULL`),
+      .where(sql`${t.isDeleted} = false`),
     addAuthenticatedPolicy(t),
-    addDeletedAtPolicy(t),
+    ...addDeletedAtPolicies(t),
   ],
 );
 
 export const configTypeEnum = pgEnum('config_type', ConfigType);
 
-export const configEntity = pgTable(
+export const configEntity = pgTable.withRLS(
   'config',
   {
     ...baseEntity('cfg'),
@@ -427,138 +438,14 @@ export const configEntity = pgTable(
   (t) => [
     uniqueIndex()
       .on(t.group, t.tenantId, t.userId, t.name, t.version)
-      .where(sql`${t.deletedAt} IS NULL`),
+      .where(sql`${t.isDeleted} = false`),
     index()
       .on(t.group, t.tenantId, t.userId, t.name)
-      .where(sql`${t.deletedAt} IS NULL`),
+      .where(sql`${t.isDeleted} = false`),
     index()
       .on(t.group, t.tenantId, t.userId)
-      .where(sql`${t.deletedAt} IS NULL`),
-    addDeletedAtPolicy(t),
-  ],
-);
-
-export const authAccountEntity = pgTable(
-  'auth_account',
-  {
-    id: text().primaryKey(),
-    accountId: text().notNull(),
-    providerId: text().notNull(),
-    userId: text()
-      .notNull()
-      .references(() => authUserEntity.id, { onDelete: 'cascade' }),
-    accessToken: text(),
-    refreshToken: text(),
-    idToken: text(),
-    accessTokenExpiresAt: timestamp({ withTimezone: true }),
-    refreshTokenExpiresAt: timestamp({ withTimezone: true }),
-    scope: text(),
-    password: text(),
-    createdAt: timestamp({ withTimezone: true })
-      .default(sql`CURRENT_TIMESTAMP`)
-      .notNull(),
-    updatedAt: timestamp({ withTimezone: true }).notNull(),
-  },
-  (table) => [
-    index('auth_account_userId_idx').using(
-      'btree',
-      table.userId.asc().nullsLast(),
-    ),
-  ],
-);
-
-export const authInvitationEntity = pgTable(
-  'auth_invitation',
-  {
-    id: text().primaryKey(),
-    organizationId: text()
-      .notNull()
-      .references(() => authOrganizationEntity.id, { onDelete: 'cascade' }),
-    email: text().notNull(),
-    role: text(),
-    status: text().notNull(),
-    expiresAt: timestamp({ withTimezone: true }).notNull(),
-    createdAt: timestamp({ withTimezone: true })
-      .default(sql`CURRENT_TIMESTAMP`)
-      .notNull(),
-    inviterId: text()
-      .notNull()
-      .references(() => authUserEntity.id, { onDelete: 'cascade' }),
-  },
-  (table) => [
-    index('auth_invitation_email_idx').using(
-      'btree',
-      table.email.asc().nullsLast(),
-    ),
-    index('auth_invitation_organizationId_idx').using(
-      'btree',
-      table.organizationId.asc().nullsLast(),
-    ),
-  ],
-);
-
-export const authMemberEntity = pgTable(
-  'auth_member',
-  {
-    id: text().primaryKey(),
-    organizationId: text()
-      .notNull()
-      .references(() => authOrganizationEntity.id, { onDelete: 'cascade' }),
-    userId: text()
-      .notNull()
-      .references(() => authUserEntity.id, { onDelete: 'cascade' }),
-    role: text().notNull(),
-    createdAt: timestamp({ withTimezone: true }).notNull(),
-  },
-  (table) => [
-    index('auth_member_organizationId_idx').using(
-      'btree',
-      table.organizationId.asc().nullsLast(),
-    ),
-    index('auth_member_userId_idx').using(
-      'btree',
-      table.userId.asc().nullsLast(),
-    ),
-  ],
-);
-
-export const authOrganizationEntity = pgTable(
-  'auth_organization',
-  {
-    id: text().primaryKey(),
-    name: text().notNull(),
-    slug: text().notNull(),
-    logo: text(),
-    createdAt: timestamp({ withTimezone: true }).notNull(),
-    metadata: text(),
-    membershipLimit: integer('membership_limit').notNull(),
-  },
-  (table) => [
-    unique('auth_organization_slug_key').on(table.slug),
-  ],
-);
-
-export const authUserEntity = pgTable(
-  'auth_user',
-  {
-    id: text().primaryKey(),
-    name: text().notNull(),
-    email: text().notNull(),
-    emailVerified: boolean().notNull(),
-    image: text(),
-    createdAt: timestamp({ withTimezone: true })
-      .default(sql`CURRENT_TIMESTAMP`)
-      .notNull(),
-    updatedAt: timestamp({ withTimezone: true })
-      .default(sql`CURRENT_TIMESTAMP`)
-      .notNull(),
-    role: text(),
-    banned: boolean(),
-    banReason: text(),
-    banExpires: timestamp({ withTimezone: true }),
-  },
-  (table) => [
-    unique('auth_user_email_key').on(table.email),
+      .where(sql`${t.isDeleted} = false`),
+    ...addDeletedAtPolicies(t),
   ],
 );
 
@@ -577,9 +464,4 @@ export const mainEntities = {
   appointment: appointmentEntity,
   appointmentItem: appointmentItemEntity,
   config: configEntity,
-  authAccount: authAccountEntity,
-  authInvitation: authInvitationEntity,
-  authMember: authMemberEntity,
-  authOrganization: authOrganizationEntity,
-  authUser: authUserEntity,
 };

@@ -3,13 +3,13 @@ import { AppEnv } from '../../core/config/app-env';
 import { LoggerService } from '../../core/logger/logger.service';
 import { drizzle } from 'drizzle-orm/node-postgres';
 import { getClazz } from '../../shared/utils/get-clazz';
-import { mainEntities } from './main-entities';
-import { mainRelations } from './main-relations';
 import pg from 'pg';
 import { Transactional } from '@nestjs-cls/transactional';
 import { MAIN_DATABASE_CONNECTION_NAME } from './main-database-connection-name';
 import { type PgTransactionConfig } from 'drizzle-orm/pg-core';
 import { type TransactionalAdapterDrizzleOrm } from '@nestjs-cls/transactional-adapter-drizzle-orm';
+import { allEntities } from './all-entities';
+import { allRelations } from './all-relations';
 
 let pool: pg.Pool | undefined = undefined;
 
@@ -40,7 +40,7 @@ export function getMainDatabaseClient(pool: pg.Pool, logger: LoggerService) {
   return Object.assign(
     drizzle({
       client: pool,
-      relations: mainRelations,
+      relations: allRelations,
       jit: true,
       // schema: mainEntities,
       logger: false,
@@ -53,7 +53,7 @@ export function getMainDatabaseClient(pool: pg.Pool, logger: LoggerService) {
       // },
     }),
     {
-      e: mainEntities,
+      e: allEntities,
     },
   );
 }

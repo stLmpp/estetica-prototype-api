@@ -31,6 +31,12 @@ async function bootstrap() {
   app.use(compression()).use(helmet()).enableVersioning({
     type: VersioningType.URI,
   });
+  app.enableCors({
+    origin: 'http://localhost:4200', // Allows all origins
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'], // Allows all methods
+    allowedHeaders: ['Content-Type'], // Allows all custom and standard headers
+    credentials: true,
+  });
   await SwaggerModule.loadPluginMetadata(metadata);
   const appEnv = app.get(AppEnv);
   const openapiConfig = new DocumentBuilder()
