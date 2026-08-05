@@ -206,7 +206,10 @@ export const catalogItemEntity = pgTable.withRLS(
     ...baseEntity('citm'),
     itemType: catalogItemType('item_type').notNull(),
     name: varchar('name', { length: 256 }).notNull(),
-    defaultPrice: numeric('default_price', { precision: 10, scale: 2 }),
+    defaultPrice: numeric('default_price', {
+      precision: 10,
+      scale: 2,
+    }),
     active: boolean('active').notNull(),
   },
   (t) => [

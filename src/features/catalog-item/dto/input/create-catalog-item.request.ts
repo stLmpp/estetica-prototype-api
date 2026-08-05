@@ -8,8 +8,9 @@ export const CreateCatalogItemSchema = z.object({
   defaultPrice: z
     .string()
     .trim()
-    .regex(/^\d+(\.\d{1,2})?$/)
-    .optional(),
+    .regex(/^\d{1,8}(\.\d{1,2})?$/)
+    .optional()
+    .nullable(),
   active: z.boolean().default(true),
 });
 

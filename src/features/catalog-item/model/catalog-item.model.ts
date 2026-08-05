@@ -8,7 +8,7 @@ export const CatalogItemModelSchema = z.object({
   defaultPrice: z
     .string()
     .trim()
-    .regex(/^\d+(\.\d{1,2})?$/)
+    .regex(/^\d{1,8}(\.\d{1,2})?$/)
     .optional(),
   active: z.boolean(),
 });

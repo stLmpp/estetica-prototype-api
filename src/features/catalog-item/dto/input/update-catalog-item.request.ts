@@ -9,8 +9,9 @@ export const UpdateCatalogItemSchema = z
     defaultPrice: z
       .string()
       .trim()
-      .regex(/^\d+(\.\d{1,2})?$/)
-      .optional(),
+      .regex(/^\d{1,8}(\.\d{1,2})?$/)
+      .optional()
+      .nullable(),
     active: z.boolean().optional(),
   })
   .refine((data) => Object.keys(data).length > 0, {
