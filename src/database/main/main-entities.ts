@@ -9,6 +9,7 @@ import {
   pgEnum,
   pgPolicy,
   pgTable,
+  smallint,
   text,
   timestamp,
   uniqueIndex,
@@ -83,7 +84,7 @@ function addDeletedAtPolicies(table: {
   ];
 }
 
-const baseEntityWithoutId = {
+const baseEntityWithoutIdAndTenant = {
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
   deletedAt: timestamp('deleted_at'),
@@ -92,6 +93,10 @@ const baseEntityWithoutId = {
   lastUpdatedBy: varchar('last_updated_by', { length: 64 })
     .$default(() => getUserId())
     .$onUpdate(() => getUserId()),
+};
+
+const baseEntityWithoutId = {
+  ...baseEntityWithoutIdAndTenant,
   tenantId: varchar('tenant_id', { length: 64 })
     .notNull()
     .$defaultFn(() => getTenantId()),
@@ -437,6 +442,8 @@ export const configEntity = pgTable.withRLS(
     userId: varchar('user_id', { length: 64 }).notNull(),
     value: text('value').notNull(),
     type: configTypeEnum('type').notNull(),
+    requiredSecurityLevel: smallint('required_security_level'),
+    tenantId: varchar('tenant_id', { length: 64 }),
   },
   (t) => [
     uniqueIndex()

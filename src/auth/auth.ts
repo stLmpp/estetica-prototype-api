@@ -27,6 +27,17 @@ export const AuthOrgRole = {
 
 export type AuthOrgRole = (typeof AuthOrgRole)[keyof typeof AuthOrgRole];
 
+export const AuthSecurityLevel: Record<AuthRole, number> = {
+  [AuthRole.Admin]: 0,
+  [AuthRole.User]: 100,
+};
+
+export const AuthOrgSecurityLevel: Record<AuthOrgRole, number> = {
+  [AuthOrgRole.Owner]: 0,
+  [AuthOrgRole.Admin]: 100,
+  [AuthOrgRole.User]: 200,
+};
+
 const generateIdPrefixMap: Record<ModelNames, string> = {
   account: 'acc',
   invitation: 'invit',

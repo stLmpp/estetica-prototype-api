@@ -9,16 +9,22 @@ import {
   sql,
   getColumns,
   asc,
+  lte,
+  or,
+  ne,
 } from 'drizzle-orm';
 import { mainEntities } from '../main-entities';
 import { FilterConfigDto } from '../../../features/config/dto/input/list-config.request';
 import { promiseAllObject } from '../../../shared/utils/promise-all-object';
 import { GetGroupRequest } from '../../../features/config/dto/input/get-group.request';
+import { GLOBAL_TENANT } from '../../../auth/constants';
 
 interface AllPossibleParams {
   name: string;
   version: number | 'latest';
   params: PossibleConfigParams[];
+  orgSecurityLevel: number;
+  securityLevel: number;
 }
 
 export interface PossibleConfigParams {
@@ -30,6 +36,28 @@ export interface PossibleConfigParams {
 
 @Injectable()
 export class ConfigRepository extends Repository {
+  private getAuthorizedCondition(
+    securityLevel: number,
+    orgSecurityLevel: number,
+  ) {
+    return or(
+      and(
+        eq(this.db.e.config.tenantId, GLOBAL_TENANT),
+        or(
+          isNull(this.db.e.config.requiredSecurityLevel),
+          lte(this.db.e.config.requiredSecurityLevel, securityLevel),
+        ),
+      ),
+      and(
+        ne(this.db.e.config.tenantId, GLOBAL_TENANT),
+        or(
+          isNull(this.db.e.config.requiredSecurityLevel),
+          lte(this.db.e.config.requiredSecurityLevel, orgSecurityLevel),
+        ),
+      ),
+    );
+  }
+
   findFirstLatestVersionByGroupAndNameAndUserIdAndTenantId(
     group: string,
     name: string,
@@ -49,7 +77,13 @@ export class ConfigRepository extends Repository {
     });
   }
 
-  async findFirstByParams({ params, name, version }: AllPossibleParams) {
+  async findFirstByParams({
+    params,
+    name,
+    version,
+    securityLevel,
+    orgSecurityLevel,
+  }: AllPossibleParams) {
     if (!params.length) {
       return null;
     }
@@ -59,6 +93,7 @@ export class ConfigRepository extends Repository {
         eq(this.db.e.config.group, param.group),
         eq(this.db.e.config.userId, param.userId),
         eq(this.db.e.config.tenantId, param.tenantId),
+        this.getAuthorizedCondition(securityLevel, orgSecurityLevel),
       ];
       if (version === 'latest') {
         where.push(isNull(this.db.e.config.inactivatedAt));
@@ -105,6 +140,7 @@ export class ConfigRepository extends Repository {
       eq(this.db.e.config.userId, dto.userId).if(dto.userId),
       isNull(this.db.e.config.inactivatedAt).if(!dto.showInactivated),
       eq(this.db.e.config.version, dto.version!).if(dto.version),
+      // TODO this.getAuthorizedCondition(securityLevel, orgSecurityLevel),
     );
     const offset = (dto.page - 1) * dto.limit;
     const configs = this.db
@@ -127,15 +163,17 @@ export class ConfigRepository extends Repository {
   }
 
   findByGroup(dto: GetGroupRequest) {
-    return this.db.query.config.findMany({
-      where: {
-        group: dto.group,
-        tenantId: dto.tenantId,
-        userId: dto.userId,
-        inactivatedAt: {
-          isNull: true,
-        },
-      },
-    });
+    const where = [
+      eq(this.db.e.config.group, dto.group),
+      eq(this.db.e.config.tenantId, dto.tenantId).if(dto.tenantId),
+      eq(this.db.e.config.userId, dto.userId).if(dto.userId),
+      isNull(this.db.e.config.inactivatedAt),
+      // TODO this.getAuthorizedCondition(securityLevel, orgSecurityLevel),
+    ];
+
+    return this.db
+      .select()
+      .from(this.db.e.config)
+      .where(and(...where));
   }
 }
