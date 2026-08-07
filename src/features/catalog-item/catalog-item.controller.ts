@@ -9,7 +9,6 @@ import {
   Query,
 } from '@nestjs/common';
 import { OrgRoles, RequireActiveOrg } from '@thallesp/nestjs-better-auth';
-import { AuthOrgRole } from '../../auth/auth';
 import { CatalogItemService } from './catalog-item.service';
 import { ResponseType } from '../../shared/decorator/response-type.decorator';
 import { CreateCatalogItemRequest } from './dto/input/create-catalog-item.request';
@@ -18,6 +17,7 @@ import { UpdateCatalogItemRequest } from './dto/input/update-catalog-item.reques
 import { FilterCatalogItemDto } from './dto/input/list-catalog-item.request';
 import { ListCatalogItemResponseModel } from './dto/output/list-catalog-item.response';
 import { GetCatalogItemResponseModel } from './dto/output/get-catalog-item.response';
+import { AuthOrgRole } from '../../auth/constants';
 
 @Controller({
   path: 'catalog-item',

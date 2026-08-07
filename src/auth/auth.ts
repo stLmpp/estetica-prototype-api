@@ -7,36 +7,11 @@ import { z } from 'zod';
 import { v7 as uuidv7 } from 'uuid';
 import { extraAuthEndPointsPlugin } from './extra-auth-end-points.plugin';
 import { BetterAuthRedisSecondaryStorage } from '../core/redis/better-auth-redis-secondary-storage';
+import { AuthRole } from './constants';
 
 const appEnv = AppEnv.instance;
 
 const logger = LoggerService.create('Auth');
-
-export const AuthRole = {
-  Admin: 'admin',
-  User: 'user',
-} as const;
-
-export type AuthRole = (typeof AuthRole)[keyof typeof AuthRole];
-
-export const AuthOrgRole = {
-  Owner: 'owner',
-  Admin: 'admin',
-  User: 'user',
-} as const;
-
-export type AuthOrgRole = (typeof AuthOrgRole)[keyof typeof AuthOrgRole];
-
-export const AuthSecurityLevel: Record<AuthRole, number> = {
-  [AuthRole.Admin]: 0,
-  [AuthRole.User]: 100,
-};
-
-export const AuthOrgSecurityLevel: Record<AuthOrgRole, number> = {
-  [AuthOrgRole.Owner]: 0,
-  [AuthOrgRole.Admin]: 100,
-  [AuthOrgRole.User]: 200,
-};
 
 const generateIdPrefixMap: Record<ModelNames, string> = {
   account: 'acc',

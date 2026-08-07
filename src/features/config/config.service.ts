@@ -1,16 +1,22 @@
 import { Injectable } from '@nestjs/common';
-import { PublishConfigDto } from './dto/input/publish-config.request';
+import { type PublishConfigDto } from './dto/input/publish-config.request';
 import {
   ConfigRepository,
   PossibleConfigParams,
 } from '../../database/main/repositories/config.repository';
+import { ConfigAdminRepository } from '../../database/main/repositories/config-admin.repository';
 import { CONFIG_GROUP_GLOBAL } from './config.constants';
 import { MainTransactional } from '../../database/main/main-database-connection';
 import { Redis } from '@upstash/redis';
 import { InferSelectModel } from 'drizzle-orm';
 import { mainEntities } from '../../database/main/main-entities';
 import { FilterConfigDto } from './dto/input/list-config.request';
-import { GLOBAL_TENANT, GLOBAL_USER } from '../../auth/constants';
+import {
+  AuthOrgSecurityLevel,
+  AuthSecurityLevel,
+  GLOBAL_TENANT,
+  GLOBAL_USER,
+} from '../../auth/constants';
 import { GetConfigRequest } from './dto/input/get-config.request';
 import { AuthValidationService } from '../../auth/auth-validation.service';
 import { ConfigExceptions } from './config-exceptions';
@@ -25,6 +31,7 @@ import { AppEnv } from '../../core/config/app-env';
 export class ConfigService {
   constructor(
     private readonly configRepository: ConfigRepository,
+    private readonly configAdminRepository: ConfigAdminRepository,
     private readonly redis: Redis,
     private readonly authValidationService: AuthValidationService,
     private readonly appEnv: AppEnv,
@@ -53,28 +60,44 @@ export class ConfigService {
     this.authValidationService.assertSessionHasAccess(tenantId, userId);
     const group = config.group ?? CONFIG_GROUP_GLOBAL;
     const entity =
-      await this.configRepository.findFirstLatestVersionByGroupAndNameAndUserIdAndTenantId(
+      await this.configAdminRepository.findFirstLatestVersionByGroupAndNameAndUserIdAndTenantId(
         group,
         config.name,
         userId,
         tenantId,
       );
     const version = (entity?.version ?? 0) + 1;
+    const newEntityInsert: Parameters<ConfigAdminRepository['insert']>[0] = {
+      displayName: config.displayName,
+      name: config.name,
+      tenantId,
+      userId,
+      version,
+      description: config.description,
+      value: config.value,
+      type: config.type,
+      group,
+    };
+    switch (config.roleType) {
+      case 'org': {
+        newEntityInsert.requiredSecurityLevel = AuthSecurityLevel[config.role];
+        break;
+      }
+      case 'general': {
+        newEntityInsert.requiredSecurityLevel =
+          AuthOrgSecurityLevel[config.orgRole];
+        break;
+      }
+      default: {
+        // Do nothing
+        break;
+      }
+    }
     const [newEntity] = await Promise.all([
-      this.configRepository
-        .insert({
-          displayName: config.displayName,
-          name: config.name,
-          tenantId,
-          userId,
-          version,
-          description: config.description,
-          value: config.value,
-          type: config.type,
-          group,
-        })
+      this.configAdminRepository
+        .insert(newEntityInsert)
         .then((results) => results.at(0)!),
-      entity && this.configRepository.inactivate(entity.id),
+      entity && this.configAdminRepository.inactivate(entity.id),
       entity &&
         this.redis.del(
           this.createKey(

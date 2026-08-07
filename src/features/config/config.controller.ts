@@ -1,7 +1,9 @@
 import { Body, Controller, Get, Post, Query } from '@nestjs/common';
 import { Roles } from '@thallesp/nestjs-better-auth';
-import { AuthRole } from '../../auth/auth';
-import { PublishConfigRequest } from './dto/input/publish-config.request';
+import {
+  type PublishConfigRequest,
+  PublishConfigRequestSchema,
+} from './dto/input/publish-config.request';
 import { PublishConfigResponseModel } from './dto/output/publish-config.response';
 import { ConfigService } from './config.service';
 import { ResponseType } from '../../shared/decorator/response-type.decorator';
@@ -13,6 +15,8 @@ import {
 import { GetConfigResponse } from './dto/output/get-config.response';
 import { GetConfigRequest } from './dto/input/get-config.request';
 import { GetGroupRequest } from './dto/input/get-group.request';
+import { ZodValidationPipe } from 'nestjs-zod';
+import { AuthRole } from '../../auth/constants';
 
 @Controller({
   path: 'config',
@@ -25,7 +29,8 @@ export class ConfigController {
   @Roles([AuthRole.Admin])
   @Post('publish')
   async publish(
-    @Body() request: PublishConfigRequest,
+    @Body(new ZodValidationPipe(PublishConfigRequestSchema))
+    request: PublishConfigRequest,
   ): Promise<PublishConfigResponseModel> {
     const [config, old] = await this.configService.publish(request.config);
 

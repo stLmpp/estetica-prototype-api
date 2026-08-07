@@ -22,17 +22,12 @@ import { CatalogItemType } from '../../shared/domain/catalog-item-type.enum';
 import { AnamnesisFieldType } from '../../shared/domain/anamnesis-field.type';
 import { AnamnesisFieldValidationType } from '../../shared/domain/anamnesis-field-validation.enum';
 import { AppointmentStatus } from '../../shared/domain/appointment-staus.enum';
-import { ClsServiceManager } from 'nestjs-cls';
 import { safe } from '../../shared/utils/safe';
-import { CLS_TENANT_ID_KEY, CLS_USER_ID_KEY } from '../../auth/constants';
 import { ConfigType } from '../../shared/domain/config-type.enum';
+import { AuthDataService } from '../../auth/auth-data.service';
 
 function getUserId() {
-  const [error, userId] = safe(() => {
-    const clsService = ClsServiceManager.getClsService();
-    const userId: string = clsService.get(CLS_USER_ID_KEY);
-    return userId;
-  });
+  const [error, userId] = safe(() => AuthDataService.instance.getUserId());
   if (error) {
     console.warn('Failed to retrieve user ID from session', error);
   }
@@ -40,11 +35,7 @@ function getUserId() {
 }
 
 function getTenantId() {
-  const [error, tenantId] = safe(() => {
-    const clsService = ClsServiceManager.getClsService();
-    const tenantId: string = clsService.get(CLS_TENANT_ID_KEY);
-    return tenantId;
-  });
+  const [error, tenantId] = safe(() => AuthDataService.instance.getTenantId());
   if (error) {
     console.warn('Failed to retrieve tenant ID from session', error);
     throw error;
@@ -443,7 +434,6 @@ export const configEntity = pgTable.withRLS(
     value: text('value').notNull(),
     type: configTypeEnum('type').notNull(),
     requiredSecurityLevel: smallint('required_security_level'),
-    tenantId: varchar('tenant_id', { length: 64 }),
   },
   (t) => [
     uniqueIndex()

@@ -4,10 +4,11 @@ import {
   Injectable,
   NestInterceptor,
 } from '@nestjs/common';
-import { Observable } from 'rxjs';
+import { catchError, from, Observable, of, switchMap, tap } from 'rxjs';
 import { ClsService } from 'nestjs-cls';
 import { Request } from 'express';
 import {
+  CLS_SESSION_ORG_ROLE_KEY,
   CLS_SESSION_ROLE_KEY,
   CLS_TENANT_ID_KEY,
   CLS_USER_ID_KEY,
@@ -15,12 +16,14 @@ import {
 import { BetterAuthSession } from '../../auth/auth';
 import { coreExceptions } from '../core-exceptions';
 import { Reflector } from '@nestjs/core';
+import { AuthService } from '../../auth/auth.service';
 
 @Injectable()
 export class SessionInterceptor implements NestInterceptor {
   constructor(
     private readonly clsService: ClsService,
     private readonly reflector: Reflector,
+    private readonly authService: AuthService,
   ) {}
 
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
@@ -45,6 +48,16 @@ export class SessionInterceptor implements NestInterceptor {
     this.clsService.set(CLS_TENANT_ID_KEY, tenantId);
     this.clsService.set(CLS_USER_ID_KEY, session.user.id);
     this.clsService.set(CLS_SESSION_ROLE_KEY, session.user.role);
-    return next.handle();
+    return from(
+      this.authService.api.getActiveMemberRole({
+        headers: request.headers,
+      }),
+    ).pipe(
+      catchError(() => of(null)),
+      tap((response) => {
+        this.clsService.set(CLS_SESSION_ORG_ROLE_KEY, response?.role);
+      }),
+      switchMap(() => next.handle()),
+    );
   }
 }

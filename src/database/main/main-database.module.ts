@@ -12,6 +12,7 @@ import { CustomerPhoneRepository } from './repositories/customer-phone.repositor
 import { AnamnesisFieldRepository } from './repositories/anamnesis-field.repository';
 import { TransactionalAdapterDrizzleOrmCustom } from '../../core/transactional-adapter-drizzle-orm-custom';
 import { ConfigRepository } from './repositories/config.repository';
+import { ConfigAdminRepository } from './repositories/config-admin.repository';
 import { AuthOrganizationRepository } from './repositories/auth-organization.repository';
 import { AuthUserRepository } from './repositories/auth-user.repository';
 import { CatalogItemRepository } from './repositories/catalog-item.repository';
@@ -22,6 +23,7 @@ const REPOSITORIES = [
   CustomerPhoneRepository,
   AnamnesisFieldRepository,
   ConfigRepository,
+  ConfigAdminRepository,
   AuthOrganizationRepository,
   AuthUserRepository,
   CatalogItemRepository,

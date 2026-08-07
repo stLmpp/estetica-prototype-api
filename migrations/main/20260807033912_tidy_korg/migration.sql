@@ -1,0 +1,1 @@
+ALTER TABLE "config" ADD COLUMN "required_security_level" smallint;

@@ -16,7 +16,8 @@ import { ListCustomerResponseModel } from './dto/output/list-customer.response';
 import { GetCustomerResponseModel } from './dto/output/get-customer.response';
 import { ResponseType } from '../../shared/decorator/response-type.decorator';
 import { OrgRoles, RequireActiveOrg } from '@thallesp/nestjs-better-auth';
-import { AuthOrgRole } from '../../auth/auth';
+
+import { AuthOrgRole } from '../../auth/constants';
 
 @Controller({
   path: 'customer',

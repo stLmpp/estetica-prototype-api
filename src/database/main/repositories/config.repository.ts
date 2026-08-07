@@ -2,29 +2,33 @@ import { Injectable } from '@nestjs/common';
 import { Repository } from './repository';
 import {
   and,
+  asc,
   desc,
   eq,
-  InferInsertModel,
-  isNull,
-  sql,
   getColumns,
-  asc,
+  isNull,
   lte,
-  or,
   ne,
+  or,
+  sql,
 } from 'drizzle-orm';
-import { mainEntities } from '../main-entities';
 import { FilterConfigDto } from '../../../features/config/dto/input/list-config.request';
 import { promiseAllObject } from '../../../shared/utils/promise-all-object';
 import { GetGroupRequest } from '../../../features/config/dto/input/get-group.request';
 import { GLOBAL_TENANT } from '../../../auth/constants';
+import { AuthDataService } from '../../../auth/auth-data.service';
+import {
+  InjectTransactionHost,
+  TransactionHost,
+} from '@nestjs-cls/transactional';
+import { MAIN_DATABASE_CONNECTION_NAME } from '../main-database-connection-name';
+import { TransactionalAdapterDrizzleOrm } from '@nestjs-cls/transactional-adapter-drizzle-orm';
+import { MainDatasource } from '../main-database-connection';
 
 interface AllPossibleParams {
   name: string;
   version: number | 'latest';
   params: PossibleConfigParams[];
-  orgSecurityLevel: number;
-  securityLevel: number;
 }
 
 export interface PossibleConfigParams {
@@ -36,10 +40,17 @@ export interface PossibleConfigParams {
 
 @Injectable()
 export class ConfigRepository extends Repository {
-  private getAuthorizedCondition(
-    securityLevel: number,
-    orgSecurityLevel: number,
+  constructor(
+    @InjectTransactionHost(MAIN_DATABASE_CONNECTION_NAME)
+    txHost: TransactionHost<TransactionalAdapterDrizzleOrm<MainDatasource>>,
+    private readonly authDataService: AuthDataService,
   ) {
+    super(txHost);
+  }
+
+  private getAuthorizedCondition() {
+    const securityLevel = this.authDataService.getSessionSecurityLevel();
+    const orgSecurityLevel = this.authDataService.getOrgSessionSecurityLevel();
     return or(
       and(
         eq(this.db.e.config.tenantId, GLOBAL_TENANT),
@@ -58,32 +69,7 @@ export class ConfigRepository extends Repository {
     );
   }
 
-  findFirstLatestVersionByGroupAndNameAndUserIdAndTenantId(
-    group: string,
-    name: string,
-    userId: string,
-    tenantId: string,
-  ) {
-    return this.db.query.config.findFirst({
-      where: {
-        group,
-        name,
-        userId,
-        tenantId,
-      },
-      orderBy: {
-        version: 'desc',
-      },
-    });
-  }
-
-  async findFirstByParams({
-    params,
-    name,
-    version,
-    securityLevel,
-    orgSecurityLevel,
-  }: AllPossibleParams) {
+  async findFirstByParams({ params, name, version }: AllPossibleParams) {
     if (!params.length) {
       return null;
     }
@@ -93,7 +79,7 @@ export class ConfigRepository extends Repository {
         eq(this.db.e.config.group, param.group),
         eq(this.db.e.config.userId, param.userId),
         eq(this.db.e.config.tenantId, param.tenantId),
-        this.getAuthorizedCondition(securityLevel, orgSecurityLevel),
+        this.getAuthorizedCondition(),
       ];
       if (version === 'latest') {
         where.push(isNull(this.db.e.config.inactivatedAt));
@@ -121,17 +107,6 @@ export class ConfigRepository extends Repository {
     return entity;
   }
 
-  async inactivate(id: string) {
-    await this.db
-      .update(this.db.e.config)
-      .set({ inactivatedAt: new Date() })
-      .where(and(eq(this.db.e.config.id, id)));
-  }
-
-  insert(dto: Omit<InferInsertModel<typeof mainEntities.config>, 'id'>) {
-    return this.db.insert(mainEntities.config).values(dto).returning();
-  }
-
   async findPaginated(dto: FilterConfigDto) {
     const where = and(
       eq(this.db.e.config.group, dto.group).if(dto.group),
@@ -140,7 +115,7 @@ export class ConfigRepository extends Repository {
       eq(this.db.e.config.userId, dto.userId).if(dto.userId),
       isNull(this.db.e.config.inactivatedAt).if(!dto.showInactivated),
       eq(this.db.e.config.version, dto.version!).if(dto.version),
-      // TODO this.getAuthorizedCondition(securityLevel, orgSecurityLevel),
+      this.getAuthorizedCondition(),
     );
     const offset = (dto.page - 1) * dto.limit;
     const configs = this.db
@@ -168,7 +143,7 @@ export class ConfigRepository extends Repository {
       eq(this.db.e.config.tenantId, dto.tenantId).if(dto.tenantId),
       eq(this.db.e.config.userId, dto.userId).if(dto.userId),
       isNull(this.db.e.config.inactivatedAt),
-      // TODO this.getAuthorizedCondition(securityLevel, orgSecurityLevel),
+      this.getAuthorizedCondition(),
     ];
 
     return this.db
