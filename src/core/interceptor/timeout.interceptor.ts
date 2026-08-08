@@ -3,7 +3,6 @@ import {
   ExecutionContext,
   Injectable,
   NestInterceptor,
-  RequestTimeoutException,
 } from '@nestjs/common';
 import {
   catchError,
@@ -13,6 +12,7 @@ import {
   TimeoutError,
 } from 'rxjs';
 import { AppEnv } from '../config/app-env';
+import { coreExceptions } from '../core-exceptions';
 
 @Injectable()
 export class TimeoutInterceptor implements NestInterceptor {
@@ -26,7 +26,7 @@ export class TimeoutInterceptor implements NestInterceptor {
       timeout(this.appEnv.requestTimeoutMs),
       catchError((error: Error) => {
         if (error instanceof TimeoutError) {
-          return throwError(() => new RequestTimeoutException());
+          return throwError(() => coreExceptions.requestTimeout());
         }
         return throwError(() => error);
       }),

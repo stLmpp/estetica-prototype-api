@@ -136,7 +136,7 @@ their Swagger schemas won't be generated correctly.
   - `@OrgRoles([AuthOrgRole.Admin])` — restrict by org-scoped role
     (method-level on customer create/update).
   - All from `@thallesp/nestjs-better-auth`; roles themselves come from
-    `AuthRole` / `AuthOrgRole` in `src/auth/auth.ts` — don't invent new role
+    `AuthRole` / `AuthOrgRole` in `src/core/auth/auth.ts` — don't invent new role
     strings ad hoc.
 - Session identity (tenantId/userId/role) is populated into CLS by
   `SessionInterceptor` and should be read via `ClsService` or
@@ -180,7 +180,7 @@ Two layers work together:
    `@OptionalAuth`) decide who can call the route at all — see
    **Controllers** above.
 2. **Data-scoped access**, enforced in the service layer via
-   `AuthValidationService` (`src/auth/auth-validation.service.ts`):
+   `AuthValidationService` (`src/core/auth/auth-validation.service.ts`):
    - `assertSessionHasAccess(tenantId, userId)` — checks the current CLS
      session against the target resource's tenant/user. `GLOBAL_TENANT` /
      `GLOBAL_USER` are treated as shared/public scope, and the `Admin` role

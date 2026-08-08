@@ -1,4 +1,4 @@
-import { exception } from '../core/exception/exception';
+import { exception } from '../exception/exception';
 
 export const authExceptions = {
   tenantNotFound: exception({

@@ -17,7 +17,7 @@ import { UpdateCatalogItemRequest } from './dto/input/update-catalog-item.reques
 import { FilterCatalogItemDto } from './dto/input/list-catalog-item.request';
 import { ListCatalogItemResponseModel } from './dto/output/list-catalog-item.response';
 import { GetCatalogItemResponseModel } from './dto/output/get-catalog-item.response';
-import { AuthOrgRole } from '../../auth/constants';
+import { AuthOrgRole } from '../../core/auth/constants';
 
 @Controller({
   path: 'catalog-item',

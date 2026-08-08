@@ -5,7 +5,7 @@ import {
   Hook,
 } from '@thallesp/nestjs-better-auth';
 import { isAPIError } from 'better-auth/api';
-import { exception } from '../core/exception/exception';
+import { dynamicException } from '../exception/exception';
 
 @Injectable()
 @Hook()
@@ -16,12 +16,12 @@ export class ErrorAfterHook {
     if (!isAPIError(error)) {
       return;
     }
-    const authException = exception({
+    const authException = dynamicException({
       code: error.body?.code ?? 'UNKNOWN_AUTH_ERROR',
       message: error.body?.message ?? error.message,
       status: error.statusCode,
       error: error.message,
     });
-    throw ctx.error(error.status, authException(), error.headers);
+    throw ctx.error(error.status, authException, error.headers);
   }
 }

@@ -1,12 +1,12 @@
 import { betterAuth, type ModelNames } from 'better-auth';
-import { AppEnv } from '../core/config/app-env';
+import { AppEnv } from '../config/app-env';
 import { admin, openAPI, organization } from 'better-auth/plugins';
-import { LoggerService } from '../core/logger/logger.service';
-import { getMigrationPool } from '../database/main/main-database-connection';
+import { LoggerService } from '../logger/logger.service';
+import { getMigrationPool } from '../../database/main/main-database-connection';
 import { z } from 'zod';
 import { v7 as uuidv7 } from 'uuid';
 import { extraAuthEndPointsPlugin } from './extra-auth-end-points.plugin';
-import { BetterAuthRedisSecondaryStorage } from '../core/redis/better-auth-redis-secondary-storage';
+import { BetterAuthRedisSecondaryStorage } from '../redis/better-auth-redis-secondary-storage';
 import { AuthRole } from './constants';
 import { adminAccessControl } from './admin-access-control';
 import { organizationAccessControl } from './organization-access-control';

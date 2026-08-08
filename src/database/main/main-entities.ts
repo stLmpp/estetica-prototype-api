@@ -24,7 +24,7 @@ import { AnamnesisFieldValidationType } from '../../shared/domain/anamnesis-fiel
 import { AppointmentStatus } from '../../shared/domain/appointment-staus.enum';
 import { safe } from '../../shared/utils/safe';
 import { ConfigType } from '../../shared/domain/config-type.enum';
-import { AuthDataService } from '../../auth/auth-data.service';
+import { AuthDataService } from '../../core/auth/auth-data.service';
 import { SecurityLevelType } from '../../shared/domain/security-level-type.enum';
 
 function getUserId() {

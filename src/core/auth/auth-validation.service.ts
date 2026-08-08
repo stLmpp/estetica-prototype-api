@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { AuthRole, GLOBAL_TENANT, GLOBAL_USER } from './constants';
-import { coreExceptions } from '../core/core-exceptions';
+import { coreExceptions } from '../core-exceptions';
 import { authExceptions } from './auth-exceptions';
-import { AuthOrganizationRepository } from '../database/main/repositories/auth-organization.repository';
-import { AuthUserRepository } from '../database/main/repositories/auth-user.repository';
+import { AuthOrganizationRepository } from '../../database/main/repositories/auth-organization.repository';
+import { AuthUserRepository } from '../../database/main/repositories/auth-user.repository';
 import { AuthDataService } from './auth-data.service';
 
 @Injectable()

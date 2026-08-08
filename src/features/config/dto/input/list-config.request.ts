@@ -3,7 +3,7 @@ import { BooleanParamSchema } from '../../../../shared/model/common.model';
 import { createZodDto } from 'nestjs-zod';
 import { z } from 'zod';
 import { CONFIG_GROUP_GLOBAL } from '../../config.constants';
-import { GLOBAL_TENANT, GLOBAL_USER } from '../../../../auth/constants';
+import { GLOBAL_TENANT, GLOBAL_USER } from '../../../../core/auth/constants';
 
 export const FilterConfigSchema = RequestPaginatedSchema.extend({
   name: z.string().trim().min(1).max(64).optional(),

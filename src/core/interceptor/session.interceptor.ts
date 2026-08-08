@@ -12,10 +12,10 @@ import {
   CLS_SESSION_ROLE_KEY,
   CLS_TENANT_ID_KEY,
   CLS_USER_ID_KEY,
-} from '../../auth/constants';
-import { BetterAuthSession } from '../../auth/auth';
+} from '../auth/constants';
+import { BetterAuthSession } from '../auth/auth';
 import { Reflector } from '@nestjs/core';
-import { AuthService } from '../../auth/auth.service';
+import { AuthService } from '../auth/auth.service';
 
 @Injectable()
 export class SessionInterceptor implements NestInterceptor {

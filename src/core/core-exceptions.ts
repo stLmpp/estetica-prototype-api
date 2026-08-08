@@ -43,4 +43,9 @@ export const coreExceptions = {
     status: 403,
     message: 'Forbidden',
   }),
+  requestTimeout: exception({
+    code: 'TIMEOUT',
+    status: 408,
+    message: 'Request timeout',
+  }),
 };

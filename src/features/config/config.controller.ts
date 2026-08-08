@@ -1,5 +1,5 @@
 import { Body, Controller, Get, Post, Query } from '@nestjs/common';
-import { Roles } from '@thallesp/nestjs-better-auth';
+import { UserHasPermission } from '@thallesp/nestjs-better-auth';
 import {
   type PublishConfigRequest,
   PublishConfigRequestSchema,
@@ -16,7 +16,6 @@ import { GetConfigResponse } from './dto/output/get-config.response';
 import { GetConfigRequest } from './dto/input/get-config.request';
 import { GetGroupRequest } from './dto/input/get-group.request';
 import { ZodValidationPipe } from 'nestjs-zod';
-import { AuthRole } from '../../auth/constants';
 import { BodyType } from '../../shared/decorator/body-type.decorator';
 
 @Controller({
@@ -28,7 +27,7 @@ export class ConfigController {
 
   @BodyType(PublishConfigRequestSchema)
   @ResponseType(PublishConfigResponseModel)
-  @Roles([AuthRole.Admin])
+  @UserHasPermission({ permission: { config: ['publish'] } })
   @Post('publish')
   async publish(
     @Body(new ZodValidationPipe(PublishConfigRequestSchema))
@@ -45,6 +44,7 @@ export class ConfigController {
   }
 
   @ResponseType(ListConfigPaginatedResponseModel)
+  @UserHasPermission({ permission: { config: ['get'] } })
   @Get()
   async listPaginated(
     @Query() query: FilterConfigDto,
@@ -63,6 +63,7 @@ export class ConfigController {
   }
 
   @ResponseType(ListConfigResponseModel)
+  @UserHasPermission({ permission: { config: ['get'] } })
   @Get('query-group')
   async listGroup(
     @Query() query: GetGroupRequest,
@@ -77,6 +78,7 @@ export class ConfigController {
   }
 
   @ResponseType(GetConfigResponse)
+  @UserHasPermission({ permission: { config: ['get'] } })
   @Get('query-one')
   async getConfig(
     @Query() query: GetConfigRequest,

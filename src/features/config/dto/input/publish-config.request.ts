@@ -1,7 +1,6 @@
 import { z } from 'zod';
-import { createZodDto } from 'nestjs-zod';
 import { ConfigType } from '../../../../shared/domain/config-type.enum';
-import { AuthOrgRole, AuthRole } from '../../../../auth/constants';
+import { AuthOrgRole, AuthRole } from '../../../../core/auth/constants';
 import { SecurityLevelType } from '../../../../shared/domain/security-level-type.enum';
 
 export const BasePublishConfigSchema = z.object({

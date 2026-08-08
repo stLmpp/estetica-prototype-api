@@ -14,7 +14,7 @@ import {
 import { FilterConfigDto } from '../../../features/config/dto/input/list-config.request';
 import { promiseAllObject } from '../../../shared/utils/promise-all-object';
 import { GetGroupRequest } from '../../../features/config/dto/input/get-group.request';
-import { AuthDataService } from '../../../auth/auth-data.service';
+import { AuthDataService } from '../../../core/auth/auth-data.service';
 import {
   InjectTransactionHost,
   TransactionHost,

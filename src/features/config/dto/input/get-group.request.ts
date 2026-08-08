@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { GLOBAL_TENANT, GLOBAL_USER } from '../../../../auth/constants';
+import { GLOBAL_TENANT, GLOBAL_USER } from '../../../../core/auth/constants';
 import { createZodDto } from 'nestjs-zod';
 import { BooleanParamSchema } from '../../../../shared/model/common.model';
 

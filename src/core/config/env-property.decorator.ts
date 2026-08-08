@@ -60,7 +60,7 @@ const typeParser: Record<
   string: (value) => value,
   boolean: (value) => value === 'true',
   json: (value, { name, typeGetter }) => {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+     
     const [error, json] = safe(() => JSON.parse(value));
     if (error) {
       throw new Error(`Invalid JSON value for ${name}: ${value}`);
@@ -73,7 +73,7 @@ const typeParser: Record<
       }
       return parsedJson.data;
     }
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+     
     return json;
   },
   list: (value, config) => {

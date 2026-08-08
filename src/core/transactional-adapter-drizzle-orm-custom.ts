@@ -4,9 +4,9 @@ import {
 } from '@nestjs-cls/transactional';
 import { type DrizzleOrmTransactionalAdapterOptions } from '@nestjs-cls/transactional-adapter-drizzle-orm';
 import type { NodePgDatabase } from 'drizzle-orm/node-postgres';
-import { RLS_ROLE } from '../auth/constants';
+import { RLS_ROLE } from './auth/constants';
 import { sql } from 'drizzle-orm';
-import { AuthDataService } from '../auth/auth-data.service';
+import { AuthDataService } from './auth/auth-data.service';
 
 type AnyDrizzleClient = NodePgDatabase;
 

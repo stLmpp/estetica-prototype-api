@@ -16,9 +16,9 @@ import {
   AuthSecurityLevel,
   GLOBAL_TENANT,
   GLOBAL_USER,
-} from '../../auth/constants';
+} from '../../core/auth/constants';
 import { GetConfigRequest } from './dto/input/get-config.request';
-import { AuthValidationService } from '../../auth/auth-validation.service';
+import { AuthValidationService } from '../../core/auth/auth-validation.service';
 import { ConfigExceptions } from './config-exceptions';
 import { ConfigModel } from './model/config.model';
 import { GetGroupRequest } from './dto/input/get-group.request';
