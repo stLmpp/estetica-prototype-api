@@ -74,6 +74,7 @@ export class ConfigRepository extends Repository {
         eq(this.db.e.config.group, param.group),
         eq(this.db.e.config.userId, param.userId),
         eq(this.db.e.config.tenantId, param.tenantId),
+        eq(this.db.e.config.isDeleted, false),
         this.getAuthorizedCondition(),
       ];
       if (version === 'latest') {
@@ -110,6 +111,7 @@ export class ConfigRepository extends Repository {
       eq(this.db.e.config.userId, dto.userId).if(dto.userId),
       isNull(this.db.e.config.inactivatedAt).if(!dto.showInactivated),
       eq(this.db.e.config.version, dto.version!).if(dto.version),
+      eq(this.db.e.config.isDeleted, false),
       this.getAuthorizedCondition(),
     );
     const offset = (dto.page - 1) * dto.limit;
@@ -138,6 +140,7 @@ export class ConfigRepository extends Repository {
       eq(this.db.e.config.tenantId, dto.tenantId).if(dto.tenantId),
       eq(this.db.e.config.userId, dto.userId).if(dto.userId),
       isNull(this.db.e.config.inactivatedAt),
+      eq(this.db.e.config.isDeleted, false),
       this.getAuthorizedCondition(),
     ];
 

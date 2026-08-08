@@ -17,6 +17,7 @@ export class ConfigAdminRepository extends Repository {
         name,
         userId,
         tenantId,
+        isDeleted: false,
       },
       orderBy: {
         version: 'desc',
@@ -28,7 +29,9 @@ export class ConfigAdminRepository extends Repository {
     await this.db
       .update(this.db.e.config)
       .set({ inactivatedAt: new Date() })
-      .where(and(eq(this.db.e.config.id, id)));
+      .where(
+        and(eq(this.db.e.config.id, id), eq(this.db.e.config.isDeleted, false)),
+      );
   }
 
   insert(dto: Omit<InferInsertModel<typeof mainEntities.config>, 'id'>) {

@@ -425,7 +425,7 @@ export const securityLevelType = pgEnum(
 );
 export const configTypeEnum = pgEnum('config_type', ConfigType);
 
-export const configEntity = pgTable.withRLS(
+export const configEntity = pgTable(
   'config',
   {
     ...baseEntity('cfg'),
@@ -451,7 +451,6 @@ export const configEntity = pgTable.withRLS(
     index()
       .on(t.group, t.tenantId, t.userId)
       .where(sql`${t.isDeleted} = false`),
-    ...addDeletedAtPolicies(t),
   ],
 );
 
