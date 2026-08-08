@@ -7,13 +7,13 @@ import { createAccessControl } from 'better-auth/plugins/access';
 
 const statement = {
   ...defaultStatements,
-  config: ['get', 'create', 'update'],
+  config: ['get', 'publish'],
 } as const;
 
 const ac = createAccessControl(statement);
 
 const admin = ac.newRole({
-  config: ['get', 'create', 'update'],
+  config: ['get', 'publish'],
   ...adminAc.statements,
 });
 
