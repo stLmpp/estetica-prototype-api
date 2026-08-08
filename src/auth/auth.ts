@@ -8,6 +8,8 @@ import { v7 as uuidv7 } from 'uuid';
 import { extraAuthEndPointsPlugin } from './extra-auth-end-points.plugin';
 import { BetterAuthRedisSecondaryStorage } from '../core/redis/better-auth-redis-secondary-storage';
 import { AuthRole } from './constants';
+import { adminAccessControl } from './admin-access-control';
+import { organizationAccessControl } from './organization-access-control';
 
 const appEnv = AppEnv.instance;
 
@@ -50,8 +52,20 @@ export const auth = betterAuth({
     openAPI({
       path: 'openapi',
     }),
-    admin(),
+    admin({
+      ac: adminAccessControl.ac,
+      roles: {
+        admin: adminAccessControl.admin,
+        user: adminAccessControl.user,
+      },
+    }),
     organization({
+      ac: organizationAccessControl.ac,
+      roles: {
+        owner: organizationAccessControl.owner,
+        admin: organizationAccessControl.admin,
+        member: organizationAccessControl.member,
+      },
       requireEmailVerificationOnInvitation: false, // TODO
       allowUserToCreateOrganization: (user) => user.role === AuthRole.Admin,
       disableOrganizationDeletion: true,
