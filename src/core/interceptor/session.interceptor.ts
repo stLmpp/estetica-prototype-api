@@ -14,7 +14,6 @@ import {
   CLS_USER_ID_KEY,
 } from '../../auth/constants';
 import { BetterAuthSession } from '../../auth/auth';
-import { coreExceptions } from '../core-exceptions';
 import { Reflector } from '@nestjs/core';
 import { AuthService } from '../../auth/auth.service';
 
@@ -38,26 +37,25 @@ export class SessionInterceptor implements NestInterceptor {
       return next.handle();
     }
     const session = request.session;
-    if (!session) {
-      throw coreExceptions.unauthorized('Session not found in request');
-    }
-    const tenantId = session.session.activeOrganizationId;
-    if (!tenantId) {
-      throw coreExceptions.unauthorized('Tenant ID not found in session');
-    }
+    const tenantId = session?.session.activeOrganizationId;
     this.clsService.set(CLS_TENANT_ID_KEY, tenantId);
-    this.clsService.set(CLS_USER_ID_KEY, session.user.id);
-    this.clsService.set(CLS_SESSION_ROLE_KEY, session.user.role);
-    return from(
-      this.authService.api.getActiveMemberRole({
-        headers: request.headers,
-      }),
-    ).pipe(
-      catchError(() => of(null)),
-      tap((response) => {
-        this.clsService.set(CLS_SESSION_ORG_ROLE_KEY, response?.role);
-      }),
-      switchMap(() => next.handle()),
-    );
+    this.clsService.set(CLS_USER_ID_KEY, session?.user.id);
+    this.clsService.set(CLS_SESSION_ROLE_KEY, session?.user.role);
+
+    const getActiveMemberRole$ =
+      session && tenantId
+        ? from(
+            this.authService.api.getActiveMemberRole({
+              headers: request.headers,
+            }),
+          ).pipe(
+            catchError(() => of(null)),
+            tap((response) => {
+              this.clsService.set(CLS_SESSION_ORG_ROLE_KEY, response?.role);
+            }),
+          )
+        : of(null);
+
+    return getActiveMemberRole$.pipe(switchMap(() => next.handle()));
   }
 }

@@ -8,14 +8,12 @@ import {
   getColumns,
   isNull,
   lte,
-  ne,
   or,
   sql,
 } from 'drizzle-orm';
 import { FilterConfigDto } from '../../../features/config/dto/input/list-config.request';
 import { promiseAllObject } from '../../../shared/utils/promise-all-object';
 import { GetGroupRequest } from '../../../features/config/dto/input/get-group.request';
-import { GLOBAL_TENANT } from '../../../auth/constants';
 import { AuthDataService } from '../../../auth/auth-data.service';
 import {
   InjectTransactionHost,
@@ -24,6 +22,7 @@ import {
 import { MAIN_DATABASE_CONNECTION_NAME } from '../main-database-connection-name';
 import { TransactionalAdapterDrizzleOrm } from '@nestjs-cls/transactional-adapter-drizzle-orm';
 import { MainDatasource } from '../main-database-connection';
+import { SecurityLevelType } from '../../../shared/domain/security-level-type.enum';
 
 interface AllPossibleParams {
   name: string;
@@ -52,19 +51,15 @@ export class ConfigRepository extends Repository {
     const securityLevel = this.authDataService.getSessionSecurityLevel();
     const orgSecurityLevel = this.authDataService.getOrgSessionSecurityLevel();
     return or(
+      isNull(this.db.e.config.requiredSecurityLevel),
+      isNull(this.db.e.config.securityLevelType),
       and(
-        eq(this.db.e.config.tenantId, GLOBAL_TENANT),
-        or(
-          isNull(this.db.e.config.requiredSecurityLevel),
-          lte(this.db.e.config.requiredSecurityLevel, securityLevel),
-        ),
+        eq(this.db.e.config.securityLevelType, SecurityLevelType.ORG),
+        lte(this.db.e.config.requiredSecurityLevel, orgSecurityLevel),
       ),
       and(
-        ne(this.db.e.config.tenantId, GLOBAL_TENANT),
-        or(
-          isNull(this.db.e.config.requiredSecurityLevel),
-          lte(this.db.e.config.requiredSecurityLevel, orgSecurityLevel),
-        ),
+        eq(this.db.e.config.securityLevelType, SecurityLevelType.GENERAL),
+        lte(this.db.e.config.requiredSecurityLevel, securityLevel),
       ),
     );
   }

@@ -2,6 +2,7 @@ import { z } from 'zod';
 import { createZodDto } from 'nestjs-zod';
 import { ConfigType } from '../../../../shared/domain/config-type.enum';
 import { AuthOrgRole, AuthRole } from '../../../../auth/constants';
+import { SecurityLevelType } from '../../../../shared/domain/security-level-type.enum';
 
 export const BasePublishConfigSchema = z.object({
   name: z.string().trim().min(1).max(256),
@@ -16,15 +17,16 @@ export const BasePublishConfigSchema = z.object({
 
 const PublishConfigSchema = z.discriminatedUnion('roleType', [
   BasePublishConfigSchema.extend({
-    roleType: z.literal('org'),
+    roleType: z.literal(SecurityLevelType.GENERAL),
     role: z.enum(AuthRole),
   }),
   BasePublishConfigSchema.extend({
-    roleType: z.literal('general'),
-    orgRole: z.enum(AuthOrgRole),
+    roleType: z.literal(SecurityLevelType.ORG),
+    role: z.enum(AuthOrgRole),
   }),
   BasePublishConfigSchema.extend({
     roleType: z.undefined().optional(),
+    role: z.undefined().optional(),
   }),
 ]);
 

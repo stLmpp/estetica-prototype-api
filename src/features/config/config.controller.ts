@@ -17,6 +17,7 @@ import { GetConfigRequest } from './dto/input/get-config.request';
 import { GetGroupRequest } from './dto/input/get-group.request';
 import { ZodValidationPipe } from 'nestjs-zod';
 import { AuthRole } from '../../auth/constants';
+import { BodyType } from '../../shared/decorator/body-type.decorator';
 
 @Controller({
   path: 'config',
@@ -25,6 +26,7 @@ import { AuthRole } from '../../auth/constants';
 export class ConfigController {
   constructor(private readonly configService: ConfigService) {}
 
+  @BodyType(PublishConfigRequestSchema)
   @ResponseType(PublishConfigResponseModel)
   @Roles([AuthRole.Admin])
   @Post('publish')
@@ -65,6 +67,7 @@ export class ConfigController {
   async listGroup(
     @Query() query: GetGroupRequest,
   ): Promise<ListConfigResponseModel> {
+    console.log({ query });
     const configs = await this.configService.listGroup(query);
     return {
       data: {

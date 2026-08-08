@@ -25,6 +25,7 @@ import { AppointmentStatus } from '../../shared/domain/appointment-staus.enum';
 import { safe } from '../../shared/utils/safe';
 import { ConfigType } from '../../shared/domain/config-type.enum';
 import { AuthDataService } from '../../auth/auth-data.service';
+import { SecurityLevelType } from '../../shared/domain/security-level-type.enum';
 
 function getUserId() {
   const [error, userId] = safe(() => AuthDataService.instance.getUserId());
@@ -418,6 +419,10 @@ export const appointmentItemEntity = pgTable.withRLS(
   ],
 );
 
+export const securityLevelType = pgEnum(
+  'security_level_type',
+  SecurityLevelType,
+);
 export const configTypeEnum = pgEnum('config_type', ConfigType);
 
 export const configEntity = pgTable.withRLS(
@@ -434,6 +439,7 @@ export const configEntity = pgTable.withRLS(
     value: text('value').notNull(),
     type: configTypeEnum('type').notNull(),
     requiredSecurityLevel: smallint('required_security_level'),
+    securityLevelType: securityLevelType('security_level_type'),
   },
   (t) => [
     uniqueIndex()

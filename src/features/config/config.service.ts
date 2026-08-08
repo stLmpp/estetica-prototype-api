@@ -26,6 +26,7 @@ import { ConfigType } from '../../shared/domain/config-type.enum';
 import { BooleanParamSchema } from '../../shared/model/common.model';
 import { safe } from '../../shared/utils/safe';
 import { AppEnv } from '../../core/config/app-env';
+import { SecurityLevelType } from '../../shared/domain/security-level-type.enum';
 
 @Injectable()
 export class ConfigService {
@@ -36,6 +37,11 @@ export class ConfigService {
     private readonly authValidationService: AuthValidationService,
     private readonly appEnv: AppEnv,
   ) {}
+
+  private readonly roleToSecurityLevelType = {
+    [SecurityLevelType.GENERAL]: AuthSecurityLevel,
+    [SecurityLevelType.ORG]: AuthOrgSecurityLevel,
+  };
 
   private createKey(
     group: string,
@@ -77,15 +83,16 @@ export class ConfigService {
       value: config.value,
       type: config.type,
       group,
+      securityLevelType: config.roleType,
     };
     switch (config.roleType) {
-      case 'org': {
+      case SecurityLevelType.GENERAL: {
         newEntityInsert.requiredSecurityLevel = AuthSecurityLevel[config.role];
         break;
       }
-      case 'general': {
+      case SecurityLevelType.ORG: {
         newEntityInsert.requiredSecurityLevel =
-          AuthOrgSecurityLevel[config.orgRole];
+          AuthOrgSecurityLevel[config.role];
         break;
       }
       default: {
