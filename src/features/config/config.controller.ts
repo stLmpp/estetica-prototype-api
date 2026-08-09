@@ -1,5 +1,4 @@
 import { Body, Controller, Get, Post, Query } from '@nestjs/common';
-import { UserHasPermission } from '@thallesp/nestjs-better-auth';
 import {
   type PublishConfigRequest,
   PublishConfigRequestSchema,
@@ -17,6 +16,7 @@ import { GetConfigRequest } from './dto/input/get-config.request';
 import { GetGroupRequest } from './dto/input/get-group.request';
 import { ZodValidationPipe } from 'nestjs-zod';
 import { BodyType } from '../../shared/decorator/body-type.decorator';
+import { HasPermission } from '../../core/auth/has-permission.decorator';
 
 @Controller({
   path: 'config',
@@ -27,7 +27,7 @@ export class ConfigController {
 
   @BodyType(PublishConfigRequestSchema)
   @ResponseType(PublishConfigResponseModel)
-  @UserHasPermission({ permission: { config: ['publish'] } })
+  @HasPermission({ permission: { config: ['publish', 'get'] } })
   @Post('publish')
   async publish(
     @Body(new ZodValidationPipe(PublishConfigRequestSchema))
@@ -44,7 +44,7 @@ export class ConfigController {
   }
 
   @ResponseType(ListConfigPaginatedResponseModel)
-  @UserHasPermission({ permission: { config: ['get'] } })
+  @HasPermission({ permission: { config: ['get'] } })
   @Get()
   async listPaginated(
     @Query() query: FilterConfigDto,
@@ -63,7 +63,7 @@ export class ConfigController {
   }
 
   @ResponseType(ListConfigResponseModel)
-  @UserHasPermission({ permission: { config: ['get'] } })
+  @HasPermission({ permission: { config: ['get'] } })
   @Get('query-group')
   async listGroup(
     @Query() query: GetGroupRequest,
@@ -78,7 +78,7 @@ export class ConfigController {
   }
 
   @ResponseType(GetConfigResponse)
-  @UserHasPermission({ permission: { config: ['get'] } })
+  @HasPermission({ permission: { config: ['get'] } })
   @Get('query-one')
   async getConfig(
     @Query() query: GetConfigRequest,
