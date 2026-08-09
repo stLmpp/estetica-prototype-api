@@ -5,8 +5,9 @@ import {
   type UserHasPermissionOptions,
 } from '@thallesp/nestjs-better-auth';
 import { type RoleStatements } from 'better-auth/plugins/access';
-import { adminAccessControl } from './admin-access-control';
-import { organizationAccessControl } from './organization-access-control';
+import { type adminAccessControl } from './admin-access-control';
+import { type organizationAccessControl } from './organization-access-control';
+import { applyDecorators } from '@nestjs/common';
 
 type AdminPermissionCheck = RoleStatements<
   typeof adminAccessControl.ac.statements
@@ -16,8 +17,10 @@ type OrgPermissionCheck = RoleStatements<
   typeof organizationAccessControl.ac.statements
 >;
 
-interface HasPermissionOptions
-  extends Omit<UserHasPermissionOptions, 'permission' | 'permissions'> {
+interface HasPermissionOptions extends Omit<
+  UserHasPermissionOptions,
+  'permission' | 'permissions'
+> {
   permission?: AdminPermissionCheck;
   permissions?: AdminPermissionCheck;
 }
@@ -32,8 +35,10 @@ export function HasPermission(options: HasPermissionOptions) {
   return UserHasPermission(options as UserHasPermissionOptions);
 }
 
-interface OrgHasPermissionOptions
-  extends Omit<MemberHasPermissionOptions, 'permissions'> {
+interface OrgHasPermissionOptions extends Omit<
+  MemberHasPermissionOptions,
+  'permissions'
+> {
   permissions: OrgPermissionCheck;
 }
 
@@ -44,5 +49,7 @@ interface OrgHasPermissionOptions
  * compile time instead of silently denying access at runtime.
  */
 export function OrgHasPermission(options: OrgHasPermissionOptions) {
-  return MemberHasPermission(options as MemberHasPermissionOptions);
+  return applyDecorators(
+    MemberHasPermission(options as MemberHasPermissionOptions),
+  );
 }

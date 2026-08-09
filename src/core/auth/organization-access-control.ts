@@ -8,7 +8,7 @@ import { createAccessControl } from 'better-auth/plugins/access';
 
 const statement = {
   ...defaultStatements,
-  catalogItem: ['get', 'create', 'update'],
+  catalogItem: ['get', 'create', 'update', 'delete'],
   person: ['get', 'create', 'update'],
   customer: ['get', 'create', 'update'],
 } as const;
@@ -16,14 +16,14 @@ const statement = {
 const ac = createAccessControl(statement);
 
 const owner = ac.newRole({
-  catalogItem: ['get', 'create', 'update'],
+  catalogItem: ['get', 'create', 'update', 'delete'],
   person: ['get', 'create', 'update'],
   customer: ['get', 'create', 'update'],
   ...ownerAc.statements,
 });
 
 const admin = ac.newRole({
-  catalogItem: ['get', 'create', 'update'],
+  catalogItem: ['get', 'create', 'update', 'delete'],
   person: ['get', 'create', 'update'],
   customer: ['get', 'create', 'update'],
   ...adminAc.statements,

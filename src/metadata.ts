@@ -1,4 +1,4 @@
- 
+/* eslint-disable */
 export default async () => {
     const t = {
         ["./shared/model/response-error.model"]: await import("./shared/model/response-error.model"),

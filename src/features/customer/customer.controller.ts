@@ -18,6 +18,7 @@ import { ResponseType } from '../../shared/decorator/response-type.decorator';
 import { OrgRoles, RequireActiveOrg } from '@thallesp/nestjs-better-auth';
 
 import { AuthOrgRole } from '../../core/auth/constants';
+import { OrgHasPermission } from '../../core/auth/has-permission.decorator';
 
 @Controller({
   path: 'customer',
@@ -29,7 +30,9 @@ export class CustomerController {
 
   @ResponseType(CreateCustomerResponseModel, 201)
   @Post()
-  @OrgRoles([AuthOrgRole.Admin])
+  @OrgHasPermission({
+    permissions: { customer: ['create'], person: ['create'] },
+  })
   async create(
     @Body() body: CustomerCreateRequest,
   ): Promise<CreateCustomerResponseModel> {
@@ -38,7 +41,9 @@ export class CustomerController {
   }
 
   @Patch(':customerId')
-  @OrgRoles([AuthOrgRole.Admin])
+  @OrgHasPermission({
+    permissions: { customer: ['update'] },
+  })
   async update(
     @Param('customerId') customerId: string,
     @Body() body: UpdateCustomerRequest,
@@ -48,6 +53,9 @@ export class CustomerController {
 
   @ResponseType(ListCustomerResponseModel)
   @Get()
+  @OrgHasPermission({
+    permissions: { customer: ['get'] },
+  })
   async listPaginated(
     @Query() dto: FilterCustomerDto,
   ): Promise<ListCustomerResponseModel> {
@@ -64,6 +72,9 @@ export class CustomerController {
 
   @ResponseType(GetCustomerResponseModel)
   @Get(':customerId')
+  @OrgHasPermission({
+    permissions: { customer: ['get'], person: ['get'] },
+  })
   async getById(
     @Param('customerId') customerId: string,
   ): Promise<GetCustomerResponseModel> {

@@ -8,7 +8,7 @@ import {
   Post,
   Query,
 } from '@nestjs/common';
-import { OrgRoles, RequireActiveOrg } from '@thallesp/nestjs-better-auth';
+import { RequireActiveOrg } from '@thallesp/nestjs-better-auth';
 import { CatalogItemService } from './catalog-item.service';
 import { ResponseType } from '../../shared/decorator/response-type.decorator';
 import { CreateCatalogItemRequest } from './dto/input/create-catalog-item.request';
@@ -17,7 +17,7 @@ import { UpdateCatalogItemRequest } from './dto/input/update-catalog-item.reques
 import { FilterCatalogItemDto } from './dto/input/list-catalog-item.request';
 import { ListCatalogItemResponseModel } from './dto/output/list-catalog-item.response';
 import { GetCatalogItemResponseModel } from './dto/output/get-catalog-item.response';
-import { AuthOrgRole } from '../../core/auth/constants';
+import { OrgHasPermission } from '../../core/auth/has-permission.decorator';
 
 @Controller({
   path: 'catalog-item',
@@ -29,7 +29,7 @@ export class CatalogItemController {
 
   @ResponseType(CreateCatalogItemResponseModel, 201)
   @Post()
-  @OrgRoles([AuthOrgRole.Admin, AuthOrgRole.Owner])
+  @OrgHasPermission({ permissions: { catalogItem: ['create'] } })
   async create(
     @Body() body: CreateCatalogItemRequest,
   ): Promise<CreateCatalogItemResponseModel> {
@@ -38,7 +38,7 @@ export class CatalogItemController {
   }
 
   @Patch(':catalogItemId')
-  @OrgRoles([AuthOrgRole.Admin, AuthOrgRole.Owner])
+  @OrgHasPermission({ permissions: { catalogItem: ['update'] } })
   async update(
     @Param('catalogItemId') catalogItemId: string,
     @Body() body: UpdateCatalogItemRequest,
@@ -47,13 +47,14 @@ export class CatalogItemController {
   }
 
   @Delete(':catalogItemId')
-  @OrgRoles([AuthOrgRole.Admin, AuthOrgRole.Owner])
+  @OrgHasPermission({ permissions: { catalogItem: ['delete'] } })
   async delete(@Param('catalogItemId') catalogItemId: string): Promise<void> {
     await this.catalogItemService.delete(catalogItemId);
   }
 
   @ResponseType(ListCatalogItemResponseModel)
   @Get()
+  @OrgHasPermission({ permissions: { catalogItem: ['get'] } })
   async listPaginated(
     @Query() query: FilterCatalogItemDto,
   ): Promise<ListCatalogItemResponseModel> {
@@ -71,6 +72,7 @@ export class CatalogItemController {
 
   @ResponseType(GetCatalogItemResponseModel)
   @Get(':catalogItemId')
+  @OrgHasPermission({ permissions: { catalogItem: ['get'] } })
   async getById(
     @Param('catalogItemId') catalogItemId: string,
   ): Promise<GetCatalogItemResponseModel> {
