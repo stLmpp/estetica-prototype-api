@@ -18,11 +18,7 @@ export class AuthValidationService {
     if (tenantId === GLOBAL_TENANT && userId === GLOBAL_USER) {
       return;
     }
-    const role = this.authDataService.getSessionRole();
-    if (!role) {
-      throw coreExceptions.forbidden();
-    }
-    if (role === AuthRole.Admin) {
+    if (this.authDataService.hasRole(AuthRole.Admin)) {
       return;
     }
     const sessionUserId = this.authDataService.getUserId();

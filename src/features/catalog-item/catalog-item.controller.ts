@@ -17,7 +17,11 @@ import { UpdateCatalogItemRequest } from './dto/input/update-catalog-item.reques
 import { FilterCatalogItemDto } from './dto/input/list-catalog-item.request';
 import { ListCatalogItemResponseModel } from './dto/output/list-catalog-item.response';
 import { GetCatalogItemResponseModel } from './dto/output/get-catalog-item.response';
-import { OrgHasPermission } from '../../core/auth/has-permission.decorator';
+import {
+  HasPermissionV2,
+  OrgHasPermission,
+} from '../../core/auth/has-permission.decorator';
+import { AuthRole } from '../../core/auth/constants';
 
 @Controller({
   path: 'catalog-item',
@@ -72,6 +76,18 @@ export class CatalogItemController {
 
   @ResponseType(GetCatalogItemResponseModel)
   @Get(':catalogItemId')
+  @HasPermissionV2({
+    or: [
+      {
+        orgPermissions: {
+          catalogItem: ['get'],
+        },
+      },
+      {
+        roles: [AuthRole.Admin],
+      },
+    ],
+  })
   @OrgHasPermission({ permissions: { catalogItem: ['get'] } })
   async getById(
     @Param('catalogItemId') catalogItemId: string,

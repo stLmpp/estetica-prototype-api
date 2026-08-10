@@ -10,6 +10,7 @@ import {
   type BaseHasPermission,
   type NormalizedHasPermission,
 } from './has-permission.decorator';
+import { AuthRole } from './constants';
 
 @Injectable()
 export class HasPermissionGuard implements CanActivate {
@@ -37,6 +38,13 @@ export class HasPermissionGuard implements CanActivate {
       throw coreExceptions.unauthorized();
     }
 
+    if (
+      !metadata.withoutImplicitAdminAccess &&
+      this.authDataService.hasRole(AuthRole.Admin)
+    ) {
+      return true;
+    }
+
     if (metadata.requiresActiveOrg && !session.session.activeOrganizationId) {
       throw coreExceptions.forbidden();
     }
@@ -61,13 +69,13 @@ export class HasPermissionGuard implements CanActivate {
     headers: Headers,
   ): Promise<boolean> {
     if (options.roles) {
-      const role = this.authDataService.getSessionRole();
-      return !!role && options.roles.includes(role);
+      return options.roles.some((role) => this.authDataService.hasRole(role));
     }
 
     if (options.orgRoles) {
-      const orgRole = this.authDataService.getSessionOrgRole();
-      return !!orgRole && options.orgRoles.includes(orgRole);
+      return options.orgRoles.some((role) =>
+        this.authDataService.hasOrgRole(role),
+      );
     }
 
     if (options.permissions) {

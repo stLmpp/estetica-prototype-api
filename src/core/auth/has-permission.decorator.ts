@@ -4,18 +4,28 @@ import {
   UserHasPermission,
   type UserHasPermissionOptions,
 } from '@thallesp/nestjs-better-auth';
-import { type RoleStatements } from 'better-auth/plugins/access';
 import { type adminAccessControl } from './admin-access-control';
 import { type organizationAccessControl } from './organization-access-control';
 import { applyDecorators, SetMetadata } from '@nestjs/common';
 import { type RequireExactlyOne } from 'type-fest';
 import { type AuthOrgRole, type AuthRole } from './constants';
 
-type AdminPermissionCheck = RoleStatements<
+/**
+ * Like better-auth's `RoleStatements`, but resolves each resource to a plain
+ * mutable array instead of `T[number][] | ReadonlyArray<T[number]>`. The
+ * readonly half of that union isn't assignable to the mutable array type
+ * `userHasPermission`/`hasPermission` expect in their body, which trips
+ * `TS2769: No overload matches this call` at every call site.
+ */
+type PermissionCheck<TStatements extends Record<string, readonly string[]>> = {
+  [K in keyof TStatements]?: TStatements[K][number][];
+};
+
+type AdminPermissionCheck = PermissionCheck<
   typeof adminAccessControl.ac.statements
 >;
 
-type OrgPermissionCheck = RoleStatements<
+type OrgPermissionCheck = PermissionCheck<
   typeof organizationAccessControl.ac.statements
 >;
 
@@ -61,6 +71,7 @@ export type BaseHasPermission = {
   orgPermissions?: OrgPermissionCheck;
   roles?: AuthRole[];
   orgRoles?: AuthOrgRole[];
+  withoutImplicitAdminAccess?: boolean;
 };
 
 export type HasPermissionOptionsV2 = RequireExactlyOne<
@@ -88,6 +99,7 @@ export interface NormalizedHasPermission {
    * every branch is org-scoped (otherwise a non-org branch could still pass).
    */
   requiresActiveOrg: boolean;
+  withoutImplicitAdminAccess: boolean;
 }
 
 function isOrgScoped(check: BaseHasPermission): boolean {
@@ -112,6 +124,7 @@ export function HasPermissionV2(options: HasPermissionOptionsV2) {
     mode,
     checks,
     requiresActiveOrg,
+    withoutImplicitAdminAccess: options.withoutImplicitAdminAccess ?? false,
   };
 
   return applyDecorators(SetMetadata('has-permission', normalized));

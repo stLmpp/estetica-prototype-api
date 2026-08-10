@@ -3,8 +3,8 @@ import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
 import { Request } from 'express';
 import { BetterAuthSession } from './auth';
 import {
-  CLS_SESSION_ORG_ROLE_KEY,
-  CLS_SESSION_ROLE_KEY,
+  CLS_SESSION_ORG_ROLES_KEY,
+  CLS_SESSION_ROLES_KEY,
   CLS_TENANT_ID_KEY,
   CLS_USER_ID_KEY,
 } from './constants';
@@ -43,7 +43,10 @@ export class AuthGuard implements CanActivate {
     const tenantId = session?.session.activeOrganizationId;
     this.clsService.set(CLS_TENANT_ID_KEY, tenantId);
     this.clsService.set(CLS_USER_ID_KEY, session?.user.id);
-    this.clsService.set(CLS_SESSION_ROLE_KEY, session?.user.role);
+    this.clsService.set(
+      CLS_SESSION_ROLES_KEY,
+      session?.user.role?.split(',') ?? [],
+    );
 
     if (session && tenantId) {
       const response = await this.authService.api
@@ -51,7 +54,10 @@ export class AuthGuard implements CanActivate {
           headers: fromNodeHeaders(request.headers),
         })
         .catch(() => null);
-      this.clsService.set(CLS_SESSION_ORG_ROLE_KEY, response?.role);
+      this.clsService.set(
+        CLS_SESSION_ORG_ROLES_KEY,
+        response?.role?.split(',') ?? [],
+      );
     }
 
     return true;

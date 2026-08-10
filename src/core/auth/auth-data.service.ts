@@ -5,8 +5,7 @@ import {
   AuthOrgSecurityLevel,
   AuthRole,
   AuthSecurityLevel,
-  CLS_SESSION_ORG_ROLE_KEY,
-  CLS_SESSION_ROLE_KEY,
+  CLS_SESSION_ORG_ROLES_KEY,
   CLS_TENANT_ID_KEY,
   CLS_USER_ID_KEY,
 } from './constants';
@@ -30,26 +29,43 @@ export class AuthDataService {
     return this.clsService.get<string>(CLS_USER_ID_KEY);
   }
 
-  getSessionRole() {
-    return this.clsService.get<AuthRole | undefined>(CLS_SESSION_ROLE_KEY);
-  }
-
-  getSessionOrgRole() {
-    return this.clsService.get<AuthOrgRole | undefined>(
-      CLS_SESSION_ORG_ROLE_KEY,
+  getSessionRoles() {
+    return (
+      this.clsService.get<AuthRole[] | undefined>(CLS_SESSION_ORG_ROLES_KEY) ??
+      []
     );
   }
 
+  hasRole(role: AuthRole) {
+    return this.getSessionRoles().includes(role);
+  }
+
+  getSessionOrgRoles() {
+    return (
+      this.clsService.get<AuthOrgRole[] | undefined>(
+        CLS_SESSION_ORG_ROLES_KEY,
+      ) ?? []
+    );
+  }
+
+  hasOrgRole(role: AuthOrgRole) {
+    return this.getSessionOrgRoles().includes(role);
+  }
+
   getSessionSecurityLevel() {
-    const role = this.getSessionRole();
-    return role ? AuthSecurityLevel[role] : this.maxSecurityLevel + 1;
+    const roles = this.getSessionRoles();
+    if (!roles.length) {
+      return this.maxSecurityLevel + 1;
+    }
+    return Math.min(...roles.map((role) => AuthSecurityLevel[role]));
   }
 
   getOrgSessionSecurityLevel() {
-    const orgRole = this.getSessionOrgRole();
-    return orgRole
-      ? AuthOrgSecurityLevel[orgRole]
-      : this.maxOrgSecurityLevel + 1;
+    const orgRoles = this.getSessionOrgRoles();
+    if (!orgRoles.length) {
+      return this.maxOrgSecurityLevel + 1;
+    }
+    return Math.min(...orgRoles.map((role) => AuthOrgSecurityLevel[role]));
   }
 
   static readonly instance = new AuthDataService(
