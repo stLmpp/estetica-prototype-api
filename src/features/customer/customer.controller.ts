@@ -15,9 +15,7 @@ import { FilterCustomerDto } from './dto/input/list-customer.request';
 import { ListCustomerResponseModel } from './dto/output/list-customer.response';
 import { GetCustomerResponseModel } from './dto/output/get-customer.response';
 import { ResponseType } from '../../shared/decorator/response-type.decorator';
-import { OrgRoles, RequireActiveOrg } from '@thallesp/nestjs-better-auth';
-
-import { AuthOrgRole } from '../../core/auth/constants';
+import { RequireActiveOrg } from '@thallesp/nestjs-better-auth';
 import { OrgHasPermission } from '../../core/auth/has-permission.decorator';
 
 @Controller({

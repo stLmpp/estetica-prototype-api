@@ -17,7 +17,6 @@ import { CustomerModule } from './features/customer/customer.module';
 import { AllExceptionsFilter } from './core/filter/all-exception.filter';
 import { CustomZodSerializerInterceptor } from './core/interceptor/custom-zod-serializer-interceptor';
 import { ClsModule } from 'nestjs-cls';
-import { SessionInterceptor } from './core/interceptor/session.interceptor';
 import { AnamnesisFieldModule } from './features/anamnesis-field/anamnesis-field.module';
 import { safeAsync } from './shared/utils/safe';
 import { isAPIError } from 'better-auth/api';
@@ -31,6 +30,8 @@ import { ConfigModule } from './features/config/config.module';
 import { ResponseErrorModel } from './shared/model/response-error.model';
 import { ZodValidationPipe } from 'nestjs-zod';
 import { CatalogItemModule } from './features/catalog-item/catalog-item.module';
+import { AuthGuard } from './core/auth/auth.guard';
+import { HasPermissionGuard } from './core/auth/has-permission.guard';
 
 const appEnv = AppEnv.instance;
 
@@ -64,6 +65,7 @@ const CORE_MODULES: ModuleMetadata['imports'] = [
       },
       rawBody: true,
     },
+    disableGlobalAuthGuard: true,
   }),
   ClsModule.forRoot({
     global: true,
@@ -95,30 +97,13 @@ if (appEnv.environment === Environment.Production) {
   ],
   providers: [
     ErrorAfterHook,
-    {
-      provide: APP_GUARD,
-      useClass: ThrottlerGuard,
-    },
-    {
-      provide: APP_FILTER,
-      useClass: AllExceptionsFilter,
-    },
-    {
-      provide: APP_PIPE,
-      useClass: ZodValidationPipe,
-    },
-    {
-      provide: APP_INTERCEPTOR,
-      useClass: CustomZodSerializerInterceptor,
-    },
-    {
-      provide: APP_INTERCEPTOR,
-      useClass: SessionInterceptor,
-    },
-    {
-      provide: APP_INTERCEPTOR,
-      useClass: LoggingInterceptor,
-    },
+    { provide: APP_GUARD, useClass: ThrottlerGuard },
+    { provide: APP_GUARD, useClass: AuthGuard },
+    { provide: APP_GUARD, useClass: HasPermissionGuard },
+    { provide: APP_FILTER, useClass: AllExceptionsFilter },
+    { provide: APP_PIPE, useClass: ZodValidationPipe },
+    { provide: APP_INTERCEPTOR, useClass: CustomZodSerializerInterceptor },
+    { provide: APP_INTERCEPTOR, useClass: LoggingInterceptor },
   ],
 })
 class AppModule implements OnModuleInit {
