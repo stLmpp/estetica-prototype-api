@@ -8,7 +8,7 @@ import { BetterAuthSession } from './auth';
 import { coreExceptions } from '../core-exceptions';
 import {
   type BaseHasPermission,
-  type HasPermissionOptionsV2,
+  type NormalizedHasPermission,
 } from './has-permission.decorator';
 
 @Injectable()
@@ -20,11 +20,11 @@ export class HasPermissionGuard implements CanActivate {
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const options = this.reflector.getAllAndOverride<
-      HasPermissionOptionsV2 | undefined
+    const metadata = this.reflector.getAllAndOverride<
+      NormalizedHasPermission | undefined
     >('has-permission', [context.getHandler(), context.getClass()]);
 
-    if (!options) {
+    if (!metadata) {
       return true;
     }
 
@@ -37,35 +37,22 @@ export class HasPermissionGuard implements CanActivate {
       throw coreExceptions.unauthorized();
     }
 
+    if (metadata.requiresActiveOrg && !session.session.activeOrganizationId) {
+      throw coreExceptions.forbidden();
+    }
+
     const headers = fromNodeHeaders(request.headers);
-    const allowed = await this.evaluate(options, session, headers);
+    const results = await Promise.all(
+      metadata.checks.map((check) => this.check(check, session, headers)),
+    );
+    const allowed =
+      metadata.mode === 'or' ? results.some(Boolean) : results.every(Boolean);
+
     if (!allowed) {
       throw coreExceptions.forbidden();
     }
 
     return true;
-  }
-
-  private async evaluate(
-    options: HasPermissionOptionsV2,
-    session: BetterAuthSession,
-    headers: Headers,
-  ): Promise<boolean> {
-    if (options.or) {
-      const results = await Promise.all(
-        options.or.map((check) => this.check(check, session, headers)),
-      );
-      return results.some(Boolean);
-    }
-
-    if (options.and) {
-      const results = await Promise.all(
-        options.and.map((check) => this.check(check, session, headers)),
-      );
-      return results.every(Boolean);
-    }
-
-    return this.check(options, session, headers);
   }
 
   private async check(

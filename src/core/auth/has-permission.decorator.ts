@@ -8,8 +8,8 @@ import { type RoleStatements } from 'better-auth/plugins/access';
 import { type adminAccessControl } from './admin-access-control';
 import { type organizationAccessControl } from './organization-access-control';
 import { applyDecorators, SetMetadata } from '@nestjs/common';
-import { RequireExactlyOne } from 'type-fest';
-import { AuthOrgRole, AuthRole } from './constants';
+import { type RequireExactlyOne } from 'type-fest';
+import { type AuthOrgRole, type AuthRole } from './constants';
 
 type AdminPermissionCheck = RoleStatements<
   typeof adminAccessControl.ac.statements
@@ -70,6 +70,30 @@ export type HasPermissionOptionsV2 = RequireExactlyOne<
   }
 >;
 
+export type HasPermissionMode = 'and' | 'or';
+
+/**
+ * Metadata shape consumed by `HasPermissionGuard`. Computed once when the
+ * decorator is applied (module load) instead of on every request, so the
+ * guard just iterates `checks` without re-deriving `or`/`and`/single-check
+ * branching each time.
+ */
+export interface NormalizedHasPermission {
+  mode: HasPermissionMode;
+  checks: BaseHasPermission[];
+  /**
+   * True when an active organization is required no matter which check(s)
+   * end up deciding the outcome, letting the guard reject before making any
+   * API call: for `and`, any org-scoped check forces it; for `or`, only if
+   * every branch is org-scoped (otherwise a non-org branch could still pass).
+   */
+  requiresActiveOrg: boolean;
+}
+
+function isOrgScoped(check: BaseHasPermission): boolean {
+  return !!check.orgPermissions || !!check.orgRoles;
+}
+
 export function HasPermissionV2(options: HasPermissionOptionsV2) {
   if (options.or && !options.or.length) {
     throw new Error('options.or must have at least one element');
@@ -79,5 +103,16 @@ export function HasPermissionV2(options: HasPermissionOptionsV2) {
     throw new Error('options.and must have at least one element');
   }
 
-  return applyDecorators(SetMetadata('has-permission', options));
+  const mode: HasPermissionMode = options.or ? 'or' : 'and';
+  const checks: BaseHasPermission[] = options.or ?? options.and ?? [options];
+  const requiresActiveOrg =
+    mode === 'and' ? checks.some(isOrgScoped) : checks.every(isOrgScoped);
+
+  const normalized: NormalizedHasPermission = {
+    mode,
+    checks,
+    requiresActiveOrg,
+  };
+
+  return applyDecorators(SetMetadata('has-permission', normalized));
 }
