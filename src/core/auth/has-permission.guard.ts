@@ -38,15 +38,15 @@ export class HasPermissionGuard implements CanActivate {
       throw coreExceptions.unauthorized();
     }
 
+    if (metadata.requiresActiveOrg && !session.session.activeOrganizationId) {
+      throw coreExceptions.forbidden();
+    }
+
     if (
       !metadata.withoutImplicitAdminAccess &&
       this.authDataService.hasRole(AuthRole.Admin)
     ) {
       return true;
-    }
-
-    if (metadata.requiresActiveOrg && !session.session.activeOrganizationId) {
-      throw coreExceptions.forbidden();
     }
 
     const headers = fromNodeHeaders(request.headers);

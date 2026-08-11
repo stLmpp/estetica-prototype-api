@@ -32,6 +32,9 @@ import { ZodValidationPipe } from 'nestjs-zod';
 import { CatalogItemModule } from './features/catalog-item/catalog-item.module';
 import { AuthGuard } from './core/auth/auth.guard';
 import { HasPermissionGuard } from './core/auth/has-permission.guard';
+import { RedisModule } from './core/redis/redis.module';
+import { Redis } from '@upstash/redis';
+import { RedisThrottlerStorage } from '@nestjs-redis/throttler-storage';
 
 const appEnv = AppEnv.instance;
 
@@ -41,15 +44,17 @@ const CORE_MODULES: ModuleMetadata['imports'] = [
   MainDatabaseModule,
   LoggerModule,
   ThrottlerModule.forRootAsync({
-    imports: [EnvironmentModule],
-    inject: [AppEnv],
-    useFactory: (appEnv: AppEnv) => ({
+    imports: [EnvironmentModule, RedisModule],
+    inject: [AppEnv, Redis],
+    useFactory: (appEnv: AppEnv, redis: Redis) => ({
       throttlers: [
         {
+          // TODO improve key
           ttl: appEnv.throttlerTtlMs,
           limit: appEnv.throttlerLimit,
         },
       ],
+      storage: new RedisThrottlerStorage(redis),
     }),
   }),
   BetterAuthModule.forRoot({
