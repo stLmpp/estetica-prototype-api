@@ -10,7 +10,7 @@ const statement = {
   ...defaultStatements,
   catalogItem: ['get', 'create', 'update', 'delete'],
   person: ['get', 'create', 'update'],
-  customer: ['get', 'create', 'update'],
+  customer: ['get', 'create', 'update', 'delete'],
 } as const;
 
 const ac = createAccessControl(statement);
@@ -18,14 +18,14 @@ const ac = createAccessControl(statement);
 const owner = ac.newRole({
   catalogItem: ['get', 'create', 'update', 'delete'],
   person: ['get', 'create', 'update'],
-  customer: ['get', 'create', 'update'],
+  customer: ['get', 'create', 'update', 'delete'],
   ...ownerAc.statements,
 });
 
 const admin = ac.newRole({
   catalogItem: ['get', 'create', 'update', 'delete'],
   person: ['get', 'create', 'update'],
-  customer: ['get', 'create', 'update'],
+  customer: ['get', 'create', 'update', 'delete'],
   ...adminAc.statements,
 });
 

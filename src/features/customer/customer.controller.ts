@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   Patch,
@@ -47,6 +48,14 @@ export class CustomerController {
     @Body() body: UpdateCustomerRequest,
   ): Promise<void> {
     await this.customerService.update(customerId, body.customer);
+  }
+
+  @Delete(':customerId')
+  @HasPermission({
+    orgPermissions: { customer: ['delete'] },
+  })
+  async delete(@Param('customerId') customerId: string): Promise<void> {
+    await this.customerService.delete(customerId);
   }
 
   @ResponseType(ListCustomerResponseModel)

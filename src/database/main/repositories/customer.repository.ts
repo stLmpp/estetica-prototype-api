@@ -30,6 +30,13 @@ export class CustomerRepository extends Repository {
       .where(and(eq(this.db.e.customer.id, id)));
   }
 
+  async delete(id: string) {
+    await this.db
+      .update(this.db.e.customer)
+      .set({ deletedAt: new Date() })
+      .where(eq(this.db.e.customer.id, id));
+  }
+
   async listPaginated({
     page,
     limit,
@@ -123,7 +130,6 @@ export class CustomerRepository extends Repository {
                 columns: {
                   id: true,
                   number: true,
-                  customerId: true,
                   type: true,
                 },
               },

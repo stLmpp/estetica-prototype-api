@@ -77,6 +77,17 @@ export class CustomerService {
   }
 
   @MainTransactional()
+  async delete(id: string) {
+    const customer = await this.customerRepository.getById(id);
+    if (!customer) {
+      throw CustomerExceptions.customerNotFound([
+        { field: 'customerId', issue: `not found with value '${id}'` },
+      ]);
+    }
+    await this.customerRepository.delete(id);
+  }
+
+  @MainTransactional()
   async listPaginated(dto: FilterCustomerDto) {
     return this.customerRepository.listPaginated(dto);
   }
