@@ -17,11 +17,7 @@ import { UpdateCatalogItemRequest } from './dto/input/update-catalog-item.reques
 import { FilterCatalogItemDto } from './dto/input/list-catalog-item.request';
 import { ListCatalogItemResponseModel } from './dto/output/list-catalog-item.response';
 import { GetCatalogItemResponseModel } from './dto/output/get-catalog-item.response';
-import {
-  HasPermissionV2,
-  OrgHasPermission,
-} from '../../core/auth/has-permission.decorator';
-import { AuthRole } from '../../core/auth/constants';
+import { HasPermission } from '../../core/auth/has-permission.decorator';
 
 @Controller({
   path: 'catalog-item',
@@ -33,7 +29,7 @@ export class CatalogItemController {
 
   @ResponseType(CreateCatalogItemResponseModel, 201)
   @Post()
-  @OrgHasPermission({ permissions: { catalogItem: ['create'] } })
+  @HasPermission({ orgPermissions: { catalogItem: ['create'] } })
   async create(
     @Body() body: CreateCatalogItemRequest,
   ): Promise<CreateCatalogItemResponseModel> {
@@ -42,7 +38,7 @@ export class CatalogItemController {
   }
 
   @Patch(':catalogItemId')
-  @OrgHasPermission({ permissions: { catalogItem: ['update'] } })
+  @HasPermission({ orgPermissions: { catalogItem: ['update'] } })
   async update(
     @Param('catalogItemId') catalogItemId: string,
     @Body() body: UpdateCatalogItemRequest,
@@ -51,14 +47,14 @@ export class CatalogItemController {
   }
 
   @Delete(':catalogItemId')
-  @OrgHasPermission({ permissions: { catalogItem: ['delete'] } })
+  @HasPermission({ orgPermissions: { catalogItem: ['delete'] } })
   async delete(@Param('catalogItemId') catalogItemId: string): Promise<void> {
     await this.catalogItemService.delete(catalogItemId);
   }
 
   @ResponseType(ListCatalogItemResponseModel)
   @Get()
-  @OrgHasPermission({ permissions: { catalogItem: ['get'] } })
+  @HasPermission({ orgPermissions: { catalogItem: ['get'] } })
   async listPaginated(
     @Query() query: FilterCatalogItemDto,
   ): Promise<ListCatalogItemResponseModel> {
@@ -76,19 +72,7 @@ export class CatalogItemController {
 
   @ResponseType(GetCatalogItemResponseModel)
   @Get(':catalogItemId')
-  @HasPermissionV2({
-    or: [
-      {
-        orgPermissions: {
-          catalogItem: ['get'],
-        },
-      },
-      {
-        roles: [AuthRole.Admin],
-      },
-    ],
-  })
-  @OrgHasPermission({ permissions: { catalogItem: ['get'] } })
+  @HasPermission({ orgPermissions: { catalogItem: ['get'] } })
   async getById(
     @Param('catalogItemId') catalogItemId: string,
   ): Promise<GetCatalogItemResponseModel> {

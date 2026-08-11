@@ -16,7 +16,7 @@ import { GetConfigRequest } from './dto/input/get-config.request';
 import { GetGroupRequest } from './dto/input/get-group.request';
 import { ZodValidationPipe } from 'nestjs-zod';
 import { BodyType } from '../../shared/decorator/body-type.decorator';
-import { HasPermissionV2 } from '../../core/auth/has-permission.decorator';
+import { HasPermission } from '../../core/auth/has-permission.decorator';
 
 @Controller({
   path: 'config',
@@ -27,7 +27,7 @@ export class ConfigController {
 
   @BodyType(PublishConfigRequestSchema)
   @ResponseType(PublishConfigResponseModel)
-  @HasPermissionV2({ permissions: { config: ['publish', 'get'] } })
+  @HasPermission({ permissions: { config: ['publish', 'get'] } })
   @Post('publish')
   async publish(
     @Body(new ZodValidationPipe(PublishConfigRequestSchema))
@@ -44,7 +44,7 @@ export class ConfigController {
   }
 
   @ResponseType(ListConfigPaginatedResponseModel)
-  @HasPermissionV2({ permissions: { config: ['get'] } })
+  @HasPermission({ permissions: { config: ['get'] } })
   @Get()
   async listPaginated(
     @Query() query: FilterConfigDto,
@@ -63,7 +63,7 @@ export class ConfigController {
   }
 
   @ResponseType(ListConfigResponseModel)
-  @HasPermissionV2({ permissions: { config: ['get'] } })
+  @HasPermission({ permissions: { config: ['get'] } })
   @Get('query-group')
   async listGroup(
     @Query() query: GetGroupRequest,
@@ -78,7 +78,7 @@ export class ConfigController {
   }
 
   @ResponseType(GetConfigResponse)
-  @HasPermissionV2({ permissions: { config: ['get'] } })
+  @HasPermission({ permissions: { config: ['get'] } })
   @Get('query-one')
   async getConfig(
     @Query() query: GetConfigRequest,

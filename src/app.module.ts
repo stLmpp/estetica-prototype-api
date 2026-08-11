@@ -10,7 +10,10 @@ import { EnvironmentModule } from './core/config/environment.module';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { AppEnv } from './core/config/app-env';
 import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
-import { AuthModule as BetterAuthModule } from '@thallesp/nestjs-better-auth';
+import {
+  AuthGuard as BaseAuthGuard,
+  AuthModule as BetterAuthModule,
+} from '@thallesp/nestjs-better-auth';
 import { auth } from './core/auth/auth';
 import { GracefulShutdownModule } from '@tygra/nestjs-graceful-shutdown';
 import { CustomerModule } from './features/customer/customer.module';
@@ -33,8 +36,9 @@ import { CatalogItemModule } from './features/catalog-item/catalog-item.module';
 import { AuthGuard } from './core/auth/auth.guard';
 import { HasPermissionGuard } from './core/auth/has-permission.guard';
 import { RedisModule } from './core/redis/redis.module';
-import { Redis } from '@upstash/redis';
 import { RedisThrottlerStorage } from '@nestjs-redis/throttler-storage';
+import { Redis } from '@upstash/redis';
+import { ThrottlerRedisClient } from './core/redis/throttler-redis-client';
 
 const appEnv = AppEnv.instance;
 
@@ -54,7 +58,12 @@ const CORE_MODULES: ModuleMetadata['imports'] = [
           limit: appEnv.throttlerLimit,
         },
       ],
-      storage: new RedisThrottlerStorage(redis),
+      storage: new RedisThrottlerStorage(
+        // RedisThrottlerStorage is typed against node-redis's RedisClientType; ThrottlerRedisClient
+        // only implements the subset it actually calls (scriptLoad/evalSha/eval) — see its own
+        // comment for why a straight `redis` client can't be passed here.
+        new ThrottlerRedisClient(redis),
+      ),
     }),
   }),
   BetterAuthModule.forRoot({
@@ -102,6 +111,7 @@ if (appEnv.environment === Environment.Production) {
   ],
   providers: [
     ErrorAfterHook,
+    BaseAuthGuard,
     { provide: APP_GUARD, useClass: ThrottlerGuard },
     { provide: APP_GUARD, useClass: AuthGuard },
     { provide: APP_GUARD, useClass: HasPermissionGuard },
@@ -131,6 +141,16 @@ class AppModule implements OnModuleInit {
           name: this.appEnv.betterAuthAdminName,
           password: this.appEnv.betterAuthAdminPassword,
           role: 'admin',
+        },
+      }),
+    );
+    await safeAsync(() =>
+      this.authService.api.createUser({
+        body: {
+          email: this.appEnv.betterAuthUserEmail,
+          name: this.appEnv.betterAuthUserEmail,
+          password: this.appEnv.betterAuthUserPassword,
+          role: 'user',
         },
       }),
     );

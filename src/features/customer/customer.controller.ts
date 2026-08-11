@@ -16,7 +16,7 @@ import { ListCustomerResponseModel } from './dto/output/list-customer.response';
 import { GetCustomerResponseModel } from './dto/output/get-customer.response';
 import { ResponseType } from '../../shared/decorator/response-type.decorator';
 import { RequireActiveOrg } from '@thallesp/nestjs-better-auth';
-import { OrgHasPermission } from '../../core/auth/has-permission.decorator';
+import { HasPermission } from '../../core/auth/has-permission.decorator';
 
 @Controller({
   path: 'customer',
@@ -28,8 +28,8 @@ export class CustomerController {
 
   @ResponseType(CreateCustomerResponseModel, 201)
   @Post()
-  @OrgHasPermission({
-    permissions: { customer: ['create'], person: ['create'] },
+  @HasPermission({
+    orgPermissions: { customer: ['create'], person: ['create'] },
   })
   async create(
     @Body() body: CustomerCreateRequest,
@@ -39,8 +39,8 @@ export class CustomerController {
   }
 
   @Patch(':customerId')
-  @OrgHasPermission({
-    permissions: { customer: ['update'] },
+  @HasPermission({
+    orgPermissions: { customer: ['update'] },
   })
   async update(
     @Param('customerId') customerId: string,
@@ -51,8 +51,8 @@ export class CustomerController {
 
   @ResponseType(ListCustomerResponseModel)
   @Get()
-  @OrgHasPermission({
-    permissions: { customer: ['get'] },
+  @HasPermission({
+    orgPermissions: { customer: ['get'] },
   })
   async listPaginated(
     @Query() dto: FilterCustomerDto,
@@ -70,8 +70,8 @@ export class CustomerController {
 
   @ResponseType(GetCustomerResponseModel)
   @Get(':customerId')
-  @OrgHasPermission({
-    permissions: { customer: ['get'], person: ['get'] },
+  @HasPermission({
+    orgPermissions: { customer: ['get'], person: ['get'] },
   })
   async getById(
     @Param('customerId') customerId: string,

@@ -103,6 +103,18 @@ export class AppEnv {
   readonly betterAuthAdminEmail!: string;
 
   @EnvProperty({
+    name: 'BETTER_AUTH_USER_PASSWORD',
+    required: true,
+  })
+  readonly betterAuthUserPassword!: string;
+
+  @EnvProperty({
+    name: 'BETTER_AUTH_USER_EMAIL',
+    required: true,
+  })
+  readonly betterAuthUserEmail!: string;
+
+  @EnvProperty({
     name: 'BETTER_AUTH_TRUSTED_ORIGINS',
     required: true,
     type: 'list',

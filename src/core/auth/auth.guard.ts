@@ -23,12 +23,6 @@ export class AuthGuard implements CanActivate {
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const result = await this.baseAuthGuard.canActivate(context);
-
-    if (!result) {
-      return false;
-    }
-
     const isAuthOptional = this.reflector.getAllAndOverride<boolean>(
       'OPTIONAL',
       [context.getHandler(), context.getClass()],
@@ -39,6 +33,13 @@ export class AuthGuard implements CanActivate {
     if (request.path.startsWith('/v1/auth') || isAuthOptional) {
       return true;
     }
+
+    const result = await this.baseAuthGuard.canActivate(context);
+
+    if (!result) {
+      return false;
+    }
+
     const session = request.session;
     const tenantId = session?.session.activeOrganizationId;
     this.clsService.set(CLS_TENANT_ID_KEY, tenantId);
