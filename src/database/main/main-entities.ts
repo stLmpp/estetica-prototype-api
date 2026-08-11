@@ -218,6 +218,26 @@ export const catalogItemEntity = pgTable.withRLS(
   ],
 );
 
+export const employeeServiceEntity = pgTable.withRLS(
+  'employee_service',
+  {
+    ...baseEntity('esvc'),
+    employeeId: varchar('employee_id', { length: 38 })
+      .references(() => employeeEntity.id)
+      .notNull(),
+    catalogItemId: varchar('catalog_item_id', { length: 38 })
+      .references(() => catalogItemEntity.id)
+      .notNull(),
+  },
+  (t) => [
+    index()
+      .on(t.tenantId, t.catalogItemId)
+      .where(sql`${t.isDeleted} = false`),
+    addAuthenticatedPolicy(t),
+    ...addDeletedAtPolicies(t),
+  ],
+);
+
 export const customerFollowupEntity = pgTable.withRLS(
   'customer_followup',
   {
@@ -460,6 +480,7 @@ export const mainEntities = {
   customer: customerEntity,
   personPhone: personPhoneEntity,
   catalogItem: catalogItemEntity,
+  employeeService: employeeServiceEntity,
   customerFollowup: customerFollowupEntity,
   followupItem: followupItemEntity,
   anamnesisField: anamnesisFieldEntity,
