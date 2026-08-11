@@ -4,7 +4,7 @@ import { mainEntities } from '../main-entities';
 import { Repository } from './repository';
 
 @Injectable()
-export class CustomerPhoneRepository extends Repository {
+export class PersonPhoneRepository extends Repository {
   async insertMany(
     phones: Array<InferInsertModel<typeof mainEntities.personPhone>>,
   ) {

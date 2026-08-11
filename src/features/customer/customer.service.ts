@@ -9,14 +9,14 @@ import { GetCustomerResDto } from './dto/output/get-customer.response';
 import { CustomerExceptions } from './customer-exceptions';
 import { MainTransactional } from '../../database/main/main-database-connection';
 import { PersonRepository } from '../../database/main/repositories/person.repository';
-import { CustomerPhoneRepository } from '../../database/main/repositories/customer-phone.repository';
+import { PersonPhoneRepository } from '../../database/main/repositories/person-phone.repository';
 
 @Injectable()
 export class CustomerService {
   constructor(
     private readonly customerRepository: CustomerRepository,
     private readonly personRepository: PersonRepository,
-    private readonly customerPhoneRepository: CustomerPhoneRepository,
+    private readonly personPhoneRepository: PersonPhoneRepository,
   ) {}
 
   @MainTransactional()
@@ -37,7 +37,7 @@ export class CustomerService {
         personId: person.id,
         jobName: dto.jobName,
       }),
-      this.customerPhoneRepository.insertMany(
+      this.personPhoneRepository.insertMany(
         dto.phones?.map((phone) => ({
           number: phone.number,
           type: phone.type,

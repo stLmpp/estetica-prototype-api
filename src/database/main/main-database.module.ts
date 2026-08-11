@@ -8,7 +8,7 @@ import { CustomerRepository } from './repositories/customer.repository';
 import { ClsPluginTransactional } from '@nestjs-cls/transactional';
 import { MAIN_DATABASE_CONNECTION_NAME } from './main-database-connection-name';
 import { PersonRepository } from './repositories/person.repository';
-import { CustomerPhoneRepository } from './repositories/customer-phone.repository';
+import { PersonPhoneRepository } from './repositories/person-phone.repository';
 import { AnamnesisFieldRepository } from './repositories/anamnesis-field.repository';
 import { TransactionalAdapterDrizzleOrmCustom } from '../../core/transactional-adapter-drizzle-orm-custom';
 import { ConfigRepository } from './repositories/config.repository';
@@ -16,17 +16,19 @@ import { ConfigAdminRepository } from './repositories/config-admin.repository';
 import { AuthOrganizationRepository } from './repositories/auth-organization.repository';
 import { AuthUserRepository } from './repositories/auth-user.repository';
 import { CatalogItemRepository } from './repositories/catalog-item.repository';
+import { EmployeeRepository } from './repositories/employee.repository';
 
 const REPOSITORIES = [
   CustomerRepository,
   PersonRepository,
-  CustomerPhoneRepository,
+  PersonPhoneRepository,
   AnamnesisFieldRepository,
   ConfigRepository,
   ConfigAdminRepository,
   AuthOrganizationRepository,
   AuthUserRepository,
   CatalogItemRepository,
+  EmployeeRepository,
 ];
 
 @Module({
