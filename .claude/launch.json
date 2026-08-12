@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "estetica-fe",
+      "runtimeExecutable": "sh",
+      "runtimeArgs": ["-c", "cd ../estetica-prototype-fe && pnpm start"],
+      "port": 4200
+    }
+  ]
+}

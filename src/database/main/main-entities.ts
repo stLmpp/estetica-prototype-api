@@ -207,6 +207,7 @@ export const catalogItemEntity = pgTable.withRLS(
       precision: 10,
       scale: 2,
     }),
+    defaultDuration: varchar('default_duration', { length: 32 }),
     active: boolean('active').notNull(),
   },
   (t) => [

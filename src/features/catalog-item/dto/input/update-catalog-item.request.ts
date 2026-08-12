@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { createZodDto } from 'nestjs-zod';
 import { CatalogItemType } from '../../../../shared/domain/catalog-item-type.enum';
+import { DurationSchema } from '../../../../shared/model/common.model';
 
 export const UpdateCatalogItemSchema = z
   .object({
@@ -12,6 +13,7 @@ export const UpdateCatalogItemSchema = z
       .regex(/^\d{1,8}(\.\d{1,2})?$/)
       .optional()
       .nullable(),
+    defaultDuration: DurationSchema.optional().nullable(),
     active: z.boolean().optional(),
   })
   .refine((data) => Object.keys(data).length > 0, {

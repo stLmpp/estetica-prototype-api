@@ -8,6 +8,8 @@ import { FilterCatalogItemDto } from './dto/input/list-catalog-item.request';
 import { CatalogItemExceptions } from './catalog-item-exceptions';
 import { MainTransactional } from '../../database/main/main-database-connection';
 import { CatalogItemModel } from './model/catalog-item.model';
+import { CatalogItemType } from '../../shared/domain/catalog-item-type.enum';
+import { coreExceptions } from '../../core/core-exceptions';
 
 @Injectable()
 export class CatalogItemService {
@@ -15,10 +17,12 @@ export class CatalogItemService {
 
   @MainTransactional()
   async create(dto: CreateCatalogItemDto) {
+    this.assertDefaultDurationForServices(dto.itemType, dto.defaultDuration);
     const entity = await this.catalogItemRepository.insert({
       name: dto.name,
       itemType: dto.itemType,
       defaultPrice: dto.defaultPrice,
+      defaultDuration: dto.defaultDuration,
       active: dto.active,
     });
     return this.mapEntityToDto(entity);
@@ -32,6 +36,12 @@ export class CatalogItemService {
         { field: 'catalogItemId', issue: `not found with value '${id}'` },
       ]);
     }
+    const itemType = dto.itemType ?? catalogItem.itemType;
+    const defaultDuration =
+      dto.defaultDuration !== undefined
+        ? dto.defaultDuration
+        : catalogItem.defaultDuration;
+    this.assertDefaultDurationForServices(itemType, defaultDuration);
     await this.catalogItemRepository.update(id, dto);
   }
 
@@ -67,6 +77,20 @@ export class CatalogItemService {
     return this.mapEntityToDto(catalogItem);
   }
 
+  private assertDefaultDurationForServices(
+    itemType: CatalogItemType,
+    defaultDuration: string | null | undefined,
+  ) {
+    if (itemType === CatalogItemType.SERVICE && !defaultDuration) {
+      throw coreExceptions.invalidRequest([
+        {
+          field: 'defaultDuration',
+          issue: 'defaultDuration is required for services',
+        },
+      ]);
+    }
+  }
+
   private mapEntityToDto(
     entity: InferSelectModel<typeof mainEntities.catalogItem>,
   ): CatalogItemModel {
@@ -75,6 +99,7 @@ export class CatalogItemService {
       name: entity.name,
       itemType: entity.itemType,
       defaultPrice: entity.defaultPrice ?? undefined,
+      defaultDuration: entity.defaultDuration ?? undefined,
       active: entity.active,
     };
   }

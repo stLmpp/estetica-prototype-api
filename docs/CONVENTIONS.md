@@ -233,9 +233,10 @@ a 404 "tenant not found" reach someone who would otherwise get a 403.
   `configEntity`'s unique index on `group, tenantId, userId, name, version`)
   — a repository method that filters/sorts on a column combination should
   usually have a matching index.
-- After changing entities: `pnpm migrations:build:main`, then
-  `pnpm migrations:generate:main` to produce a migration — review the
-  generated SQL before running `pnpm migrations:run:main`.
+- After changing entities, see [`docs/MIGRATIONS.md`](./MIGRATIONS.md) for
+  the build → generate → review → run workflow. The build step is easy to
+  forget and `migrations:generate:main` will misbehave silently without it —
+  don't skip straight to generate.
 
 ## Exceptions
 

@@ -58,6 +58,7 @@ src/
     utils/                safe(), promiseAllObject(), etc.
 migrations/               drizzle-kit migrations + per-datasource configs
 docs/                     CONVENTIONS.md — code-level rules, see above
+                          MIGRATIONS.md — drizzle migration workflow
 test/                     e2e tests (jest-e2e.json)
 ```
 

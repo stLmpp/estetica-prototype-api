@@ -1,0 +1,1 @@
+ALTER TABLE "catalog_item" ADD COLUMN "default_duration" varchar(32);

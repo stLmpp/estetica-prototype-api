@@ -101,6 +101,7 @@ export class AppointmentRepository extends Repository {
     limit,
     customerId,
     employeeId,
+    catalogItemId,
     status,
     from,
     to,
@@ -110,6 +111,9 @@ export class AppointmentRepository extends Repository {
     const where = and(
       eq(this.db.e.appointment.customerId, customerId!).if(customerId),
       eq(this.db.e.appointment.employeeId, employeeId!).if(employeeId),
+      eq(this.db.e.appointmentItem.catalogItemId, catalogItemId!).if(
+        catalogItemId,
+      ),
       eq(this.db.e.appointment.status, status!).if(status),
       lt(this.db.e.appointment.startTime, to!).if(to),
       gt(this.db.e.appointment.endTime, from!).if(from),
@@ -151,6 +155,10 @@ export class AppointmentRepository extends Repository {
         count: sql<number>`count(*)`.mapWith(Number),
       })
       .from(this.db.e.appointment)
+      .innerJoin(
+        this.db.e.appointmentItem,
+        eq(this.db.e.appointmentItem.appointmentId, this.db.e.appointment.id),
+      )
       .where(where)
       .execute()
       .then((results) => results[0]?.count ?? 0);

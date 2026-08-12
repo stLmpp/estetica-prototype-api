@@ -40,6 +40,21 @@ export const ZipCodeSchema = z
   .trim()
   .regex(/^\d{8}$/);
 
+export const DurationSchema = z
+  .string()
+  .trim()
+  .refine(
+    (value) => {
+      try {
+        Temporal.Duration.from(value);
+        return true;
+      } catch {
+        return false;
+      }
+    },
+    { message: 'Invalid ISO 8601 duration' },
+  );
+
 export const BooleanParamSchema = z.codec(
   z.enum(['true', 'false', '', 'y', 'n', 'yes', 'no']),
   z.boolean(),

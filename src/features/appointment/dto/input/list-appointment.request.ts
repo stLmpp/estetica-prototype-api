@@ -7,6 +7,7 @@ import { AppointmentStatus } from '../../../../shared/domain/appointment-staus.e
 export const FilterAppointmentSchema = RequestPaginatedSchema.extend({
   customerId: z.string().trim().min(1).optional(),
   employeeId: z.string().trim().min(1).optional(),
+  catalogItemId: z.string().trim().min(1).optional(),
   status: z.enum(AppointmentStatus).optional(),
   from: DatetimeParamSchema.optional(),
   to: DatetimeParamSchema.optional(),
