@@ -371,6 +371,19 @@ a 404 "tenant not found" reach someone who would otherwise get a 403.
   interfaces/DI tokens beyond what already exists) — this codebase favors
   concrete classes until real repetition justifies an abstraction.
 - `pnpm` only — don't run npm/yarn or touch `package-lock.json`/`yarn.lock`.
+- Never run `npx`. In order of preference:
+  1. If the command is already a `package.json` script (`lint`, `format`,
+     `test`, `migrations:generate:main`, etc.), run it via `pnpm <script>` —
+     e.g. `pnpm lint`, not `npx eslint --fix`.
+  2. If it's a binary from a package already in `node_modules` but with no
+     script for it (e.g. a one-off `tsc --noEmit`), use `pnpm exec <bin>` —
+     e.g. `pnpm exec tsc --noEmit`. This runs the project's own installed
+     binary; it doesn't fetch anything.
+  3. Only when the package isn't installed at all, use `pnpm dlx` (or its
+     `pnpx` shorthand) — and never bare `dlx tsc`/`pnpx tsc`: there's a
+     same-named decoy package on the registry that isn't the TypeScript
+     compiler. `tsc` specifically is always case 2 here (`typescript` is
+     already a dependency) — never case 3.
 - Dependency patches live in `patches/` (see `patches/nestjs-zod.patch`,
   wired up via `pnpm-workspace.yaml`'s `patchedDependencies`) — check there
   before assuming a library's shipped types/behavior when something looks

@@ -1,0 +1,1 @@
+ALTER TABLE "appointment_item" ALTER COLUMN "price_applied" SET NOT NULL;

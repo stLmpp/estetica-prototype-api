@@ -8,6 +8,7 @@ export const FilterCatalogItemSchema = RequestPaginatedSchema.extend({
   name: z.string().trim().min(1).max(256).optional(),
   itemType: z.enum(CatalogItemType).optional(),
   active: BooleanParamSchema.optional(),
+  hasEmployees: BooleanParamSchema.optional(),
 });
 
 export class FilterCatalogItemDto extends createZodDto(

@@ -1,5 +1,13 @@
 import { Injectable } from '@nestjs/common';
-import { and, desc, eq, ilike, InferInsertModel, sql } from 'drizzle-orm';
+import {
+  and,
+  desc,
+  eq,
+  exists,
+  ilike,
+  InferInsertModel,
+  sql,
+} from 'drizzle-orm';
 import { mainEntities } from '../main-entities';
 import { FilterCatalogItemDto } from '../../../features/catalog-item/dto/input/list-catalog-item.request';
 import { promiseAllObject } from '../../../shared/utils/promise-all-object';
@@ -45,12 +53,20 @@ export class CatalogItemRepository extends Repository {
     name,
     itemType,
     active,
+    hasEmployees,
   }: FilterCatalogItemDto) {
     const offset = (page - 1) * limit;
+    const employeeExistsQuery = this.db
+      .select({ 1: sql`1` })
+      .from(this.db.e.employeeService)
+      .where(
+        eq(this.db.e.employeeService.catalogItemId, this.db.e.catalogItem.id),
+      );
     const where = and(
       ilike(this.db.e.catalogItem.name, `%${name}%`).if(name),
       eq(this.db.e.catalogItem.itemType, itemType!).if(itemType),
       eq(this.db.e.catalogItem.active, active!).if(active !== undefined),
+      exists(employeeExistsQuery).if(hasEmployees),
     );
     const catalogItems = this.db
       .select()

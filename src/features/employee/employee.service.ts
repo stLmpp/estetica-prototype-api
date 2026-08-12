@@ -62,7 +62,7 @@ export class EmployeeService {
 
   @MainTransactional()
   async update(id: string, dto: UpdateEmployeeDto) {
-    const employee = await this.employeeRepository.getById(id);
+    const employee = await this.employeeRepository.findFirstById(id);
     if (!employee) {
       throw EmployeeExceptions.employeeNotFound([
         { field: 'employeeId', issue: `not found with value '${id}'` },
@@ -77,7 +77,7 @@ export class EmployeeService {
 
   @MainTransactional()
   async delete(id: string) {
-    const employee = await this.employeeRepository.getById(id);
+    const employee = await this.employeeRepository.findFirstById(id);
     if (!employee) {
       throw EmployeeExceptions.employeeNotFound([
         { field: 'employeeId', issue: `not found with value '${id}'` },
@@ -88,13 +88,13 @@ export class EmployeeService {
 
   @MainTransactional()
   async listPaginated(dto: FilterEmployeeDto) {
-    return this.employeeRepository.listPaginated(dto);
+    return this.employeeRepository.findPaginated(dto);
   }
 
   @MainTransactional()
   async getById(id: string): Promise<GetEmployeeResDto> {
     const employee =
-      await this.employeeRepository.getByIdWithPersonPersonPhones(id);
+      await this.employeeRepository.findFirstByIdWithPersonAndPhones(id);
     if (!employee) {
       throw EmployeeExceptions.employeeNotFound([
         { field: 'employeeId', issue: `not found with value '${id}'` },

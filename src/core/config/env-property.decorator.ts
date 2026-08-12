@@ -60,7 +60,6 @@ const typeParser: Record<
   string: (value) => value,
   boolean: (value) => value === 'true',
   json: (value, { name, typeGetter }) => {
-     
     const [error, json] = safe(() => JSON.parse(value));
     if (error) {
       throw new Error(`Invalid JSON value for ${name}: ${value}`);
@@ -73,7 +72,7 @@ const typeParser: Record<
       }
       return parsedJson.data;
     }
-     
+
     return json;
   },
   list: (value, config) => {

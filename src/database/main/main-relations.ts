@@ -22,6 +22,7 @@ export const mainRelations = defineRelations(mainEntities, (r) => ({
       to: r.person.id,
       optional: false,
     }),
+    employeeServices: r.many.employeeService(),
   },
 
   // --- CUSTOMER ---
@@ -39,6 +40,20 @@ export const mainRelations = defineRelations(mainEntities, (r) => ({
   catalogItem: {
     followupItems: r.many.followupItem(),
     appointmentItems: r.many.appointmentItem(),
+    employeeServices: r.many.employeeService(),
+  },
+
+  employeeService: {
+    employee: r.one.employee({
+      from: r.employeeService.employeeId,
+      to: r.employee.id,
+      optional: false,
+    }),
+    catalogItem: r.one.catalogItem({
+      from: r.employeeService.catalogItemId,
+      to: r.catalogItem.id,
+      optional: false,
+    }),
   },
 
   customerFollowup: {

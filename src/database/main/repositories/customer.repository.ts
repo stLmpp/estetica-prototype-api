@@ -100,6 +100,24 @@ export class CustomerRepository extends Repository {
     });
   }
 
+  async findFirstByIdWithPerson(id: string) {
+    return this.db.query.customer.findFirst({
+      where: {
+        id,
+      },
+      columns: {
+        id: true,
+      },
+      with: {
+        person: {
+          columns: {
+            name: true,
+          },
+        },
+      },
+    });
+  }
+
   async getByIdWithPersonPersonPhones(id: string) {
     return this.db.query.customer
       .findFirst({

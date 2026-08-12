@@ -17,6 +17,8 @@ import { AuthOrganizationRepository } from './repositories/auth-organization.rep
 import { AuthUserRepository } from './repositories/auth-user.repository';
 import { CatalogItemRepository } from './repositories/catalog-item.repository';
 import { EmployeeRepository } from './repositories/employee.repository';
+import { EmployeeServiceRepository } from './repositories/employee-service.repository';
+import { AppointmentRepository } from './repositories/appointment.repository';
 
 const REPOSITORIES = [
   CustomerRepository,
@@ -29,6 +31,8 @@ const REPOSITORIES = [
   AuthUserRepository,
   CatalogItemRepository,
   EmployeeRepository,
+  EmployeeServiceRepository,
+  AppointmentRepository,
 ];
 
 @Module({

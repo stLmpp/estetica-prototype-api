@@ -34,6 +34,8 @@ import { ResponseErrorModel } from './shared/model/response-error.model';
 import { ZodValidationPipe } from 'nestjs-zod';
 import { CatalogItemModule } from './features/catalog-item/catalog-item.module';
 import { EmployeeModule } from './features/employee/employee.module';
+import { EmployeeServiceModule } from './features/employee-service/employee-service.module';
+import { AppointmentModule } from './features/appointment/appointment.module';
 import { AuthGuard } from './core/auth/auth.guard';
 import { HasPermissionGuard } from './core/auth/has-permission.guard';
 import { RedisModule } from './core/redis/redis.module';
@@ -110,6 +112,8 @@ if (appEnv.environment === Environment.Production) {
     ConfigModule,
     CatalogItemModule,
     EmployeeModule,
+    EmployeeServiceModule,
+    AppointmentModule,
   ],
   providers: [
     ErrorAfterHook,

@@ -12,6 +12,8 @@ const statement = {
   person: ['get', 'create', 'update'],
   customer: ['get', 'create', 'update', 'delete'],
   employee: ['get', 'create', 'update', 'delete'],
+  employeeService: ['get', 'create', 'delete'],
+  appointment: ['get', 'create', 'update', 'updateStatus', 'delete'],
 } as const;
 
 const ac = createAccessControl(statement);
@@ -21,6 +23,8 @@ const owner = ac.newRole({
   person: ['get', 'create', 'update'],
   customer: ['get', 'create', 'update', 'delete'],
   employee: ['get', 'create', 'update', 'delete'],
+  employeeService: ['get', 'create', 'delete'],
+  appointment: ['get', 'create', 'update', 'updateStatus', 'delete'],
   ...ownerAc.statements,
 });
 
@@ -29,6 +33,8 @@ const admin = ac.newRole({
   person: ['get', 'create', 'update'],
   customer: ['get', 'create', 'update', 'delete'],
   employee: ['get'],
+  employeeService: ['get', 'create', 'delete'],
+  appointment: ['get', 'create', 'update', 'updateStatus', 'delete'],
   ...adminAc.statements,
 });
 
@@ -37,6 +43,8 @@ const member = ac.newRole({
   person: ['get'],
   customer: ['get'],
   employee: ['get'],
+  employeeService: ['get'],
+  appointment: ['get', 'create', 'update', 'updateStatus'],
   ...memberAc.statements,
 });
 

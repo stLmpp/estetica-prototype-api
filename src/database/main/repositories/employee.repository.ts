@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { and, eq, ilike, InferInsertModel, sql } from 'drizzle-orm';
+import { and, eq, exists, ilike, InferInsertModel, sql } from 'drizzle-orm';
 import { mainEntities } from '../main-entities';
 import { FilterEmployeeDto } from '../../../features/employee/dto/input/list-employee.request';
 import { promiseAllObject } from '../../../shared/utils/promise-all-object';
@@ -37,11 +37,29 @@ export class EmployeeRepository extends Repository {
       .where(eq(this.db.e.employee.id, id));
   }
 
-  async listPaginated({ page, limit, name, role }: FilterEmployeeDto) {
+  async findPaginated({
+    page,
+    limit,
+    name,
+    role,
+    catalogItemId,
+  }: FilterEmployeeDto) {
     const offset = (page - 1) * limit;
+    const employeeServiceExistsQuery = this.db
+      .select({ 1: sql`1` })
+      .from(this.db.e.employeeService)
+      .where(
+        and(
+          eq(this.db.e.employeeService.employeeId, this.db.e.employee.id),
+          eq(this.db.e.employeeService.catalogItemId, catalogItemId!).if(
+            catalogItemId,
+          ),
+        ),
+      );
     const where = and(
       ilike(this.db.e.person.name, `%${name}%`).if(name),
       ilike(this.db.e.employee.role, `%${role}%`).if(role),
+      exists(employeeServiceExistsQuery).if(catalogItemId),
     );
     const employees = this.db
       .select({
@@ -73,7 +91,7 @@ export class EmployeeRepository extends Repository {
     return promiseAllObject({ employees, count });
   }
 
-  async getById(id: string) {
+  async findFirstById(id: string) {
     return this.db.query.employee.findFirst({
       where: {
         id,
@@ -81,7 +99,25 @@ export class EmployeeRepository extends Repository {
     });
   }
 
-  async getByIdWithPersonPersonPhones(id: string) {
+  async findFirstByIdWithPerson(id: string) {
+    return this.db.query.employee.findFirst({
+      where: {
+        id,
+      },
+      columns: {
+        id: true,
+      },
+      with: {
+        person: {
+          columns: {
+            name: true,
+          },
+        },
+      },
+    });
+  }
+
+  async findFirstByIdWithPersonAndPhones(id: string) {
     return this.db.query.employee
       .findFirst({
         where: {

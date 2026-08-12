@@ -1,0 +1,1 @@
+CREATE UNIQUE INDEX "employee_service_tenant_id_employee_id_catalog_item_id_index" ON "employee_service" ("tenant_id","employee_id","catalog_item_id") WHERE "is_deleted" = false;

@@ -233,6 +233,9 @@ export const employeeServiceEntity = pgTable.withRLS(
     index()
       .on(t.tenantId, t.catalogItemId)
       .where(sql`${t.isDeleted} = false`),
+    uniqueIndex()
+      .on(t.tenantId, t.employeeId, t.catalogItemId)
+      .where(sql`${t.isDeleted} = false`),
     addAuthenticatedPolicy(t),
     ...addDeletedAtPolicies(t),
   ],
@@ -425,7 +428,7 @@ export const appointmentItemEntity = pgTable.withRLS(
     priceApplied: numeric('price_applied', {
       precision: 10,
       scale: 2,
-    }),
+    }).notNull(),
   },
   (t) => [
     index()
