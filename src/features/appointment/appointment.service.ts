@@ -9,6 +9,8 @@ import { UpdateAppointmentDto } from './dto/input/update-appointment.request';
 import { UpdateAppointmentStatusDto } from './dto/input/update-appointment-status.request';
 import { FilterAppointmentDto } from './dto/input/list-appointment.request';
 import { GetAppointmentResDto } from './dto/output/get-appointment.response';
+import { GetDayScheduleDto } from './dto/input/get-day-schedule.request';
+import { DayScheduleAppointmentDto } from './dto/output/get-day-schedule.response';
 import { AppointmentExceptions } from './appointment-exceptions';
 import { CustomerExceptions } from '../customer/customer-exceptions';
 import { EmployeeExceptions } from '../employee/employee-exceptions';
@@ -204,5 +206,27 @@ export class AppointmentService {
       catalogItemName: appointment.catalogItemName,
       priceApplied: appointment.priceApplied,
     };
+  }
+
+  @MainTransactional()
+  async getDaySchedule(
+    dto: GetDayScheduleDto,
+  ): Promise<DayScheduleAppointmentDto[]> {
+    const employee = await this.employeeRepository.findFirstById(
+      dto.employeeId,
+    );
+    if (!employee) {
+      throw EmployeeExceptions.employeeNotFound([
+        {
+          field: 'employeeId',
+          issue: `not found with value '${dto.employeeId}'`,
+        },
+      ]);
+    }
+    return this.appointmentRepository.findManyForDaySchedule(
+      dto.employeeId,
+      dto.from,
+      dto.to,
+    );
   }
 }

@@ -5,6 +5,7 @@ import {
   eq,
   exists,
   ilike,
+  inArray,
   InferInsertModel,
   sql,
 } from 'drizzle-orm';
@@ -45,6 +46,17 @@ export class CatalogItemRepository extends Repository {
         id,
       },
     });
+  }
+
+  findManyByIds(ids: string[]) {
+    if (!ids.length) {
+      return Promise.resolve([]);
+    }
+    return this.db
+      .select()
+      .from(this.db.e.catalogItem)
+      .where(inArray(this.db.e.catalogItem.id, ids))
+      .execute();
   }
 
   async findPaginated({

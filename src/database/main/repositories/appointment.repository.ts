@@ -165,6 +165,45 @@ export class AppointmentRepository extends Repository {
     return promiseAllObject({ appointments, count });
   }
 
+  async findManyForDaySchedule(employeeId: string, from: Date, to: Date) {
+    const customerPerson = alias(this.db.e.person, 'day_schedule_customer_person');
+    return this.db
+      .select({
+        id: this.db.e.appointment.id,
+        startTime: this.db.e.appointment.startTime,
+        endTime: this.db.e.appointment.endTime,
+        customerName: customerPerson.name,
+        catalogItemName: this.db.e.catalogItem.name,
+      })
+      .from(this.db.e.appointment)
+      .innerJoin(
+        this.db.e.customer,
+        eq(this.db.e.appointment.customerId, this.db.e.customer.id),
+      )
+      .innerJoin(
+        customerPerson,
+        eq(this.db.e.customer.personId, customerPerson.id),
+      )
+      .innerJoin(
+        this.db.e.appointmentItem,
+        eq(this.db.e.appointmentItem.appointmentId, this.db.e.appointment.id),
+      )
+      .innerJoin(
+        this.db.e.catalogItem,
+        eq(this.db.e.appointmentItem.catalogItemId, this.db.e.catalogItem.id),
+      )
+      .where(
+        and(
+          eq(this.db.e.appointment.employeeId, employeeId),
+          ne(this.db.e.appointment.status, AppointmentStatus.CANCELLED),
+          lt(this.db.e.appointment.startTime, to),
+          gt(this.db.e.appointment.endTime, from),
+        ),
+      )
+      .orderBy(this.db.e.appointment.startTime)
+      .execute();
+  }
+
   async hasConflict(
     employeeId: string,
     startTime: Date,

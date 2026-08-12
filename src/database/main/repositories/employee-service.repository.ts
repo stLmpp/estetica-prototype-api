@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { and, eq, sql } from 'drizzle-orm';
+import { and, eq, inArray, sql } from 'drizzle-orm';
 import { FilterEmployeeServiceDto } from '../../../features/employee-service/dto/input/list-employee-service.request';
 import { promiseAllObject } from '../../../shared/utils/promise-all-object';
 import { Repository } from './repository';
@@ -36,6 +36,42 @@ export class EmployeeServiceRepository extends Repository {
         catalogItemId,
       },
     });
+  }
+
+  findAllActiveByEmployeeId(employeeId: string) {
+    return this.db.query.employeeService.findMany({
+      where: {
+        employeeId,
+      },
+    });
+  }
+
+  async insertMany(employeeId: string, catalogItemIds: string[]) {
+    if (!catalogItemIds.length) {
+      return [];
+    }
+    return this.db
+      .insert(this.db.e.employeeService)
+      .values(catalogItemIds.map((catalogItemId) => ({ employeeId, catalogItemId })))
+      .returning();
+  }
+
+  async deleteManyByEmployeeAndCatalogItems(
+    employeeId: string,
+    catalogItemIds: string[],
+  ) {
+    if (!catalogItemIds.length) {
+      return;
+    }
+    await this.db
+      .update(this.db.e.employeeService)
+      .set({ deletedAt: new Date() })
+      .where(
+        and(
+          eq(this.db.e.employeeService.employeeId, employeeId),
+          inArray(this.db.e.employeeService.catalogItemId, catalogItemIds),
+        ),
+      );
   }
 
   async findPaginated({

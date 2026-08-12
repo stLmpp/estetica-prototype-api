@@ -82,4 +82,59 @@ export class EmployeeServiceService {
   async listPaginated(dto: FilterEmployeeServiceDto) {
     return this.employeeServiceRepository.findPaginated(dto);
   }
+
+  @MainTransactional()
+  async syncForEmployee(employeeId: string, catalogItemIds: string[]) {
+    const employee = await this.employeeRepository.findFirstById(employeeId);
+    if (!employee) {
+      throw EmployeeExceptions.employeeNotFound([
+        { field: 'employeeId', issue: `not found with value '${employeeId}'` },
+      ]);
+    }
+
+    const uniqueCatalogItemIds = [...new Set(catalogItemIds)];
+    const catalogItems =
+      await this.catalogItemRepository.findManyByIds(uniqueCatalogItemIds);
+    if (catalogItems.length !== uniqueCatalogItemIds.length) {
+      throw CatalogItemExceptions.catalogItemNotFound([
+        // TODO add a specific exception for this and list the catalog itens that were not found
+        {
+          field: 'catalogItemIds',
+          issue: 'one or more catalog items were not found',
+        },
+      ]);
+    }
+
+    const existingLinks =
+      await this.employeeServiceRepository.findAllActiveByEmployeeId(
+        employeeId,
+      );
+    const existingCatalogItemIds = existingLinks.map(
+      (link) => link.catalogItemId,
+    );
+
+    const toAdd = uniqueCatalogItemIds.filter(
+      (id) => !existingCatalogItemIds.includes(id),
+    );
+    const toRemove = existingCatalogItemIds.filter(
+      (id) => !uniqueCatalogItemIds.includes(id),
+    );
+
+    const [insertedLinks] = await Promise.all([
+      this.employeeServiceRepository.insertMany(employeeId, toAdd),
+      this.employeeServiceRepository.deleteManyByEmployeeAndCatalogItems(
+        employeeId,
+        toRemove,
+      ),
+    ]);
+
+    const keptLinks = existingLinks.filter(
+      (link) => !toRemove.includes(link.catalogItemId),
+    );
+    return [...keptLinks, ...insertedLinks].map((link) => ({
+      id: link.id,
+      employeeId: link.employeeId,
+      catalogItemId: link.catalogItemId,
+    }));
+  }
 }

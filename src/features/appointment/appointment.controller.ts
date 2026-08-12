@@ -16,6 +16,8 @@ import { CreateAppointmentResponseModel } from './dto/output/create-appointment.
 import { FilterAppointmentDto } from './dto/input/list-appointment.request';
 import { ListAppointmentResponseModel } from './dto/output/list-appointment.response';
 import { GetAppointmentResponseModel } from './dto/output/get-appointment.response';
+import { GetDayScheduleDto } from './dto/input/get-day-schedule.request';
+import { GetDayScheduleResponseModel } from './dto/output/get-day-schedule.response';
 import { ResponseType } from '../../shared/decorator/response-type.decorator';
 import { RequireActiveOrg } from '@thallesp/nestjs-better-auth';
 import { HasPermission } from '../../core/auth/has-permission.decorator';
@@ -88,6 +90,18 @@ export class AppointmentController {
         page: dto.page,
       },
     };
+  }
+
+  @ResponseType(GetDayScheduleResponseModel)
+  @Get('day-schedule')
+  @HasPermission({
+    orgPermissions: { appointment: ['get'] },
+  })
+  async getDaySchedule(
+    @Query() dto: GetDayScheduleDto,
+  ): Promise<GetDayScheduleResponseModel> {
+    const appointments = await this.appointmentService.getDaySchedule(dto);
+    return { data: { appointments } };
   }
 
   @ResponseType(GetAppointmentResponseModel)

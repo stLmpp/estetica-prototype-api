@@ -5,6 +5,7 @@ import {
   Get,
   Param,
   Post,
+  Put,
   Query,
 } from '@nestjs/common';
 import { EmployeeServiceService } from './employee-service.service';
@@ -12,6 +13,8 @@ import { EmployeeServiceCreateRequest } from './dto/input/create-employee-servic
 import { CreateEmployeeServiceResponseModel } from './dto/output/create-employee-service.response';
 import { FilterEmployeeServiceDto } from './dto/input/list-employee-service.request';
 import { ListEmployeeServiceResponseModel } from './dto/output/list-employee-service.response';
+import { SyncEmployeeServiceRequest } from './dto/input/sync-employee-service.request';
+import { SyncEmployeeServiceResponseModel } from './dto/output/sync-employee-service.response';
 import { ResponseType } from '../../shared/decorator/response-type.decorator';
 import { RequireActiveOrg } from '@thallesp/nestjs-better-auth';
 import { HasPermission } from '../../core/auth/has-permission.decorator';
@@ -38,6 +41,22 @@ export class EmployeeServiceController {
       body.employeeService,
     );
     return { data: { employeeService } };
+  }
+
+  @ResponseType(SyncEmployeeServiceResponseModel)
+  @Put('employee/:employeeId')
+  @HasPermission({
+    orgPermissions: { employeeService: ['create', 'delete'] },
+  })
+  async syncForEmployee(
+    @Param('employeeId') employeeId: string,
+    @Body() body: SyncEmployeeServiceRequest,
+  ): Promise<SyncEmployeeServiceResponseModel> {
+    const employeeServices = await this.employeeServiceService.syncForEmployee(
+      employeeId,
+      body.catalogItemIds,
+    );
+    return { data: { employeeServices } };
   }
 
   @Delete(':employeeServiceId')
