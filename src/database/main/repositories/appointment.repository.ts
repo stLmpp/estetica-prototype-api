@@ -204,6 +204,55 @@ export class AppointmentRepository extends Repository {
       .execute();
   }
 
+  async findManyForCalendarRange(from: Date, to: Date, employeeId?: string) {
+    const customerPerson = alias(this.db.e.person, 'calendar_customer_person');
+    const employeePerson = alias(this.db.e.person, 'calendar_employee_person');
+    return this.db
+      .select({
+        id: this.db.e.appointment.id,
+        status: this.db.e.appointment.status,
+        startTime: this.db.e.appointment.startTime,
+        endTime: this.db.e.appointment.endTime,
+        customerName: customerPerson.name,
+        employeeName: employeePerson.name,
+        catalogItemName: this.db.e.catalogItem.name,
+      })
+      .from(this.db.e.appointment)
+      .innerJoin(
+        this.db.e.customer,
+        eq(this.db.e.appointment.customerId, this.db.e.customer.id),
+      )
+      .innerJoin(
+        customerPerson,
+        eq(this.db.e.customer.personId, customerPerson.id),
+      )
+      .innerJoin(
+        this.db.e.employee,
+        eq(this.db.e.appointment.employeeId, this.db.e.employee.id),
+      )
+      .innerJoin(
+        employeePerson,
+        eq(this.db.e.employee.personId, employeePerson.id),
+      )
+      .innerJoin(
+        this.db.e.appointmentItem,
+        eq(this.db.e.appointmentItem.appointmentId, this.db.e.appointment.id),
+      )
+      .innerJoin(
+        this.db.e.catalogItem,
+        eq(this.db.e.appointmentItem.catalogItemId, this.db.e.catalogItem.id),
+      )
+      .where(
+        and(
+          eq(this.db.e.appointment.employeeId, employeeId!).if(employeeId),
+          lt(this.db.e.appointment.startTime, to),
+          gt(this.db.e.appointment.endTime, from),
+        ),
+      )
+      .orderBy(this.db.e.appointment.startTime)
+      .execute();
+  }
+
   async hasConflict(
     employeeId: string,
     startTime: Date,

@@ -11,6 +11,8 @@ import { FilterAppointmentDto } from './dto/input/list-appointment.request';
 import { GetAppointmentResDto } from './dto/output/get-appointment.response';
 import { GetDayScheduleDto } from './dto/input/get-day-schedule.request';
 import { DayScheduleAppointmentDto } from './dto/output/get-day-schedule.response';
+import { GetCalendarRangeDto } from './dto/input/get-calendar-range.request';
+import { CalendarAppointmentDto } from './dto/output/get-calendar-range.response';
 import { AppointmentExceptions } from './appointment-exceptions';
 import { CustomerExceptions } from '../customer/customer-exceptions';
 import { EmployeeExceptions } from '../employee/employee-exceptions';
@@ -227,6 +229,30 @@ export class AppointmentService {
       dto.employeeId,
       dto.from,
       dto.to,
+    );
+  }
+
+  @MainTransactional()
+  async getCalendarRange(
+    dto: GetCalendarRangeDto,
+  ): Promise<CalendarAppointmentDto[]> {
+    if (dto.employeeId) {
+      const employee = await this.employeeRepository.findFirstById(
+        dto.employeeId,
+      );
+      if (!employee) {
+        throw EmployeeExceptions.employeeNotFound([
+          {
+            field: 'employeeId',
+            issue: `not found with value '${dto.employeeId}'`,
+          },
+        ]);
+      }
+    }
+    return this.appointmentRepository.findManyForCalendarRange(
+      dto.from,
+      dto.to,
+      dto.employeeId,
     );
   }
 }

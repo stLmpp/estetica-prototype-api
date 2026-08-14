@@ -18,6 +18,8 @@ import { ListAppointmentResponseModel } from './dto/output/list-appointment.resp
 import { GetAppointmentResponseModel } from './dto/output/get-appointment.response';
 import { GetDayScheduleDto } from './dto/input/get-day-schedule.request';
 import { GetDayScheduleResponseModel } from './dto/output/get-day-schedule.response';
+import { GetCalendarRangeDto } from './dto/input/get-calendar-range.request';
+import { GetCalendarRangeResponseModel } from './dto/output/get-calendar-range.response';
 import { ResponseType } from '../../shared/decorator/response-type.decorator';
 import { RequireActiveOrg } from '@thallesp/nestjs-better-auth';
 import { HasPermission } from '../../core/auth/has-permission.decorator';
@@ -101,6 +103,18 @@ export class AppointmentController {
     @Query() dto: GetDayScheduleDto,
   ): Promise<GetDayScheduleResponseModel> {
     const appointments = await this.appointmentService.getDaySchedule(dto);
+    return { data: { appointments } };
+  }
+
+  @ResponseType(GetCalendarRangeResponseModel)
+  @Get('calendar-range')
+  @HasPermission({
+    orgPermissions: { appointment: ['get'] },
+  })
+  async getCalendarRange(
+    @Query() dto: GetCalendarRangeDto,
+  ): Promise<GetCalendarRangeResponseModel> {
+    const appointments = await this.appointmentService.getCalendarRange(dto);
     return { data: { appointments } };
   }
 
