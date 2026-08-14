@@ -37,6 +37,14 @@ export class CustomerRepository extends Repository {
       .where(eq(this.db.e.customer.id, id));
   }
 
+  async count() {
+    const [result] = await this.db
+      .select({ count: sql<number>`count(*)`.mapWith(Number) })
+      .from(this.db.e.customer)
+      .execute();
+    return result?.count ?? 0;
+  }
+
   async listPaginated({
     page,
     limit,

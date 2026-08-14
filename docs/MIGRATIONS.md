@@ -35,7 +35,20 @@ latest schema changes, if you skip it):
 
 The auth datasource has its own runner (`pnpm migrations:run:auth`) and does
 not go through this build/generate flow — it's managed by better-auth's CLI
-directly.
+directly. It reads the compiled `dist/core/auth/auth.js`, not the TypeScript
+source, so **run `pnpm build` before `pnpm migrations:run:auth`** every time
+you change `additionalFields` or anything else in `auth.ts` — otherwise it
+migrates against a stale config.
+
+Adding a new `required: true` additional field to a table that already has
+rows will fail (`column ... contains null values`) — better-auth's migrator
+doesn't backfill existing rows for a field's `defaultValue`, it only applies
+that default at the application layer for new records. For an org that
+already has data, add the field as `required: false` first, run the
+migration, backfill the column, then flip it to `required: true` and migrate
+again — the same add-nullable → backfill → set-not-null sequence documented
+above for the main schema, just driven through `auth.ts` + the CLI instead of
+hand-written SQL.
 
 ## Notes
 

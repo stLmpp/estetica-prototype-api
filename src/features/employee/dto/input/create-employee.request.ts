@@ -7,6 +7,7 @@ import {
   PhoneNumberSchema,
   ZipCodeSchema,
 } from '../../../../shared/model/common.model';
+import { WeeklyWorkingHoursSchema } from '../../../../shared/model/working-hours.model';
 
 export const CreateEmployeePhoneSchema = z.object({
   type: z.enum(PhoneType),
@@ -25,6 +26,7 @@ export const CreateEmployeeSchema = z.object({
   maritalStatus: z.enum(MaritalStatus).optional(),
   email: z.email().trim().optional(),
   phones: z.array(CreateEmployeePhoneSchema).optional(),
+  workingHours: WeeklyWorkingHoursSchema.nullable().optional(),
 });
 
 export class CreateEmployeeDto extends createZodDto(CreateEmployeeSchema, {

@@ -31,6 +31,12 @@ the actual coding conventions it points to.
   satisfy the plugin — just run `pnpm format`.
 - Never throw a raw `Error`, a built-in Nest `HttpException`, or an ad hoc
   object from feature code — see **Exceptions** below.
+- Avoid `try`/`catch`. Use the Go-style `safe`/`safeAsync` helpers
+  (`shared/utils/safe.ts`) instead — they wrap a callback and return a
+  `[error, data]` tuple, so the error is a normal value you check inline
+  instead of a control-flow jump: `const [error, data] = await safeAsync(() => thing())`.
+  Reach for `try`/`catch` only when `safe`/`safeAsync` genuinely doesn't fit
+  (e.g. an event-listener/lifecycle callback where you can't return a tuple).
 
 ## Adding a new feature module
 

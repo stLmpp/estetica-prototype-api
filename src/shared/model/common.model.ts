@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import dayjs from 'dayjs';
+import { safe } from '../utils/safe';
 
 export const IntParamSchema = z.codec(
   z.string().trim().regex(/^\d+$/),
@@ -45,12 +46,8 @@ export const DurationSchema = z
   .trim()
   .refine(
     (value) => {
-      try {
-        Temporal.Duration.from(value);
-        return true;
-      } catch {
-        return false;
-      }
+      const [error] = safe(() => Temporal.Duration.from(value));
+      return !error;
     },
     { message: 'Invalid ISO 8601 duration' },
   );

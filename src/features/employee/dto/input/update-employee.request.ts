@@ -5,6 +5,7 @@ import {
   DateParamSchema,
   ZipCodeSchema,
 } from '../../../../shared/model/common.model';
+import { WeeklyWorkingHoursSchema } from '../../../../shared/model/working-hours.model';
 
 export const UpdateEmployeeSchema = z
   .object({
@@ -18,6 +19,7 @@ export const UpdateEmployeeSchema = z
     state: z.string().trim().min(1).max(256).optional(),
     maritalStatus: z.enum(MaritalStatus).optional(),
     email: z.email().trim().optional(),
+    workingHours: WeeklyWorkingHoursSchema.nullable().optional(),
   })
   .refine((data) => Object.keys(data).length > 0, {
     message: 'At least one field must be provided',

@@ -13,4 +13,16 @@ export class AuthOrganizationRepository extends Repository {
       },
     });
   }
+
+  findFirstByIdWithCustomerLimit(organizationId: string) {
+    return this.db.query.authOrganization.findFirst({
+      columns: {
+        id: true,
+        customerLimit: true,
+      },
+      where: {
+        id: organizationId,
+      },
+    });
+  }
 }

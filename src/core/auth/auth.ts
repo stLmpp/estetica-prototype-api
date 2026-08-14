@@ -10,6 +10,7 @@ import { BetterAuthRedisSecondaryStorage } from '../redis/better-auth-redis-seco
 import { AuthRole } from './constants';
 import { adminAccessControl } from './admin-access-control';
 import { organizationAccessControl } from './organization-access-control';
+import { WorkingHoursJsonSchema } from '../../shared/model/working-hours.model';
 
 const appEnv = AppEnv.instance;
 
@@ -80,6 +81,23 @@ export const auth = betterAuth({
               type: 'number',
               validator: {
                 input: z.int().positive(),
+              },
+            },
+            customerLimit: {
+              defaultValue: 100,
+              fieldName: 'customer_limit',
+              required: true,
+              type: 'number',
+              validator: {
+                input: z.int().nonnegative(),
+              },
+            },
+            workingHours: {
+              fieldName: 'working_hours',
+              required: false,
+              type: 'string',
+              validator: {
+                input: WorkingHoursJsonSchema,
               },
             },
           },

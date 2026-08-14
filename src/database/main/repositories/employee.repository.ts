@@ -1,8 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import { and, eq, exists, ilike, InferInsertModel, sql } from 'drizzle-orm';
+import { eq, exists, ilike, InferInsertModel, sql, and } from 'drizzle-orm';
 import { mainEntities } from '../main-entities';
 import { FilterEmployeeDto } from '../../../features/employee/dto/input/list-employee.request';
 import { promiseAllObject } from '../../../shared/utils/promise-all-object';
+import { isObjectEmpty } from '../../../shared/utils/is-object-empty';
 import { Repository } from './repository';
 
 @Injectable()
@@ -19,15 +20,25 @@ export class EmployeeRepository extends Repository {
     id: string,
     {
       role,
+      workingHours,
     }: Partial<Omit<InferInsertModel<typeof mainEntities.employee>, 'id'>>,
   ) {
-    if (!role) {
+    const patch: Partial<
+      Pick<InferInsertModel<typeof mainEntities.employee>, 'role' | 'workingHours'>
+    > = {};
+    if (role !== undefined) {
+      patch.role = role;
+    }
+    if (workingHours !== undefined) {
+      patch.workingHours = workingHours;
+    }
+    if (isObjectEmpty(patch)) {
       return;
     }
     await this.db
       .update(this.db.e.employee)
-      .set({ role })
-      .where(and(eq(this.db.e.employee.id, id)));
+      .set(patch)
+      .where(eq(this.db.e.employee.id, id));
   }
 
   async delete(id: string) {
@@ -66,6 +77,7 @@ export class EmployeeRepository extends Repository {
         id: this.db.e.employee.id,
         name: this.db.e.person.name,
         role: this.db.e.employee.role,
+        workingHours: this.db.e.employee.workingHours,
       })
       .from(this.db.e.employee)
       .innerJoin(
@@ -127,6 +139,7 @@ export class EmployeeRepository extends Repository {
           id: true,
           role: true,
           personId: true,
+          workingHours: true,
         },
         with: {
           person: {

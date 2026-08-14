@@ -35,6 +35,7 @@ export class EmployeeService {
       this.employeeRepository.insert({
         personId: person.id,
         role: dto.role,
+        workingHours: dto.workingHours,
       }),
       this.personPhoneRepository.insertMany(
         dto.phones?.map((phone) => ({
@@ -57,6 +58,7 @@ export class EmployeeService {
       maritalStatus: person.maritalStatus ?? undefined,
       email: person.email ?? undefined,
       phones,
+      workingHours: employee.workingHours,
     };
   }
 
@@ -68,9 +70,9 @@ export class EmployeeService {
         { field: 'employeeId', issue: `not found with value '${id}'` },
       ]);
     }
-    const { role, ...person } = dto;
+    const { role, workingHours, ...person } = dto;
     await Promise.all([
-      this.employeeRepository.update(id, { role }),
+      this.employeeRepository.update(id, { role, workingHours }),
       this.personRepository.update(employee.personId, person),
     ]);
   }
@@ -113,6 +115,7 @@ export class EmployeeService {
       maritalStatus: employee.person.maritalStatus ?? undefined,
       phones: employee.person.personPhones,
       email: employee.person.email ?? undefined,
+      workingHours: employee.workingHours,
     };
   }
 }

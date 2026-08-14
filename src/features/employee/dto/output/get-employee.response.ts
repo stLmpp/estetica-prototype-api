@@ -8,6 +8,7 @@ import {
   PhoneNumberSchema,
   ZipCodeSchema,
 } from '../../../../shared/model/common.model';
+import { WeeklyWorkingHoursSchema } from '../../../../shared/model/working-hours.model';
 
 export const GetEmployeePhoneResSchema = z.object({
   id: z.string(),
@@ -28,6 +29,7 @@ export const GetEmployeeResSchema = z.object({
   maritalStatus: z.enum(MaritalStatus).optional(),
   email: z.email().trim().optional(),
   phones: z.array(GetEmployeePhoneResSchema).optional(),
+  workingHours: WeeklyWorkingHoursSchema.nullable().optional(),
 });
 
 export type GetEmployeeResDto = z.input<typeof GetEmployeeResSchema>;

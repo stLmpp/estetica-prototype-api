@@ -103,6 +103,8 @@ export const authOrganizationEntity = pgTable(
     createdAt: timestamp({ withTimezone: true }).notNull(),
     metadata: text(),
     membershipLimit: integer('membership_limit').notNull(),
+    customerLimit: integer('customer_limit').notNull(),
+    workingHours: text('working_hours'),
   },
   (table) => [
     unique('auth_organization_slug_key').on(table.slug),

@@ -26,6 +26,7 @@ import { safe } from '../../shared/utils/safe';
 import { ConfigType } from '../../shared/domain/config-type.enum';
 import { AuthDataService } from '../../core/auth/auth-data.service';
 import { SecurityLevelType } from '../../shared/domain/security-level-type.enum';
+import { type WeeklyWorkingHours } from '../../shared/model/working-hours.model';
 
 function getUserId() {
   const [error, userId] = safe(() => AuthDataService.instance.getUserId());
@@ -143,6 +144,7 @@ export const employeeEntity = pgTable.withRLS(
       .notNull()
       .references(() => personEntity.id),
     role: varchar('role', { length: 256 }).notNull(),
+    workingHours: jsonb('working_hours').$type<WeeklyWorkingHours>(),
   },
   (t) => [
     index()
