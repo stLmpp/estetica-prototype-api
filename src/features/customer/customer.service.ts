@@ -5,12 +5,12 @@ import { CreateCustomerDto } from './dto/input/create-customer.request';
 
 import { CreateCustomerResDto } from './dto/output/create-customer.response';
 import { FilterCustomerDto } from './dto/input/list-customer.request';
-import { GetCustomerResDto } from './dto/output/get-customer.response';
 import { CustomerExceptions } from './customer-exceptions';
 import { MainTransactional } from '../../database/main/main-database-connection';
 import { PersonRepository } from '../../database/main/repositories/person.repository';
 import { PersonPhoneRepository } from '../../database/main/repositories/person-phone.repository';
 import { OrganizationService } from '../../core/auth/organization.service';
+import { CustomerReadService } from './customer-read.service';
 
 @Injectable()
 export class CustomerService {
@@ -19,6 +19,7 @@ export class CustomerService {
     private readonly personRepository: PersonRepository,
     private readonly personPhoneRepository: PersonPhoneRepository,
     private readonly organizationService: OrganizationService,
+    private readonly customerReadService: CustomerReadService,
   ) {}
 
   @MainTransactional()
@@ -73,12 +74,7 @@ export class CustomerService {
 
   @MainTransactional()
   async update(id: string, dto: UpdateCustomerDto) {
-    const customer = await this.customerRepository.getById(id);
-    if (!customer) {
-      throw CustomerExceptions.customerNotFound([
-        { field: 'customerId', issue: `not found with value '${id}'` },
-      ]);
-    }
+    const customer = await this.customerReadService.require(id);
     const { jobName, ...person } = dto;
     await Promise.all([
       this.customerRepository.update(id, { jobName }),
@@ -88,42 +84,12 @@ export class CustomerService {
 
   @MainTransactional()
   async delete(id: string) {
-    const customer = await this.customerRepository.getById(id);
-    if (!customer) {
-      throw CustomerExceptions.customerNotFound([
-        { field: 'customerId', issue: `not found with value '${id}'` },
-      ]);
-    }
+    await this.customerReadService.require(id);
     await this.customerRepository.delete(id);
   }
 
   @MainTransactional()
   async listPaginated(dto: FilterCustomerDto) {
     return this.customerRepository.listPaginated(dto);
-  }
-
-  @MainTransactional()
-  async getById(id: string): Promise<GetCustomerResDto> {
-    const customer =
-      await this.customerRepository.getByIdWithPersonPersonPhones(id);
-    if (!customer) {
-      throw CustomerExceptions.customerNotFound([
-        { field: 'customerId', issue: `not found with value '${id}'` },
-      ]);
-    }
-    return {
-      id: customer.id,
-      name: customer.person.name,
-      birthDate: customer.person.birthDate ?? undefined,
-      address: customer.person.address ?? undefined,
-      zipCode: customer.person.zipCode ?? undefined,
-      neighborhood: customer.person.neighborhood ?? undefined,
-      city: customer.person.city ?? undefined,
-      state: customer.person.state ?? undefined,
-      jobName: customer.jobName ?? undefined,
-      maritalStatus: customer.person.maritalStatus ?? undefined,
-      phones: customer.person.personPhones,
-      email: customer.person.email ?? undefined,
-    };
   }
 }

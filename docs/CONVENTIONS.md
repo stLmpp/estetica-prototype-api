@@ -223,6 +223,149 @@ a 404 "tenant not found" reach someone who would otherwise get a 403.
   seeing the row automatically; no manual `isNull(deletedAt)` filter is
   needed in the repository.
 
+## Service method naming
+
+This governs the *service* layer specifically — it's a separate convention
+from the **Getter naming convention** under **Repositories** above, which
+stays as-is (`findFirstById` keeps `Id` explicit even though it's the
+primary key). At the service layer, the primary key is the implicit,
+default criteria: name it only when the lookup uses something else,
+exactly like the existing `update`/`updateStatus`/`delete` never say
+`updateById`/`deleteById`.
+
+**Writes**
+
+- `create(dto)` — single insert.
+- `update(id, dto)` — partial update of the row's general fields, by
+  primary key (implicit).
+- `updateBy<Field>(value, dto)` — same, when the row is targeted by a field
+  other than the primary key.
+- `update<Field>(id, dto)` — narrow update of one specific field/subresource
+  that carries its own business rules distinct from the general `update`
+  (e.g. `updateStatus` — status has transition rules `update` doesn't
+  touch).
+- `delete(id)` — soft delete, by primary key (implicit).
+- `sync<Relation>(id, relatedIds[])` — reconcile a child/many-to-many
+  collection to match a given target set, adding/removing as needed (e.g.
+  `syncForEmployee`).
+- Escape hatch: when a write is a real domain action that isn't
+  create/update/delete, name it after that action instead of forcing it
+  into one of the above (e.g. `Config.publish`, which creates a new version
+  *and* deactivates the old one).
+
+**Reads**
+
+- `get(id)` — **never throws.** Returns the row (or `null`/`undefined`) by
+  primary key. Only add this when some caller genuinely needs to handle
+  "not found" itself instead of an exception — don't add it just to have
+  the pair.
+- `require(id)` — **always throws** its feature's own not-found exception
+  when the row doesn't exist, otherwise returns it non-nullable. This is the
+  default/expected accessor: used by that feature's own controller for its
+  `GET /:id` endpoint, by other features' services (see **Cross-feature
+  access** below — `require`/`get` specifically live on the feature's
+  `Read` service, not its full one), and by the same feature's own write
+  service internally wherever it used to inline a fetch-then-throw before
+  mutating (`update`/`updateStatus`/`delete` etc. call the injected
+  `<Feature>ReadService.require(id)` rather than duplicating the check).
+- **Relation-loading variants**, on both `get` and `require`, mirror the
+  repository layer's `With<Relation>` chaining one level up: `require(id)`
+  is the lean/no-relations form; `requireWithPerson(id)`,
+  `requireWithPersonAndPhones(id)` etc. load progressively more, matching
+  whichever repository method backs them
+  (`findFirstById` → `findFirstByIdWithPerson` →
+  `findFirstByIdWithPersonAndPhones`). Add only the variants that have an
+  actual caller — e.g. `update`/`delete` use the lean `require(id)`, a
+  cross-feature caller that only needs a name uses `requireWithPerson(id)`,
+  and the owning controller's detail endpoint uses whichever variant matches
+  its full response shape. There is no single "the" shape reused by every
+  caller — each caller gets the variant that matches what it actually needs.
+- `getBy<Field>(value)` / `requireBy<Field>(value)` — same idea, when the
+  lookup uses a field other than the primary key (e.g. `getByName`). Combine
+  with the relation-loading suffix if needed
+  (`requireByNameWithPerson(value)`).
+- `listPaginated(dto)` — paginated list + total count.
+- `list<Grouping>(dto)` — a non-paginated list variant (e.g. `listGroup`).
+- `get<Resolved>(dto)` — a single value resolved through a scope/fallback
+  hierarchy rather than a plain id lookup (e.g. `Config.get`, which walks
+  tenant/user/group).
+- `get<View>(dto)` — a specialized multi-row read shaped for one UI need,
+  not generic pagination (e.g. `getDaySchedule`, `getCalendarRange`).
+- `getCurrent<Thing>()` — no id param; resolved from the current auth/session
+  context (e.g. `getCurrentTenantId`, `getWorkingHoursForCurrentOrganization`).
+
+## Cross-feature access
+
+- A feature's service must not inject another feature's repository to
+  fetch-and-validate an entity it doesn't own, nor hand-roll that other
+  feature's exception itself (e.g. `AppointmentService` throwing
+  `CustomerExceptions.customerNotFound`). The owning feature's service
+  exposes a `require...` method instead (see **Service method naming**
+  above) — whichever relation-loading variant matches the caller's actual
+  need, not necessarily the full response DTO from that feature's own
+  controller — which throws its own not-found exception. The caller uses
+  that method and never touches the other feature's repository or exception
+  file directly.
+  - Example: to validate `customerId` on create, `AppointmentService` calls
+    `CustomerReadService.requireWithPerson(id)` (it only needs the
+    customer's name) rather than injecting `CustomerRepository` and throwing
+    `CustomerExceptions.customerNotFound` itself.
+- **Exception: sub-entities with no feature/service of their own.** A
+  repository for an entity that's always accessed through a parent
+  aggregate — not independently exposed via its own feature/controller — can
+  be injected directly by whichever service already owns that parent. E.g.
+  `PersonPhoneRepository` has no owning service; phones are a child
+  collection of `Person`, so `CustomerService`/`EmployeeService` (which
+  already compose `Person`) use `PersonPhoneRepository` directly.
+- Rationale: keeps "what does 'not found' mean for X, and what shape
+  represents X" defined in exactly one place — the feature that owns X — so
+  a future change to that entity's validation or shape happens in one file
+  instead of wherever it happened to get consumed.
+
+### Module structure: split into a `Read` module and the full module
+
+Calling another feature's service is only half the problem — importing that
+feature's *whole* module (controller, write logic, its own cross-feature
+dependencies) creates the conditions for a circular import the moment that
+other feature ever needs something back from you. So for every feature
+that's consumed cross-feature, split it in two:
+
+- **`<Feature>ReadModule`** (e.g. `CustomerReadModule`,
+  `customer-read.module.ts`) — provides and exports `<Feature>ReadService`
+  only. This service holds just the repository injection(s) needed for its
+  `get`/`require` family of methods (see **Service method naming**).
+  **It may only import the datasource module (`MainDatabaseModule`) —
+  never another feature's module, `Read` or otherwise.** This is what makes
+  it structurally impossible for the read side to end up in a cycle: a
+  cycle needs two modules that each depend on the other, and a module that
+  depends on nothing outside its own repositories can never be one of those
+  two, no matter how the rest of the graph grows.
+- **`<Feature>Module`** (unchanged in spirit) — provides `<Feature>Service`
+  (`create`/`update`/`delete`/`listPaginated`/etc.) and the controller. It
+  imports its own `<Feature>ReadModule` so `<Feature>Service` can inject
+  `<Feature>ReadService` and call `.require(id)` for its own existence
+  checks instead of duplicating that logic.
+
+**Other features only ever import `<Feature>ReadModule`, never the full
+`<Feature>Module`.** A controller that needs both reads and writes on the
+same entity (rare, and only ever within that entity's own feature) injects
+both services directly — `<Feature>Service` doesn't re-expose
+`require`/`get` under its own name just to save the controller an
+injection.
+
+This is the standard answer to this problem in NestJS, not a
+project-specific invention — often called a "facade" (export a narrow
+public service, keep the rest private). `forwardRef()` is not an acceptable
+substitute for it: NestJS's own docs treat it as a last resort, and reaching
+for it here would just be hiding a design problem this split avoids
+outright.
+
+For cross-feature *side effects* rather than reads — e.g. "when an
+appointment is completed, also do something in another feature" — prefer an
+event (`EventEmitter2`) over a direct service call once that need actually
+comes up. Not implemented anywhere yet; don't build it speculatively ahead
+of a real caller.
+
 ## Database schema (drizzle entities)
 
 - All tables are defined in `src/database/main/main-entities.ts`, relations
@@ -239,6 +382,20 @@ a 404 "tenant not found" reach someone who would otherwise get a 403.
   `configEntity`'s unique index on `group, tenantId, userId, name, version`)
   — a repository method that filters/sorts on a column combination should
   usually have a matching index.
+- **New soft-deletable tables need a hand-added trigger — drizzle-kit won't
+  generate it.** Repositories only ever set `deletedAt` on delete, never
+  `isDeleted` directly (see **Repositories** → *Never hard-delete a row*).
+  `isDeleted` is flipped to `true` by the `fn_soft_delete_trigger()` Postgres
+  function (created once, in the initial migration), fired by a
+  `tg_soft_delete` trigger attached per-table (`AFTER UPDATE OF deleted_at`).
+  That trigger isn't part of the Drizzle schema, so it's invisible to
+  `migrations:generate:main` — after generating the migration for a new
+  soft-deletable table, hand-add
+  `CREATE TRIGGER tg_soft_delete AFTER UPDATE OF deleted_at ON "<table>" FOR EACH ROW EXECUTE FUNCTION fn_soft_delete_trigger();`
+  to it yourself, or `isDeleted` never flips and the RLS policies (which
+  filter on `is_deleted`, not `deleted_at`) silently keep "deleted" rows
+  fully visible/writable. `employee_service`, `sale`, `sale_item`, and
+  `sale_transaction` were missed this way — see `TODO.md`.
 - After changing entities, see [`docs/MIGRATIONS.md`](./MIGRATIONS.md) for
   the build → generate → review → run workflow. The build step is easy to
   forget and `migrations:generate:main` will misbehave silently without it —

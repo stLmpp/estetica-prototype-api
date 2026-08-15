@@ -10,6 +10,7 @@ import {
 } from '@nestjs/common';
 import { RequireActiveOrg } from '@thallesp/nestjs-better-auth';
 import { CatalogItemService } from './catalog-item.service';
+import { CatalogItemReadService } from './catalog-item-read.service';
 import { ResponseType } from '../../shared/decorator/response-type.decorator';
 import { CreateCatalogItemRequest } from './dto/input/create-catalog-item.request';
 import { CreateCatalogItemResponseModel } from './dto/output/create-catalog-item.response';
@@ -25,7 +26,10 @@ import { HasPermission } from '../../core/auth/has-permission.decorator';
 })
 @RequireActiveOrg()
 export class CatalogItemController {
-  constructor(private readonly catalogItemService: CatalogItemService) {}
+  constructor(
+    private readonly catalogItemService: CatalogItemService,
+    private readonly catalogItemReadService: CatalogItemReadService,
+  ) {}
 
   @ResponseType(CreateCatalogItemResponseModel, 201)
   @Post()
@@ -76,7 +80,8 @@ export class CatalogItemController {
   async getById(
     @Param('catalogItemId') catalogItemId: string,
   ): Promise<GetCatalogItemResponseModel> {
-    const catalogItem = await this.catalogItemService.getById(catalogItemId);
+    const catalogItem =
+      await this.catalogItemReadService.require(catalogItemId);
     return { data: { catalogItem } };
   }
 }

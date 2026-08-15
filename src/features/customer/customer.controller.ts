@@ -9,6 +9,7 @@ import {
   Query,
 } from '@nestjs/common';
 import { CustomerService } from './customer.service';
+import { CustomerReadService } from './customer-read.service';
 import { UpdateCustomerRequest } from './dto/input/update-customer.request';
 import { CustomerCreateRequest } from './dto/input/create-customer.request';
 import { CreateCustomerResponseModel } from './dto/output/create-customer.response';
@@ -25,7 +26,10 @@ import { HasPermission } from '../../core/auth/has-permission.decorator';
 })
 @RequireActiveOrg()
 export class CustomerController {
-  constructor(private readonly customerService: CustomerService) {}
+  constructor(
+    private readonly customerService: CustomerService,
+    private readonly customerReadService: CustomerReadService,
+  ) {}
 
   @ResponseType(CreateCustomerResponseModel, 201)
   @Post()
@@ -85,7 +89,8 @@ export class CustomerController {
   async getById(
     @Param('customerId') customerId: string,
   ): Promise<GetCustomerResponseModel> {
-    const customer = await this.customerService.getById(customerId);
+    const customer =
+      await this.customerReadService.requireWithPersonAndPhones(customerId);
     return { data: { customer } };
   }
 }

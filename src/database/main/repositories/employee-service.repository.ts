@@ -52,7 +52,9 @@ export class EmployeeServiceRepository extends Repository {
     }
     return this.db
       .insert(this.db.e.employeeService)
-      .values(catalogItemIds.map((catalogItemId) => ({ employeeId, catalogItemId })))
+      .values(
+        catalogItemIds.map((catalogItemId) => ({ employeeId, catalogItemId })),
+      )
       .returning();
   }
 

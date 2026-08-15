@@ -21,7 +21,13 @@ latest schema changes, if you skip it):
 3. **Review the generated SQL** in the new `migrations/main/<timestamp>_*/`
    folder before applying it. Check for things drizzle can't infer safely on
    its own: `NOT NULL` on a column with existing rows, dropped columns/tables,
-   renames drizzle mistook for a drop+add, etc.
+   renames drizzle mistook for a drop+add, etc. **For any new soft-deletable
+   table, also hand-add its `tg_soft_delete` trigger** — drizzle-kit has no
+   idea it exists (see **Database schema (drizzle entities)** in
+   `docs/CONVENTIONS.md`), so it never generates
+   `CREATE TRIGGER tg_soft_delete AFTER UPDATE OF deleted_at ON "<table>" FOR EACH ROW EXECUTE FUNCTION fn_soft_delete_trigger();`
+   for you. Forgetting it is easy and silent (see `TODO.md` for tables this
+   already happened to) — no error, `isDeleted` just never flips to `true`.
 4. `pnpm migrations:run:main`
    Applies all pending migrations to the local dev database.
 

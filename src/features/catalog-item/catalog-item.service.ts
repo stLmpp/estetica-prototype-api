@@ -5,15 +5,18 @@ import { mainEntities } from '../../database/main/main-entities';
 import { CreateCatalogItemDto } from './dto/input/create-catalog-item.request';
 import { UpdateCatalogItemDto } from './dto/input/update-catalog-item.request';
 import { FilterCatalogItemDto } from './dto/input/list-catalog-item.request';
-import { CatalogItemExceptions } from './catalog-item-exceptions';
 import { MainTransactional } from '../../database/main/main-database-connection';
 import { CatalogItemModel } from './model/catalog-item.model';
 import { CatalogItemType } from '../../shared/domain/catalog-item-type.enum';
 import { coreExceptions } from '../../core/core-exceptions';
+import { CatalogItemReadService } from './catalog-item-read.service';
 
 @Injectable()
 export class CatalogItemService {
-  constructor(private readonly catalogItemRepository: CatalogItemRepository) {}
+  constructor(
+    private readonly catalogItemRepository: CatalogItemRepository,
+    private readonly catalogItemReadService: CatalogItemReadService,
+  ) {}
 
   @MainTransactional()
   async create(dto: CreateCatalogItemDto) {
@@ -30,12 +33,7 @@ export class CatalogItemService {
 
   @MainTransactional()
   async update(id: string, dto: UpdateCatalogItemDto) {
-    const catalogItem = await this.catalogItemRepository.findFirstById(id);
-    if (!catalogItem) {
-      throw CatalogItemExceptions.catalogItemNotFound([
-        { field: 'catalogItemId', issue: `not found with value '${id}'` },
-      ]);
-    }
+    const catalogItem = await this.catalogItemReadService.require(id);
     const itemType = dto.itemType ?? catalogItem.itemType;
     const defaultDuration =
       dto.defaultDuration !== undefined
@@ -47,12 +45,7 @@ export class CatalogItemService {
 
   @MainTransactional()
   async delete(id: string) {
-    const catalogItem = await this.catalogItemRepository.findFirstById(id);
-    if (!catalogItem) {
-      throw CatalogItemExceptions.catalogItemNotFound([
-        { field: 'catalogItemId', issue: `not found with value '${id}'` },
-      ]);
-    }
+    await this.catalogItemReadService.require(id);
     await this.catalogItemRepository.delete(id);
   }
 
@@ -64,17 +57,6 @@ export class CatalogItemService {
       catalogItems: catalogItems.map((entity) => this.mapEntityToDto(entity)),
       count,
     };
-  }
-
-  @MainTransactional()
-  async getById(id: string) {
-    const catalogItem = await this.catalogItemRepository.findFirstById(id);
-    if (!catalogItem) {
-      throw CatalogItemExceptions.catalogItemNotFound([
-        { field: 'catalogItemId', issue: `not found with value '${id}'` },
-      ]);
-    }
-    return this.mapEntityToDto(catalogItem);
   }
 
   private assertDefaultDurationForServices(

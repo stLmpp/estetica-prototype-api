@@ -16,7 +16,12 @@ import { OrganizationService } from './organization.service';
       useValue: AuthDataService.instance,
     },
   ],
-  exports: [AuthService, AuthValidationService, OrganizationService, AuthDataService],
+  exports: [
+    AuthService,
+    AuthValidationService,
+    OrganizationService,
+    AuthDataService,
+  ],
 })
 @Global()
 export class AuthModule {}

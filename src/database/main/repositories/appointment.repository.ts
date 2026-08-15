@@ -166,7 +166,10 @@ export class AppointmentRepository extends Repository {
   }
 
   async findManyForDaySchedule(employeeId: string, from: Date, to: Date) {
-    const customerPerson = alias(this.db.e.person, 'day_schedule_customer_person');
+    const customerPerson = alias(
+      this.db.e.person,
+      'day_schedule_customer_person',
+    );
     return this.db
       .select({
         id: this.db.e.appointment.id,

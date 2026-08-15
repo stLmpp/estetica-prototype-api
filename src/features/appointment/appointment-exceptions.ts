@@ -13,12 +13,14 @@ export const AppointmentExceptions = {
   }),
   appointmentInvalidStatusTransition: exception({
     code: 'APPOINTMENT_INVALID_STATUS_TRANSITION',
-    message: 'Appointment status cannot be changed once it reaches a terminal status',
+    message:
+      'Appointment status cannot be changed once it reaches a terminal status',
     status: 409,
   }),
   appointmentOutsideWorkingHours: exception({
     code: 'APPOINTMENT_OUTSIDE_WORKING_HOURS',
-    message: 'Appointment time is outside the employee/organization working hours',
+    message:
+      'Appointment time is outside the employee/organization working hours',
     status: 409,
   }),
 } as const;

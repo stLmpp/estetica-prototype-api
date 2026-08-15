@@ -24,7 +24,10 @@ export class EmployeeRepository extends Repository {
     }: Partial<Omit<InferInsertModel<typeof mainEntities.employee>, 'id'>>,
   ) {
     const patch: Partial<
-      Pick<InferInsertModel<typeof mainEntities.employee>, 'role' | 'workingHours'>
+      Pick<
+        InferInsertModel<typeof mainEntities.employee>,
+        'role' | 'workingHours'
+      >
     > = {};
     if (role !== undefined) {
       patch.role = role;

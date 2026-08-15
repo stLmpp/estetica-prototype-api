@@ -1,47 +1,32 @@
 import { Injectable } from '@nestjs/common';
 import { EmployeeServiceRepository } from '../../database/main/repositories/employee-service.repository';
-import { EmployeeRepository } from '../../database/main/repositories/employee.repository';
 import { CatalogItemRepository } from '../../database/main/repositories/catalog-item.repository';
+import { EmployeeReadService } from '../employee/employee-read.service';
+import { CatalogItemReadService } from '../catalog-item/catalog-item-read.service';
 import { CreateEmployeeServiceDto } from './dto/input/create-employee-service.request';
 import { CreateEmployeeServiceResDto } from './dto/output/create-employee-service.response';
 import { FilterEmployeeServiceDto } from './dto/input/list-employee-service.request';
 import { EmployeeServiceExceptions } from './employee-service-exceptions';
 import { MainTransactional } from '../../database/main/main-database-connection';
-import { EmployeeExceptions } from '../employee/employee-exceptions';
 import { CatalogItemExceptions } from '../catalog-item/catalog-item-exceptions';
 
 @Injectable()
 export class EmployeeServiceService {
   constructor(
     private readonly employeeServiceRepository: EmployeeServiceRepository,
-    private readonly employeeRepository: EmployeeRepository,
     private readonly catalogItemRepository: CatalogItemRepository,
+    private readonly employeeReadService: EmployeeReadService,
+    private readonly catalogItemReadService: CatalogItemReadService,
   ) {}
 
   @MainTransactional()
   async create(
     dto: CreateEmployeeServiceDto,
   ): Promise<CreateEmployeeServiceResDto> {
-    const [employee, catalogItem] = await Promise.all([
-      this.employeeRepository.findFirstById(dto.employeeId),
-      this.catalogItemRepository.findFirstById(dto.catalogItemId),
+    await Promise.all([
+      this.employeeReadService.require(dto.employeeId),
+      this.catalogItemReadService.require(dto.catalogItemId),
     ]);
-    if (!employee) {
-      throw EmployeeExceptions.employeeNotFound([
-        {
-          field: 'employeeId',
-          issue: `not found with value '${dto.employeeId}'`,
-        },
-      ]);
-    }
-    if (!catalogItem) {
-      throw CatalogItemExceptions.catalogItemNotFound([
-        {
-          field: 'catalogItemId',
-          issue: `not found with value '${dto.catalogItemId}'`,
-        },
-      ]);
-    }
     const existing =
       await this.employeeServiceRepository.findFirstByEmployeeAndCatalogItem(
         dto.employeeId,
@@ -68,13 +53,7 @@ export class EmployeeServiceService {
 
   @MainTransactional()
   async delete(id: string) {
-    const employeeService =
-      await this.employeeServiceRepository.findFirstById(id);
-    if (!employeeService) {
-      throw EmployeeServiceExceptions.employeeServiceNotFound([
-        { field: 'employeeServiceId', issue: `not found with value '${id}'` },
-      ]);
-    }
+    await this.require(id);
     await this.employeeServiceRepository.delete(id);
   }
 
@@ -84,13 +63,20 @@ export class EmployeeServiceService {
   }
 
   @MainTransactional()
-  async syncForEmployee(employeeId: string, catalogItemIds: string[]) {
-    const employee = await this.employeeRepository.findFirstById(employeeId);
-    if (!employee) {
-      throw EmployeeExceptions.employeeNotFound([
-        { field: 'employeeId', issue: `not found with value '${employeeId}'` },
+  async require(id: string) {
+    const employeeService =
+      await this.employeeServiceRepository.findFirstById(id);
+    if (!employeeService) {
+      throw EmployeeServiceExceptions.employeeServiceNotFound([
+        { field: 'employeeServiceId', issue: `not found with value '${id}'` },
       ]);
     }
+    return employeeService;
+  }
+
+  @MainTransactional()
+  async syncForEmployee(employeeId: string, catalogItemIds: string[]) {
+    await this.employeeReadService.require(employeeId);
 
     const uniqueCatalogItemIds = [...new Set(catalogItemIds)];
     const catalogItems =

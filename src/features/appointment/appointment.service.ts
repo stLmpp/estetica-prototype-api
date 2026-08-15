@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { AppointmentRepository } from '../../database/main/repositories/appointment.repository';
-import { CustomerRepository } from '../../database/main/repositories/customer.repository';
-import { EmployeeRepository } from '../../database/main/repositories/employee.repository';
-import { CatalogItemRepository } from '../../database/main/repositories/catalog-item.repository';
+import { CustomerReadService } from '../customer/customer-read.service';
+import { EmployeeReadService } from '../employee/employee-read.service';
+import { CatalogItemReadService } from '../catalog-item/catalog-item-read.service';
 import { OrganizationService } from '../../core/auth/organization.service';
 import { CreateAppointmentDto } from './dto/input/create-appointment.request';
 import { CreateAppointmentResDto } from './dto/output/create-appointment.response';
@@ -15,9 +15,6 @@ import { DayScheduleAppointmentDto } from './dto/output/get-day-schedule.respons
 import { GetCalendarRangeDto } from './dto/input/get-calendar-range.request';
 import { CalendarAppointmentDto } from './dto/output/get-calendar-range.response';
 import { AppointmentExceptions } from './appointment-exceptions';
-import { CustomerExceptions } from '../customer/customer-exceptions';
-import { EmployeeExceptions } from '../employee/employee-exceptions';
-import { CatalogItemExceptions } from '../catalog-item/catalog-item-exceptions';
 import { coreExceptions } from '../../core/core-exceptions';
 import { MainTransactional } from '../../database/main/main-database-connection';
 import { AppointmentStatus } from '../../shared/domain/appointment-staus.enum';
@@ -39,9 +36,9 @@ const TERMINAL_APPOINTMENT_STATUSES = new Set<AppointmentStatus>([
 export class AppointmentService {
   constructor(
     private readonly appointmentRepository: AppointmentRepository,
-    private readonly customerRepository: CustomerRepository,
-    private readonly employeeRepository: EmployeeRepository,
-    private readonly catalogItemRepository: CatalogItemRepository,
+    private readonly customerReadService: CustomerReadService,
+    private readonly employeeReadService: EmployeeReadService,
+    private readonly catalogItemReadService: CatalogItemReadService,
     private readonly organizationService: OrganizationService,
   ) {}
 
@@ -79,35 +76,11 @@ export class AppointmentService {
   @MainTransactional()
   async create(dto: CreateAppointmentDto): Promise<CreateAppointmentResDto> {
     const [customer, employee, catalogItem, organization] = await Promise.all([
-      this.customerRepository.findFirstByIdWithPerson(dto.customerId),
-      this.employeeRepository.findFirstByIdWithPerson(dto.employeeId),
-      this.catalogItemRepository.findFirstById(dto.catalogItemId),
+      this.customerReadService.requireWithPerson(dto.customerId),
+      this.employeeReadService.requireWithPerson(dto.employeeId),
+      this.catalogItemReadService.require(dto.catalogItemId),
       this.organizationService.getCurrentOrganization(),
     ]);
-    if (!customer) {
-      throw CustomerExceptions.customerNotFound([
-        {
-          field: 'customerId',
-          issue: `not found with value '${dto.customerId}'`,
-        },
-      ]);
-    }
-    if (!employee) {
-      throw EmployeeExceptions.employeeNotFound([
-        {
-          field: 'employeeId',
-          issue: `not found with value '${dto.employeeId}'`,
-        },
-      ]);
-    }
-    if (!catalogItem) {
-      throw CatalogItemExceptions.catalogItemNotFound([
-        {
-          field: 'catalogItemId',
-          issue: `not found with value '${dto.catalogItemId}'`,
-        },
-      ]);
-    }
 
     this.assertWithinWorkingHours(
       employee.workingHours,
@@ -173,12 +146,7 @@ export class AppointmentService {
 
   @MainTransactional()
   async update(id: string, dto: UpdateAppointmentDto) {
-    const appointment = await this.appointmentRepository.findFirstById(id);
-    if (!appointment) {
-      throw AppointmentExceptions.appointmentNotFound([
-        { field: 'appointmentId', issue: `not found with value '${id}'` },
-      ]);
-    }
+    const appointment = await this.require(id);
 
     const newStartTime = dto.startTime ?? appointment.startTime;
     const newEndTime = dto.endTime ?? appointment.endTime;
@@ -190,7 +158,7 @@ export class AppointmentService {
 
     if (dto.startTime || dto.endTime) {
       const [employee, organization, conflict] = await Promise.all([
-        this.employeeRepository.findFirstById(appointment.employeeId),
+        this.employeeReadService.require(appointment.employeeId),
         this.organizationService.getCurrentOrganization(),
         this.appointmentRepository.hasConflict(
           appointment.employeeId,
@@ -208,7 +176,7 @@ export class AppointmentService {
         ]);
       }
       this.assertWithinWorkingHours(
-        employee?.workingHours,
+        employee.workingHours,
         organization.workingHours,
         newStartTime,
         newEndTime,
@@ -220,12 +188,7 @@ export class AppointmentService {
 
   @MainTransactional()
   async updateStatus(id: string, dto: UpdateAppointmentStatusDto) {
-    const appointment = await this.appointmentRepository.findFirstById(id);
-    if (!appointment) {
-      throw AppointmentExceptions.appointmentNotFound([
-        { field: 'appointmentId', issue: `not found with value '${id}'` },
-      ]);
-    }
+    const appointment = await this.require(id);
     if (dto.status === appointment.status) {
       return;
     }
@@ -242,12 +205,7 @@ export class AppointmentService {
 
   @MainTransactional()
   async delete(id: string) {
-    const appointment = await this.appointmentRepository.findFirstById(id);
-    if (!appointment) {
-      throw AppointmentExceptions.appointmentNotFound([
-        { field: 'appointmentId', issue: `not found with value '${id}'` },
-      ]);
-    }
+    await this.require(id);
     await this.appointmentRepository.delete(id);
   }
 
@@ -257,7 +215,20 @@ export class AppointmentService {
   }
 
   @MainTransactional()
-  async getById(id: string): Promise<GetAppointmentResDto> {
+  async require(id: string) {
+    const appointment = await this.appointmentRepository.findFirstById(id);
+    if (!appointment) {
+      throw AppointmentExceptions.appointmentNotFound([
+        { field: 'appointmentId', issue: `not found with value '${id}'` },
+      ]);
+    }
+    return appointment;
+  }
+
+  @MainTransactional()
+  async requireWithCustomerAndEmployeeAndCatalogItem(
+    id: string,
+  ): Promise<GetAppointmentResDto> {
     const appointment =
       await this.appointmentRepository.findFirstByIdWithCustomerAndEmployeeAndCatalogItem(
         id,
@@ -287,17 +258,7 @@ export class AppointmentService {
   async getDaySchedule(
     dto: GetDayScheduleDto,
   ): Promise<DayScheduleAppointmentDto[]> {
-    const employee = await this.employeeRepository.findFirstById(
-      dto.employeeId,
-    );
-    if (!employee) {
-      throw EmployeeExceptions.employeeNotFound([
-        {
-          field: 'employeeId',
-          issue: `not found with value '${dto.employeeId}'`,
-        },
-      ]);
-    }
+    await this.employeeReadService.require(dto.employeeId);
     return this.appointmentRepository.findManyForDaySchedule(
       dto.employeeId,
       dto.from,
@@ -310,17 +271,7 @@ export class AppointmentService {
     dto: GetCalendarRangeDto,
   ): Promise<CalendarAppointmentDto[]> {
     if (dto.employeeId) {
-      const employee = await this.employeeRepository.findFirstById(
-        dto.employeeId,
-      );
-      if (!employee) {
-        throw EmployeeExceptions.employeeNotFound([
-          {
-            field: 'employeeId',
-            issue: `not found with value '${dto.employeeId}'`,
-          },
-        ]);
-      }
+      await this.employeeReadService.require(dto.employeeId);
     }
     return this.appointmentRepository.findManyForCalendarRange(
       dto.from,

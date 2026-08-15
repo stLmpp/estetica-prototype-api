@@ -126,7 +126,10 @@ export class AppointmentController {
   async getById(
     @Param('appointmentId') appointmentId: string,
   ): Promise<GetAppointmentResponseModel> {
-    const appointment = await this.appointmentService.getById(appointmentId);
+    const appointment =
+      await this.appointmentService.requireWithCustomerAndEmployeeAndCatalogItem(
+        appointmentId,
+      );
     return { data: { appointment } };
   }
 }

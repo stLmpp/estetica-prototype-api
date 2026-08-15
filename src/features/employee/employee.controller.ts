@@ -9,6 +9,7 @@ import {
   Query,
 } from '@nestjs/common';
 import { EmployeeService } from './employee.service';
+import { EmployeeReadService } from './employee-read.service';
 import { UpdateEmployeeRequest } from './dto/input/update-employee.request';
 import { EmployeeCreateRequest } from './dto/input/create-employee.request';
 import { CreateEmployeeResponseModel } from './dto/output/create-employee.response';
@@ -25,7 +26,10 @@ import { HasPermission } from '../../core/auth/has-permission.decorator';
 })
 @RequireActiveOrg()
 export class EmployeeController {
-  constructor(private readonly employeeService: EmployeeService) {}
+  constructor(
+    private readonly employeeService: EmployeeService,
+    private readonly employeeReadService: EmployeeReadService,
+  ) {}
 
   @ResponseType(CreateEmployeeResponseModel, 201)
   @Post()
@@ -85,7 +89,8 @@ export class EmployeeController {
   async getById(
     @Param('employeeId') employeeId: string,
   ): Promise<GetEmployeeResponseModel> {
-    const employee = await this.employeeService.getById(employeeId);
+    const employee =
+      await this.employeeReadService.requireWithPersonAndPhones(employeeId);
     return { data: { employee } };
   }
 }
