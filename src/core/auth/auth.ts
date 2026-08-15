@@ -5,7 +5,6 @@ import { LoggerService } from '../logger/logger.service';
 import { getMigrationPool } from '../../database/main/main-database-connection';
 import { z } from 'zod';
 import { v7 as uuidv7 } from 'uuid';
-import { extraAuthEndPointsPlugin } from './extra-auth-end-points.plugin';
 import { BetterAuthRedisSecondaryStorage } from '../redis/better-auth-redis-secondary-storage';
 import { AuthRole } from './constants';
 import { adminAccessControl } from './admin-access-control';
@@ -122,7 +121,6 @@ export const auth = betterAuth({
         return organizationSchema.parse(organization).membershipLimit;
       },
     }),
-    extraAuthEndPointsPlugin(),
   ],
   basePath: '/v1/auth',
   experimental: {

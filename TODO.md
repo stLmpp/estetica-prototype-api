@@ -4,12 +4,16 @@ Things noticed in passing that aren't worth stopping the current task for.
 Pull from this list when there's no specific task in flight. Finished items
 move to `TODO_DONE.md` instead of being deleted outright.
 
-- [ ] Investigate `madge` (dependency-graph / circular-dependency detector)
-      and wire it up as a project check (`pnpm` script, and ideally a CI
-      step) so an accidental circular import between feature modules gets
-      caught automatically instead of relying on code review to notice. See
-      **Module structure: split into a `Read` module and the full module**
-      in `docs/CONVENTIONS.md` for the pattern this is meant to guard.
+- [ ] Wire `madge` up as an actual project check (`pnpm` script, and ideally
+      a CI step), scoped to all of `src` — `madge --circular --extensions ts
+      src/app.module.ts`. Confirmed via `pnpm dlx madge` that `src` is clean
+      right now (exit code 0); the one blocker
+      (`core/auth/auth.ts` ↔ `core/auth/extra-auth-end-points.plugin.ts`) is
+      fixed — that file was a test and got deleted. Needs graphviz's `dot`
+      installed for `--image` output, but not for the plain `--circular`
+      check used here. See **Module structure: split into a `Read` module
+      and the full module** in `docs/CONVENTIONS.md` for the pattern this is
+      meant to guard.
 - [ ] Audit every `src/features/*/*.service.ts` against **Service method
       naming** in `docs/CONVENTIONS.md` — `create`/`update`/`updateBy<Field>`/
       `update<Field>`/`delete`/`sync<Relation>` for writes,
