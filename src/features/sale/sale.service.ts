@@ -22,6 +22,7 @@ import { MainTransactional } from '../../database/main/main-database-connection'
 import { SaleStatus } from '../../shared/domain/sale-status.enum';
 import { SaleTransactionType } from '../../shared/domain/sale-transaction-type.enum';
 import { AppointmentStatus } from '../../shared/domain/appointment-staus.enum';
+import { PaymentMethod } from '../../shared/domain/payment-method.enum';
 
 interface ResolvedSaleItem {
   catalogItemId: string;
@@ -70,12 +71,9 @@ export class SaleService {
       items.map((item) => this.multiplyMoney(item.priceApplied, item.quantity)),
     );
 
-    const transactionsInput = [
-      ...(dto.transactions ?? []),
-      ...(dto.installmentPlan
-        ? this.generateInstallmentTransactions(dto.installmentPlan)
-        : []),
-    ];
+    const transactionsInput = (dto.transactions ?? []).flatMap((entry) =>
+      this.expandTransactionEntry(entry, { allowRefund: false }),
+    );
     const status = this.deriveStatus(transactionsInput, totalAmount);
 
     const sale = await this.saleRepository.insert({
@@ -137,22 +135,30 @@ export class SaleService {
       ]);
     }
 
+    const newTransactionsInput = this.expandTransactionEntry(dto, {
+      allowRefund: true,
+    });
     const existingTransactions =
       await this.saleRepository.findTransactionsBySaleId(saleId);
-    this.assertRefundsDoNotExceedPayments([...existingTransactions, dto]);
+    this.assertRefundsDoNotExceedPayments([
+      ...existingTransactions,
+      ...newTransactionsInput,
+    ]);
 
-    const transaction = await this.saleRepository.insertTransaction(
+    const insertedTransactions = await this.saleRepository.insertTransactions(
       saleId,
-      dto,
+      newTransactionsInput,
     );
-    const allTransactions = [...existingTransactions, transaction];
+    const allTransactions = [...existingTransactions, ...insertedTransactions];
     const status = this.deriveStatus(allTransactions, sale.totalAmount);
     if (status !== sale.status) {
       await this.saleRepository.update(saleId, { status });
     }
 
     return {
-      transaction: this.mapTransactionEntityToModel(transaction),
+      transactions: insertedTransactions.map((entity) =>
+        this.mapTransactionEntityToModel(entity),
+      ),
       saleStatus: status,
     };
   }
@@ -281,9 +287,67 @@ export class SaleService {
     });
   }
 
-  private generateInstallmentTransactions(
-    plan: NonNullable<CreateSaleDto['installmentPlan']>,
+  private expandTransactionEntry(
+    entry: AddSaleTransactionDto,
+    options: { allowRefund: boolean },
   ) {
+    if (entry.installmentCount) {
+      if (
+        entry.paymentMethod !== PaymentMethod.CREDIT_CARD ||
+        entry.type !== SaleTransactionType.PAYMENT
+      ) {
+        throw SaleExceptions.saleInstallmentRequiresCreditCardPayment([
+          {
+            field: 'paymentMethod',
+            issue: `installment plans require type '${SaleTransactionType.PAYMENT}' and paymentMethod '${PaymentMethod.CREDIT_CARD}'`,
+          },
+        ]);
+      }
+      if (!entry.dueDate) {
+        throw coreExceptions.invalidRequest([
+          {
+            field: 'dueDate',
+            issue:
+              'dueDate (first installment due date) is required for an installment plan',
+          },
+        ]);
+      }
+      return this.generateInstallmentTransactions({
+        paymentMethod: entry.paymentMethod,
+        amount: entry.amount,
+        installmentCount: entry.installmentCount,
+        firstDueDate: entry.dueDate,
+        markFirstInstallmentAsReceived: entry.markFirstInstallmentAsReceived,
+      });
+    }
+
+    if (!options.allowRefund && entry.type === SaleTransactionType.REFUND) {
+      throw SaleExceptions.saleRefundNotAllowedAtCreation([
+        {
+          field: 'type',
+          issue: `transaction type '${entry.type}' is not allowed at sale creation`,
+        },
+      ]);
+    }
+
+    return [
+      {
+        type: entry.type,
+        paymentMethod: entry.paymentMethod,
+        amount: entry.amount,
+        dueDate: entry.dueDate,
+        receivedAt: entry.receivedAt,
+      },
+    ];
+  }
+
+  private generateInstallmentTransactions(plan: {
+    paymentMethod: PaymentMethod;
+    amount: string;
+    installmentCount: number;
+    firstDueDate: Date;
+    markFirstInstallmentAsReceived: boolean;
+  }) {
     const baseAmount = new Big(plan.amount)
       .div(plan.installmentCount)
       .round(2, Big.roundDown);

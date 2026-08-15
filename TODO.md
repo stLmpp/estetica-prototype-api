@@ -22,6 +22,43 @@ move to `TODO_DONE.md` instead of being deleted outright.
       `@MainTransactional()` in `docs/CONVENTIONS.md`). Extract it into a
       named enum/constant instead, for readability and so future error-code
       checks elsewhere don't repeat the same magic string.
+- [ ] Audit existing exception status codes against the new HTTP status
+      code convention in `docs/CONVENTIONS.md` (**Exceptions**) — most
+      exceptions predate that rule and weren't written with it in mind.
+      Two known categories of likely violations, not yet fixed:
+      - **404 used where it should be 422.** The rule reserves `404` for
+        the resource a route's own URL identifies; a reference to some
+        other entity that doesn't exist (an id from the request body, or
+        one feature's service calling another's `require()`/
+        `requireMany()`) should be `422`. Nearly every cross-feature
+        `require()` call in the app currently throws that feature's
+        `xNotFound` exception at `404` regardless of context — e.g.
+        `AppointmentService.create` validating `dto.employeeId`/
+        `dto.customerId`/`dto.catalogItemId`, or `SaleService.create`
+        validating `dto.appointmentId` — because the exact same
+        `require()`/exception is also used by that feature's own `GET
+        /:id` route, where `404` is correct. Fixing this needs the
+        `exception()`/`ExceptionFactory` (`src/core/exception/
+        exception.ts`) to support an optional per-call status override, so
+        cross-feature reference checks can ask for `422` while the owning
+        route's own lookup keeps the default `404` — a global find/replace
+        won't work since the two call sites throw the same exception today.
+      - **409 that's arguably 422.** Some existing `409`s look like
+        business-rule violations (state precondition, quota) rather than
+        a resource-state conflict, per the rule's distinction — e.g.
+        `SaleExceptions.saleAppointmentNotCompleted`,
+        `CustomerExceptions.customerLimitExceeded`,
+        `AppointmentExceptions.appointmentOutsideWorkingHours`. Needs a
+        deliberate pass through every `*-exceptions.ts` file to decide
+        each one case by case, not a blanket reclassification.
+      Related, smaller gap noticed while grepping every `status:` in the
+      codebase for this audit: `src/core/openapi/generate-open-api.ts`'s
+      `errorStatus` list (used to document possible error responses per
+      route in Swagger) has `400/401/403/404/409/422/429/500` but is
+      missing `408` — `coreExceptions.requestTimeout` can genuinely fire,
+      so the generated OpenAPI spec is silently incomplete. Add it once
+      the status-code audit above is done, so the Swagger list matches
+      whatever the final set of codes in active use turns out to be.
 
 ## CI/CD dependencies
 

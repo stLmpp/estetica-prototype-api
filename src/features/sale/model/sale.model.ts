@@ -13,38 +13,15 @@ const MonetaryAmountSchema = z
   .trim()
   .regex(/^\d{1,8}(\.\d{1,2})?$/);
 
-/**
- * Shared between `create-sale.request.ts` (transactions[]) and
- * `add-sale-transaction.request.ts` — same shape, same installment rules.
- */
-export const SaleTransactionInputSchema = z
-  .object({
-    type: z.enum(SaleTransactionType),
-    paymentMethod: z.enum(PaymentMethod),
-    amount: MonetaryAmountSchema,
-    installmentNumber: z.int().positive().optional(),
-    installmentCount: z.int().positive().optional(),
-    dueDate: DateParamSchema.optional(),
-    receivedAt: DatetimeParamSchema.optional(),
-  })
-  .refine(
-    (data) =>
-      (data.installmentNumber === undefined) ===
-      (data.installmentCount === undefined),
-    {
-      message: 'installmentNumber and installmentCount must be set together',
-      path: ['installmentNumber'],
-    },
-  )
-  .refine(
-    (data) =>
-      data.installmentNumber === undefined ||
-      data.installmentNumber <= data.installmentCount!,
-    {
-      message: 'installmentNumber cannot exceed installmentCount',
-      path: ['installmentNumber'],
-    },
-  );
+export const SaleTransactionInputSchema = z.object({
+  type: z.enum(SaleTransactionType),
+  paymentMethod: z.enum(PaymentMethod),
+  amount: MonetaryAmountSchema,
+  installmentCount: z.int().min(2).optional(),
+  dueDate: DateParamSchema.optional(),
+  receivedAt: DatetimeParamSchema.optional(),
+  markFirstInstallmentAsReceived: z.boolean().default(false),
+});
 
 export const SaleItemModelSchema = z.object({
   id: z.string(),

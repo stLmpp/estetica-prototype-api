@@ -5,7 +5,7 @@ import { createResponseSchema } from '../../../../shared/model/response.model';
 import { SaleTransactionModelSchema } from '../../model/sale.model';
 
 export const AddSaleTransactionResSchema = z.object({
-  transaction: SaleTransactionModelSchema,
+  transactions: z.array(SaleTransactionModelSchema),
   saleStatus: z.enum(SaleStatus),
 });
 

@@ -477,6 +477,46 @@ of a real caller.
   also translates Zod, Drizzle, Throttler, `NotFoundException` and
   better-auth API errors into the same shape. Extend this filter for new
   classes of upstream error rather than adding another global filter.
+- **HTTP status codes mean something specific — pick the one that matches
+  what actually went wrong:**
+  - `400` — the request itself is malformed (fails input validation). This
+    is what `ZodValidationPipe` already produces automatically for a
+    request that doesn't match its schema; don't hand-roll this one.
+  - `401` — the caller isn't authenticated at all.
+  - `403` — the caller is authenticated but isn't allowed to access the
+    resource.
+  - `404` — **only** for the resource a route's own URL identifies (a path
+    parameter naming "the" resource of that route — e.g.
+    `GET /customer/:customerId` when `customerId` doesn't exist). A
+    reference to some *other* entity that turns out not to exist — a body
+    field on the route's own feature, or an id handed to another feature's
+    `require()`/`requireMany()` — is `422`, not `404`. E.g. `POST
+    /appointment` with an `employeeId` that doesn't exist returns `422`,
+    not `404`: the appointment isn't "not found", the request is
+    unprocessable because it references something that doesn't exist.
+  - `409` — a conflict between the request and the current state of a
+    resource that can't both be true at once (double-booking a time slot,
+    linking an employee to a service they're already linked to).
+  - `422` — the request is well-formed and every reference in it resolves,
+    but it violates a business rule (an appointment must be `COMPLETED`
+    before a sale can be created from it, a refund can't exceed what was
+    paid, a status transition isn't legal from the current status). See
+    `authExceptions.tenantNotFound`/`userNotFound`
+    (`src/core/auth/auth-exceptions.ts`) for existing precedent of this
+    same 404-vs-422 distinction applied correctly.
+  - `408` — the request itself took too long and was aborted server-side
+    (see the timeout interceptor) — not something a specific feature
+    throws deliberately.
+  - `429` — the caller is being rate-limited (`ThrottlerException`,
+    translated automatically in `AllExceptionsFilter`) — also not
+    something feature code throws directly.
+  - `500` — our own code or infrastructure is broken in a way no caller
+    input could have triggered or fixed (a response failed to serialize
+    against its own schema, a DTO's Zod schema was never registered, a
+    query ran outside a transaction, a session's organization couldn't be
+    resolved). If a condition can legitimately happen from something a
+    caller did, it isn't a `500` — reach for one of the codes above
+    instead.
 
 ## Environment / configuration
 
