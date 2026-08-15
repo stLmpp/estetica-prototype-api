@@ -9,6 +9,7 @@
     "build": "nest build",
     "migrations:build:main": "tsx scripts/build-drizzle-kit-configs.ts",
     "migrations:generate:main": "drizzle-kit generate --config=migrations/dist/main-drizzle.config.js",
+    "migrations:generate-empty:main": "drizzle-kit generate --custom --config=migrations/dist/main-drizzle.config.js",
     "migrations:run:main": "drizzle-kit migrate --config=migrations/dist/main-drizzle.config.js",
     "migrations:run:auth": "pnpm dlx auth@latest migrate --config dist/core/auth/auth.js --yes",
     "format": "prettier --write \"src/**/*.ts\"",

@@ -1,20 +1,9 @@
 # TODO
 
 Things noticed in passing that aren't worth stopping the current task for.
-Pull from this list when there's no specific task in flight.
+Pull from this list when there's no specific task in flight. Finished items
+move to `TODO_DONE.md` instead of being deleted outright.
 
-- [ ] `employee_service`, `sale`, `sale_item`, and `sale_transaction` are
-      missing the `tg_soft_delete` trigger (`fn_soft_delete_trigger()`,
-      created in `migrations/main/20260520144049_initial`, attached per-table
-      in `migrations/main/20260803034517_trigger_deleted`) that every other
-      soft-deletable table has. Without it, `isDeleted` never flips to `true`
-      on delete, and the RLS policies (which filter on `is_deleted`, not
-      `deleted_at`) silently keep "deleted" rows fully visible/writable on
-      these four tables. Add a migration with
-      `CREATE TRIGGER tg_soft_delete AFTER UPDATE OF deleted_at ON "<table>"
-      FOR EACH ROW EXECUTE FUNCTION fn_soft_delete_trigger();` for each. See
-      **Database schema (drizzle entities)** in `docs/CONVENTIONS.md` for why
-      `migrations:generate:main` never adds this automatically.
 - [ ] `EmployeeServiceService.syncForEmployee` still injects
       `CatalogItemRepository` directly for its bulk catalog-item existence
       check (`findManyByIds` + compare counts) — no bulk equivalent exists on
