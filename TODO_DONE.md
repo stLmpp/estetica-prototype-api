@@ -25,3 +25,48 @@ outright.
       now-unused `CatalogItemRepository` and `CatalogItemExceptions`
       imports entirely. Documented the `requireMany` pattern in
       **Service method naming** in `docs/CONVENTIONS.md`.
+- [x] (2026-08-15) `core/auth/auth.ts` and
+      `core/auth/extra-auth-end-points.plugin.ts` had a real circular
+      dependency (`auth.ts` builds `auth` from a plugin list that includes
+      `extraAuthEndPointsPlugin()`; that plugin's handler called
+      `auth.api.addMember(...)`, needing the fully-built `auth` back) —
+      found via `pnpm dlx madge --circular --extensions ts
+      src/app.module.ts`. Turned out the plugin was only ever added as a
+      test and wasn't needed, so it (and its registration in `auth.ts`) was
+      deleted outright rather than restructured. `madge` now reports no
+      circular dependencies anywhere in `src` (previously only verified
+      clean under `src/features`).
+- [x] (2026-08-15) Audited every `src/features/*/*.service.ts` against
+      **Service method naming** in `docs/CONVENTIONS.md`. No violations —
+      `ConfigService.get`/`listGroup` and
+      `EmployeeServiceService.syncForEmployee` were already the doc's own
+      canonical examples for `get<Resolved>`/`list<Grouping>`/
+      `sync<Relation>`; `Customer`/`Employee`/`CatalogItem`/`Appointment`
+      were already brought in line by the earlier `require`/`get` refactor.
+      `AnamnesisFieldService` is an empty stub with no methods to check.
+- [x] (2026-08-15) Audited every `src/features/*/*.service.ts` for direct
+      injection of another feature's repository, per **Cross-feature
+      access** in `docs/CONVENTIONS.md`. No remaining violations —
+      every repository injection is either the feature's own
+      (`AppointmentRepository` in `AppointmentService`, etc.),
+      `ConfigAdminRepository` alongside `ConfigRepository` in
+      `ConfigService` (both operate on the `config` table — same feature,
+      two repository classes, not a cross-feature access), or the
+      documented `PersonRepository`/`PersonPhoneRepository` sub-entity
+      exception (`Customer`/`Employee`). `AnamnesisFieldService` is an
+      empty stub with no repositories injected.
+- [x] (2026-08-15) Audited every feature consumed cross-feature against
+      **Module structure: split into a `Read` module and the full module**
+      in `docs/CONVENTIONS.md`. Only `Customer`, `Employee`, and
+      `CatalogItem` are actually imported by another feature's module
+      (`Appointment` and `EmployeeService` both consume all three; nothing
+      else is consumed cross-feature yet) — all three already have their
+      `<Feature>ReadModule`, each importing only `MainDatabaseModule`, and
+      every cross-feature import (`AppointmentModule`,
+      `EmployeeServiceModule`) points at the `Read` module, never the full
+      one. Re-run this check once `Appointment` or anything else starts
+      being consumed cross-feature (e.g. by the upcoming `Sale` feature).
+
+This closed out every item that was in the main `TODO.md` list — remaining
+items live under **CI/CD dependencies** in `TODO.md`, parked until that
+infrastructure exists.
