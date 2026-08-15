@@ -41,6 +41,7 @@ export const mainRelations = defineRelations(mainEntities, (r) => ({
     followupItems: r.many.followupItem(),
     appointmentItems: r.many.appointmentItem(),
     employeeServices: r.many.employeeService(),
+    saleItems: r.many.saleItem(),
   },
 
   employeeService: {
@@ -137,6 +138,47 @@ export const mainRelations = defineRelations(mainEntities, (r) => ({
     catalogItem: r.one.catalogItem({
       from: r.appointmentItem.catalogItemId,
       to: r.catalogItem.id,
+      optional: false,
+    }),
+  },
+
+  sale: {
+    customer: r.one.customer({
+      from: r.sale.customerId,
+      to: r.customer.id,
+      optional: false,
+    }),
+    employee: r.one.employee({
+      from: r.sale.employeeId,
+      to: r.employee.id,
+      optional: false,
+    }),
+    appointment: r.one.appointment({
+      from: r.sale.appointmentId,
+      to: r.appointment.id,
+      optional: true,
+    }),
+    saleItems: r.many.saleItem(),
+    saleTransactions: r.many.saleTransaction(),
+  },
+
+  saleItem: {
+    sale: r.one.sale({
+      from: r.saleItem.saleId,
+      to: r.sale.id,
+      optional: false,
+    }),
+    catalogItem: r.one.catalogItem({
+      from: r.saleItem.catalogItemId,
+      to: r.catalogItem.id,
+      optional: false,
+    }),
+  },
+
+  saleTransaction: {
+    sale: r.one.sale({
+      from: r.saleTransaction.saleId,
+      to: r.sale.id,
       optional: false,
     }),
   },

@@ -25,4 +25,16 @@ export class AuthOrganizationRepository extends Repository {
       },
     });
   }
+
+  findFirstByIdWithWorkingHours(organizationId: string) {
+    return this.db.query.authOrganization.findFirst({
+      columns: {
+        id: true,
+        workingHours: true,
+      },
+      where: {
+        id: organizationId,
+      },
+    });
+  }
 }

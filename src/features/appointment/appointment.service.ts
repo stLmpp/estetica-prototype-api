@@ -3,6 +3,7 @@ import { AppointmentRepository } from '../../database/main/repositories/appointm
 import { CustomerRepository } from '../../database/main/repositories/customer.repository';
 import { EmployeeRepository } from '../../database/main/repositories/employee.repository';
 import { CatalogItemRepository } from '../../database/main/repositories/catalog-item.repository';
+import { OrganizationService } from '../../core/auth/organization.service';
 import { CreateAppointmentDto } from './dto/input/create-appointment.request';
 import { CreateAppointmentResDto } from './dto/output/create-appointment.response';
 import { UpdateAppointmentDto } from './dto/input/update-appointment.request';
@@ -20,6 +21,19 @@ import { CatalogItemExceptions } from '../catalog-item/catalog-item-exceptions';
 import { coreExceptions } from '../../core/core-exceptions';
 import { MainTransactional } from '../../database/main/main-database-connection';
 import { AppointmentStatus } from '../../shared/domain/appointment-staus.enum';
+import {
+  getWeekdayKey,
+  isWithinDayWorkingHours,
+  resolveDayWorkingHours,
+  WeeklyWorkingHours,
+} from '../../shared/model/working-hours.model';
+import dayjs from 'dayjs';
+
+const TERMINAL_APPOINTMENT_STATUSES = new Set<AppointmentStatus>([
+  AppointmentStatus.COMPLETED,
+  AppointmentStatus.CANCELLED,
+  AppointmentStatus.NO_SHOW,
+]);
 
 @Injectable()
 export class AppointmentService {
@@ -28,15 +42,49 @@ export class AppointmentService {
     private readonly customerRepository: CustomerRepository,
     private readonly employeeRepository: EmployeeRepository,
     private readonly catalogItemRepository: CatalogItemRepository,
+    private readonly organizationService: OrganizationService,
   ) {}
+
+  private assertWithinWorkingHours(
+    employeeWorkingHours: WeeklyWorkingHours | null | undefined,
+    organizationWorkingHours: WeeklyWorkingHours | null,
+    startTime: Date,
+    endTime: Date,
+  ) {
+    if (!dayjs(startTime).isSame(endTime, 'day')) {
+      throw AppointmentExceptions.appointmentOutsideWorkingHours([
+        {
+          field: 'endTime',
+          issue: 'appointment must start and end on the same day',
+        },
+      ]);
+    }
+    const weekday = getWeekdayKey(startTime);
+    const dayHours = resolveDayWorkingHours(
+      weekday,
+      employeeWorkingHours,
+      organizationWorkingHours,
+    );
+    if (!dayHours || !isWithinDayWorkingHours(dayHours, startTime, endTime)) {
+      throw AppointmentExceptions.appointmentOutsideWorkingHours([
+        {
+          field: 'startTime',
+          issue:
+            'time range falls outside the employee/organization working hours',
+        },
+      ]);
+    }
+  }
 
   @MainTransactional()
   async create(dto: CreateAppointmentDto): Promise<CreateAppointmentResDto> {
-    const [customer, employee, catalogItem] = await Promise.all([
-      this.customerRepository.findFirstByIdWithPerson(dto.customerId),
-      this.employeeRepository.findFirstByIdWithPerson(dto.employeeId),
-      this.catalogItemRepository.findFirstById(dto.catalogItemId),
-    ]);
+    const [customer, employee, catalogItem, organizationWorkingHours] =
+      await Promise.all([
+        this.customerRepository.findFirstByIdWithPerson(dto.customerId),
+        this.employeeRepository.findFirstByIdWithPerson(dto.employeeId),
+        this.catalogItemRepository.findFirstById(dto.catalogItemId),
+        this.organizationService.getCurrentWorkingHours(),
+      ]);
     if (!customer) {
       throw CustomerExceptions.customerNotFound([
         {
@@ -61,6 +109,13 @@ export class AppointmentService {
         },
       ]);
     }
+
+    this.assertWithinWorkingHours(
+      employee.workingHours,
+      organizationWorkingHours,
+      dto.startTime,
+      dto.endTime,
+    );
 
     const priceApplied = dto.priceApplied ?? catalogItem.defaultPrice;
     if (!priceApplied) {
@@ -135,12 +190,16 @@ export class AppointmentService {
     }
 
     if (dto.startTime || dto.endTime) {
-      const conflict = await this.appointmentRepository.hasConflict(
-        appointment.employeeId,
-        newStartTime,
-        newEndTime,
-        id,
-      );
+      const [employee, organizationWorkingHours, conflict] = await Promise.all([
+        this.employeeRepository.findFirstById(appointment.employeeId),
+        this.organizationService.getCurrentWorkingHours(),
+        this.appointmentRepository.hasConflict(
+          appointment.employeeId,
+          newStartTime,
+          newEndTime,
+          id,
+        ),
+      ]);
       if (conflict) {
         throw AppointmentExceptions.appointmentConflict([
           {
@@ -149,6 +208,12 @@ export class AppointmentService {
           },
         ]);
       }
+      this.assertWithinWorkingHours(
+        employee?.workingHours,
+        organizationWorkingHours,
+        newStartTime,
+        newEndTime,
+      );
     }
 
     await this.appointmentRepository.update(id, dto);
@@ -162,8 +227,17 @@ export class AppointmentService {
         { field: 'appointmentId', issue: `not found with value '${id}'` },
       ]);
     }
-    // TODO: status transition rules (e.g. which statuses can move to which)
-    // belong here once they're defined.
+    if (dto.status === appointment.status) {
+      return;
+    }
+    if (TERMINAL_APPOINTMENT_STATUSES.has(appointment.status)) {
+      throw AppointmentExceptions.appointmentInvalidStatusTransition([
+        {
+          field: 'status',
+          issue: `cannot transition from terminal status '${appointment.status}' to '${dto.status}'`,
+        },
+      ]);
+    }
     await this.appointmentRepository.update(id, { status: dto.status });
   }
 

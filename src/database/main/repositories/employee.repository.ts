@@ -118,6 +118,7 @@ export class EmployeeRepository extends Repository {
       },
       columns: {
         id: true,
+        workingHours: true,
       },
       with: {
         person: {

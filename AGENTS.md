@@ -59,6 +59,8 @@ src/
 migrations/               drizzle-kit migrations + per-datasource configs
 docs/                     CONVENTIONS.md — code-level rules, see above
                           MIGRATIONS.md — drizzle migration workflow
+                          features/<feature>/  FUNCTIONAL.md + DATABASE.md
+                            per feature (templates in features/_templates/)
 test/                     e2e tests (jest-e2e.json)
 ```
 
@@ -88,3 +90,12 @@ test/                     e2e tests (jest-e2e.json)
   better-auth, etc.), verify against the installed package or official docs
   rather than pattern-matching from something that merely looks similar —
   and ask if it's still unclear.
+- **Keep `docs/features/<feature>/` in sync with the code.** Whenever a
+  change adds, removes, or updates a database table/column/relationship, or
+  changes a business rule (who can do what, when something is allowed,
+  status/lifecycle behavior), update that feature's `DATABASE.md` and/or
+  `FUNCTIONAL.md` in the same change — not as a follow-up. If the feature
+  doesn't have these docs yet, create them from the templates in
+  `docs/features/_templates/` rather than skipping documentation. Purely
+  internal refactors with no schema or business-rule change don't need a
+  doc update.
