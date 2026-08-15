@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
 import { EmployeeServiceRepository } from '../../database/main/repositories/employee-service.repository';
-import { CatalogItemRepository } from '../../database/main/repositories/catalog-item.repository';
 import { EmployeeReadService } from '../employee/employee-read.service';
 import { CatalogItemReadService } from '../catalog-item/catalog-item-read.service';
 import { CreateEmployeeServiceDto } from './dto/input/create-employee-service.request';
@@ -8,13 +7,11 @@ import { CreateEmployeeServiceResDto } from './dto/output/create-employee-servic
 import { FilterEmployeeServiceDto } from './dto/input/list-employee-service.request';
 import { EmployeeServiceExceptions } from './employee-service-exceptions';
 import { MainTransactional } from '../../database/main/main-database-connection';
-import { CatalogItemExceptions } from '../catalog-item/catalog-item-exceptions';
 
 @Injectable()
 export class EmployeeServiceService {
   constructor(
     private readonly employeeServiceRepository: EmployeeServiceRepository,
-    private readonly catalogItemRepository: CatalogItemRepository,
     private readonly employeeReadService: EmployeeReadService,
     private readonly catalogItemReadService: CatalogItemReadService,
   ) {}
@@ -76,20 +73,11 @@ export class EmployeeServiceService {
 
   @MainTransactional()
   async syncForEmployee(employeeId: string, catalogItemIds: string[]) {
-    await this.employeeReadService.require(employeeId);
-
     const uniqueCatalogItemIds = [...new Set(catalogItemIds)];
-    const catalogItems =
-      await this.catalogItemRepository.findManyByIds(uniqueCatalogItemIds);
-    if (catalogItems.length !== uniqueCatalogItemIds.length) {
-      throw CatalogItemExceptions.catalogItemNotFound([
-        // TODO add a specific exception for this and list the catalog itens that were not found
-        {
-          field: 'catalogItemIds',
-          issue: 'one or more catalog items were not found',
-        },
-      ]);
-    }
+    await Promise.all([
+      this.employeeReadService.require(employeeId),
+      this.catalogItemReadService.requireMany(uniqueCatalogItemIds),
+    ]);
 
     const existingLinks =
       await this.employeeServiceRepository.findAllActiveByEmployeeId(

@@ -15,3 +15,13 @@ outright.
       (`migrations/main/20260815021753_bizarre_shriek`) adding the trigger
       to all four. See **Custom / hand-written SQL migrations** in
       `docs/MIGRATIONS.md` for the workflow used.
+- [x] (2026-08-15) `EmployeeServiceService.syncForEmployee` injected
+      `CatalogItemRepository` directly for its bulk catalog-item existence
+      check (`findManyByIds` + compare counts), violating **Cross-feature
+      access**. Fixed by adding `CatalogItemReadService.requireMany(ids)`
+      — a bulk form of `require` (throws listing whichever ids didn't
+      resolve, in the `details` array, otherwise returns all matching rows)
+      — and switching `syncForEmployee` to call it instead; also dropped its
+      now-unused `CatalogItemRepository` and `CatalogItemExceptions`
+      imports entirely. Documented the `requireMany` pattern in
+      **Service method naming** in `docs/CONVENTIONS.md`.

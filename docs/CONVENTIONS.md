@@ -284,6 +284,14 @@ exactly like the existing `update`/`updateStatus`/`delete` never say
   lookup uses a field other than the primary key (e.g. `getByName`). Combine
   with the relation-loading suffix if needed
   (`requireByNameWithPerson(value)`).
+- `requireMany(ids[])` — bulk form of `require`: throws (listing which
+  ids didn't resolve, in the `details` array) unless every given id matches
+  a row, otherwise returns all of them. Prefer this over a call site
+  fetching by ids and hand-rolling its own `results.length !== ids.length`
+  check (e.g. `CatalogItemReadService.requireMany`, used by
+  `EmployeeServiceService.syncForEmployee` to validate a batch of
+  `catalogItemId`s in one call instead of injecting `CatalogItemRepository`
+  directly).
 - `listPaginated(dto)` — paginated list + total count.
 - `list<Grouping>(dto)` — a non-paginated list variant (e.g. `listGroup`).
 - `get<Resolved>(dto)` — a single value resolved through a scope/fallback

@@ -21,6 +21,24 @@ export class CatalogItemReadService {
     return this.mapEntityToDto(catalogItem);
   }
 
+  @MainTransactional()
+  async requireMany(ids: string[]) {
+    const uniqueIds = [...new Set(ids)];
+    const catalogItems =
+      await this.catalogItemRepository.findManyByIds(uniqueIds);
+    if (catalogItems.length !== uniqueIds.length) {
+      const foundIds = new Set(catalogItems.map((item) => item.id));
+      const missingIds = uniqueIds.filter((id) => !foundIds.has(id));
+      throw CatalogItemExceptions.catalogItemNotFound(
+        missingIds.map((id) => ({
+          field: 'catalogItemIds',
+          issue: `not found with value '${id}'`,
+        })),
+      );
+    }
+    return catalogItems.map((entity) => this.mapEntityToDto(entity));
+  }
+
   private mapEntityToDto(
     entity: InferSelectModel<typeof mainEntities.catalogItem>,
   ): CatalogItemModel {
