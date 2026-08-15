@@ -56,17 +56,11 @@ const CORE_MODULES: ModuleMetadata['imports'] = [
     useFactory: (appEnv: AppEnv, redis: Redis) => ({
       throttlers: [
         {
-          // TODO improve key
           ttl: appEnv.throttlerTtlMs,
           limit: appEnv.throttlerLimit,
         },
       ],
-      storage: new RedisThrottlerStorage(
-        // RedisThrottlerStorage is typed against node-redis's RedisClientType; ThrottlerRedisClient
-        // only implements the subset it actually calls (scriptLoad/evalSha/eval) — see its own
-        // comment for why a straight `redis` client can't be passed here.
-        new ThrottlerRedisClient(redis),
-      ),
+      storage: new RedisThrottlerStorage(new ThrottlerRedisClient(redis)),
     }),
   }),
   BetterAuthModule.forRoot({

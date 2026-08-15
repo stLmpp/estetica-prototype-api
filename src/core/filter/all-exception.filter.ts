@@ -86,7 +86,7 @@ export class AllExceptionsFilter extends BaseExceptionFilter {
         cause &&
         typeof cause === 'object' &&
         'code' in cause &&
-        cause.code === '42704' // TODO enum
+        cause.code === '42704'
       ) {
         unknownException = coreExceptions.databaseSessionNotSet([
           {
@@ -126,8 +126,6 @@ export class AllExceptionsFilter extends BaseExceptionFilter {
       return;
     }
 
-    // TODO improve logger
-    // TODO catch APIError from better-auth
     this.logger.error('An unknown exception occurred', {
       clazz:
         unknownException &&

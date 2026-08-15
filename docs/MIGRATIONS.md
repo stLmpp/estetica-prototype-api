@@ -33,12 +33,12 @@ latest schema changes, if you skip it):
 
 ## Quick reference
 
-| Step         | Command                                |
-| ------------ | --------------------------------------- |
-| Build        | `pnpm migrations:build:main`            |
-| Generate     | `pnpm migrations:generate:main`         |
+| Step                    | Command                               |
+|-------------------------|---------------------------------------|
+| Build                   | `pnpm migrations:build:main`          |
+| Generate                | `pnpm migrations:generate:main`       |
 | Generate (custom/empty) | `pnpm migrations:generate-empty:main` |
-| Run          | `pnpm migrations:run:main`              |
+| Run                     | `pnpm migrations:run:main`            |
 
 The auth datasource has its own runner (`pnpm migrations:run:auth`) and does
 not go through this build/generate flow — it's managed by better-auth's CLI

@@ -66,7 +66,7 @@ export const auth = betterAuth({
         admin: organizationAccessControl.admin,
         member: organizationAccessControl.member,
       },
-      requireEmailVerificationOnInvitation: false, // TODO
+      requireEmailVerificationOnInvitation: false,
       allowUserToCreateOrganization: (user) => user.role === AuthRole.Admin,
       disableOrganizationDeletion: true,
       schema: {
@@ -162,7 +162,7 @@ export const auth = betterAuth({
   },
   emailAndPassword: {
     enabled: true,
-    requireEmailVerification: false, // TODO
+    requireEmailVerification: false,
     disableSignUp: true,
   },
   secondaryStorage: BetterAuthRedisSecondaryStorage.getInstance(),
