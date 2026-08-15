@@ -45,6 +45,49 @@ the actual coding conventions it points to.
   the column's actual scale) before persisting/returning the string. See
   `SaleService`'s money helpers (`src/features/sale/sale.service.ts`) for
   the pattern.
+- **Avoid nested conditionals — return early / fail fast instead.** When a
+  method has several preconditions to check before doing its real work,
+  check each one on its own line and `return`/`throw` immediately rather
+  than wrapping the "happy path" in progressively deeper `if` blocks.
+  Nesting forces the reader to hold every enclosing condition in their head
+  to know what a given line actually depends on; a flat sequence of guard
+  clauses reads top-to-bottom and each one can be understood in isolation.
+
+  ```ts
+  // Avoid — the real logic is buried three levels deep, and every branch
+  // has to be traced back through both enclosing conditions to know when
+  // it actually runs.
+  async updateStatus(id: string, dto: UpdateSaleStatusDto) {
+    const sale = await this.require(id);
+    if (dto.status !== sale.status) {
+      if (sale.status === SaleStatus.PENDING) {
+        if (dto.status === SaleStatus.CANCELLED) {
+          await this.saleRepository.update(id, { status: dto.status });
+        } else {
+          throw SaleExceptions.saleInvalidStatusTransition([...]);
+        }
+      } else {
+        throw SaleExceptions.saleInvalidStatusTransition([...]);
+      }
+    }
+  }
+
+  // Prefer — each guard clause stands on its own; by the last line, every
+  // invalid case has already exited.
+  async updateStatus(id: string, dto: UpdateSaleStatusDto) {
+    const sale = await this.require(id);
+    if (dto.status === sale.status) {
+      return;
+    }
+    if (sale.status !== SaleStatus.PENDING || dto.status !== SaleStatus.CANCELLED) {
+      throw SaleExceptions.saleInvalidStatusTransition([...]);
+    }
+    await this.saleRepository.update(id, { status: dto.status });
+  }
+  ```
+
+  See `SaleService.updateStatus` (`src/features/sale/sale.service.ts`) for
+  this exact shape in real code.
 
 ## Adding a new feature module
 
