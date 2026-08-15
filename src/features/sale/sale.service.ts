@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import Big from 'big.js';
+import dayjs from 'dayjs';
 import { InferSelectModel } from 'drizzle-orm';
 import { mainEntities } from '../../database/main/main-entities';
 import { SaleRepository } from '../../database/main/repositories/sale.repository';
@@ -69,8 +70,12 @@ export class SaleService {
       items.map((item) => this.multiplyMoney(item.priceApplied, item.quantity)),
     );
 
-    const transactionsInput = dto.transactions ?? [];
-    this.assertRefundsDoNotExceedPayments(transactionsInput);
+    const transactionsInput = [
+      ...(dto.transactions ?? []),
+      ...(dto.installmentPlan
+        ? this.generateInstallmentTransactions(dto.installmentPlan)
+        : []),
+    ];
     const status = this.deriveStatus(transactionsInput, totalAmount);
 
     const sale = await this.saleRepository.insert({
@@ -272,6 +277,34 @@ export class SaleService {
         catalogItemName: catalogItem.name,
         quantity: item.quantity,
         priceApplied,
+      };
+    });
+  }
+
+  private generateInstallmentTransactions(
+    plan: NonNullable<CreateSaleDto['installmentPlan']>,
+  ) {
+    const baseAmount = new Big(plan.amount)
+      .div(plan.installmentCount)
+      .round(2, Big.roundDown);
+    const lastAmount = new Big(plan.amount).minus(
+      baseAmount.times(plan.installmentCount - 1),
+    );
+
+    return Array.from({ length: plan.installmentCount }, (_, index) => {
+      const installmentNumber = index + 1;
+      const isLastInstallment = installmentNumber === plan.installmentCount;
+      return {
+        type: SaleTransactionType.PAYMENT,
+        paymentMethod: plan.paymentMethod,
+        amount: (isLastInstallment ? lastAmount : baseAmount).toFixed(2),
+        installmentNumber,
+        installmentCount: plan.installmentCount,
+        dueDate: dayjs(plan.firstDueDate).add(index, 'month').toDate(),
+        receivedAt:
+          installmentNumber === 1 && plan.markFirstInstallmentAsReceived
+            ? new Date()
+            : undefined,
       };
     });
   }

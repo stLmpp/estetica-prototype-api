@@ -39,6 +39,22 @@ register — a walk-in purchase with no appointment behind it.
 - An installment plan is represented as multiple `PAYMENT` transactions that
   share the same `installmentCount`, each with its own `installmentNumber`,
   `dueDate`, and `receivedAt`.
+- **Installments are only available on credit card.** A sale can be created
+  with an installment plan shorthand — total amount + installment count —
+  instead of the caller building each transaction by hand; the API rejects
+  the request if the plan's payment method isn't `CREDIT_CARD`. The
+  schedule is always monthly: installment *N* is due *N*-1 months after the
+  given first due date (same day each month). Splitting the total evenly
+  rarely divides cleanly, so the last installment absorbs whatever's left
+  over rather than distributing the remainder — the installments still
+  always sum exactly to the plan's total. The first installment can
+  optionally be marked as already received (paid on the spot) as part of
+  the same request; every other installment starts unconfirmed
+  (`receivedAt` unset) and is confirmed later like any other transaction.
+- **A sale cannot be created already refunded.** The `transactions` an
+  API caller can submit at sale creation are payments only — a `REFUND`
+  is only valid against a sale that already exists (via the add-transaction
+  action), never in the initial creation payload.
 - A transaction with `receivedAt` unset is still pending — the money hasn't
   been confirmed yet, whether that's a future installment or an
   unconfirmed payment.
@@ -81,11 +97,28 @@ register — a walk-in purchase with no appointment behind it.
   - Then the operation is rejected
 
 - **Installment payment**
-  - Given a sale of R$300 to be paid in 3x on a credit card
-  - When the sale is finalized
-  - Then three `PAYMENT` transactions are created, each ~R$100, sharing
-    `installmentCount: 3`, with `installmentNumber` 1/2/3 and their own
-    `dueDate`s — only the first may have `receivedAt` set immediately
+  - Given a sale of R$300 to be paid in 3x on a credit card, with a first
+    due date of the 15th
+  - When the sale is created with an installment plan (amount R$300, count
+    3, first due date the 15th)
+  - Then three `PAYMENT` transactions are created — R$100 due the 15th,
+    R$100 due the following 15th, R$100 due the 15th after that — sharing
+    `installmentCount: 3` with `installmentNumber` 1/2/3, and none of them
+    are confirmed (`receivedAt` unset) unless the request also marked the
+    first as received
+
+- **Installment plan on an uneven split**
+  - Given a sale of R$100 to be paid in 3x on a credit card
+  - When the sale is created with that installment plan
+  - Then the first two installments are R$33.33 each and the third is
+    R$33.34 — the rounding remainder lands on the last installment so the
+    total still adds up to exactly R$100
+
+- **Attempt to finance a non-credit-card payment**
+  - Given a sale being created with an installment plan whose payment
+    method is cash or debit card
+  - When the request is submitted
+  - Then it's rejected — only credit card can be split into installments
 
 - **Split payment**
   - Given a customer pays part in cash and part by card
@@ -113,6 +146,13 @@ register — a walk-in purchase with no appointment behind it.
   - When a second `REFUND` transaction for R$50 is submitted
   - Then the operation is rejected — R$60 + R$50 would exceed the R$100
     confirmed paid, even though neither refund alone does
+
+- **Attempt to include a refund at sale creation**
+  - Given a sale creation request whose `transactions` include one with
+    `type: REFUND`
+  - When the request is submitted
+  - Then it's rejected — a refund can only be recorded against a sale that
+    already exists
 
 ## Out of scope
 
