@@ -19,6 +19,7 @@ import { CatalogItemRepository } from './repositories/catalog-item.repository';
 import { EmployeeRepository } from './repositories/employee.repository';
 import { EmployeeServiceRepository } from './repositories/employee-service.repository';
 import { AppointmentRepository } from './repositories/appointment.repository';
+import { SaleRepository } from './repositories/sale.repository';
 
 const REPOSITORIES = [
   CustomerRepository,
@@ -33,6 +34,7 @@ const REPOSITORIES = [
   EmployeeRepository,
   EmployeeServiceRepository,
   AppointmentRepository,
+  SaleRepository,
 ];
 
 @Module({

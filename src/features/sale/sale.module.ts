@@ -3,12 +3,12 @@ import { MainDatabaseModule } from '../../database/main/main-database.module';
 import { CustomerReadModule } from '../customer/customer-read.module';
 import { EmployeeReadModule } from '../employee/employee-read.module';
 import { CatalogItemReadModule } from '../catalog-item/catalog-item-read.module';
-import { AppointmentReadModule } from './appointment-read.module';
-import { AppointmentController } from './appointment.controller';
-import { AppointmentService } from './appointment.service';
+import { AppointmentReadModule } from '../appointment/appointment-read.module';
+import { SaleController } from './sale.controller';
+import { SaleService } from './sale.service';
 
 @Module({
-  controllers: [AppointmentController],
+  controllers: [SaleController],
   imports: [
     MainDatabaseModule,
     CustomerReadModule,
@@ -16,6 +16,6 @@ import { AppointmentService } from './appointment.service';
     CatalogItemReadModule,
     AppointmentReadModule,
   ],
-  providers: [AppointmentService],
+  providers: [SaleService],
 })
-export class AppointmentModule {}
+export class SaleModule {}

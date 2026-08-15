@@ -9,7 +9,7 @@ import { CreateAppointmentResDto } from './dto/output/create-appointment.respons
 import { UpdateAppointmentDto } from './dto/input/update-appointment.request';
 import { UpdateAppointmentStatusDto } from './dto/input/update-appointment-status.request';
 import { FilterAppointmentDto } from './dto/input/list-appointment.request';
-import { GetAppointmentResDto } from './dto/output/get-appointment.response';
+import { AppointmentReadService } from './appointment-read.service';
 import { GetDayScheduleDto } from './dto/input/get-day-schedule.request';
 import { DayScheduleAppointmentDto } from './dto/output/get-day-schedule.response';
 import { GetCalendarRangeDto } from './dto/input/get-calendar-range.request';
@@ -40,6 +40,7 @@ export class AppointmentService {
     private readonly employeeReadService: EmployeeReadService,
     private readonly catalogItemReadService: CatalogItemReadService,
     private readonly organizationService: OrganizationService,
+    private readonly appointmentReadService: AppointmentReadService,
   ) {}
 
   private assertWithinWorkingHours(
@@ -146,7 +147,7 @@ export class AppointmentService {
 
   @MainTransactional()
   async update(id: string, dto: UpdateAppointmentDto) {
-    const appointment = await this.require(id);
+    const appointment = await this.appointmentReadService.require(id);
 
     const newStartTime = dto.startTime ?? appointment.startTime;
     const newEndTime = dto.endTime ?? appointment.endTime;
@@ -188,7 +189,7 @@ export class AppointmentService {
 
   @MainTransactional()
   async updateStatus(id: string, dto: UpdateAppointmentStatusDto) {
-    const appointment = await this.require(id);
+    const appointment = await this.appointmentReadService.require(id);
     if (dto.status === appointment.status) {
       return;
     }
@@ -205,53 +206,13 @@ export class AppointmentService {
 
   @MainTransactional()
   async delete(id: string) {
-    await this.require(id);
+    await this.appointmentReadService.require(id);
     await this.appointmentRepository.delete(id);
   }
 
   @MainTransactional()
   async listPaginated(dto: FilterAppointmentDto) {
     return this.appointmentRepository.findPaginated(dto);
-  }
-
-  @MainTransactional()
-  async require(id: string) {
-    const appointment = await this.appointmentRepository.findFirstById(id);
-    if (!appointment) {
-      throw AppointmentExceptions.appointmentNotFound([
-        { field: 'appointmentId', issue: `not found with value '${id}'` },
-      ]);
-    }
-    return appointment;
-  }
-
-  @MainTransactional()
-  async requireWithCustomerAndEmployeeAndCatalogItem(
-    id: string,
-  ): Promise<GetAppointmentResDto> {
-    const appointment =
-      await this.appointmentRepository.findFirstByIdWithCustomerAndEmployeeAndCatalogItem(
-        id,
-      );
-    if (!appointment) {
-      throw AppointmentExceptions.appointmentNotFound([
-        { field: 'appointmentId', issue: `not found with value '${id}'` },
-      ]);
-    }
-    return {
-      id: appointment.id,
-      status: appointment.status,
-      startTime: appointment.startTime,
-      endTime: appointment.endTime,
-      notes: appointment.notes ?? undefined,
-      customerId: appointment.customerId,
-      customerName: appointment.customerName,
-      employeeId: appointment.employeeId,
-      employeeName: appointment.employeeName,
-      catalogItemId: appointment.catalogItemId,
-      catalogItemName: appointment.catalogItemName,
-      priceApplied: appointment.priceApplied,
-    };
   }
 
   @MainTransactional()

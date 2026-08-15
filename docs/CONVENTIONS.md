@@ -37,6 +37,14 @@ the actual coding conventions it points to.
   instead of a control-flow jump: `const [error, data] = await safeAsync(() => thing())`.
   Reach for `try`/`catch` only when `safe`/`safeAsync` genuinely doesn't fit
   (e.g. an event-listener/lifecycle callback where you can't return a tuple).
+- Never do decimal arithmetic (sum, subtract, multiply, divide) on money/
+  numeric-column values with native JS operators or `parseFloat`/`Number`
+  math — floating-point error compounds silently on `numeric`-backed values
+  like `priceApplied`/`totalAmount`/`amount`. Use `big.js` (`Big` from
+  `'big.js'`) for the calculation and convert back with `.toFixed(2)` (or
+  the column's actual scale) before persisting/returning the string. See
+  `SaleService`'s money helpers (`src/features/sale/sale.service.ts`) for
+  the pattern.
 
 ## Adding a new feature module
 

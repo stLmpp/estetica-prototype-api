@@ -90,6 +90,16 @@ test/                     e2e tests (jest-e2e.json)
   better-auth, etc.), verify against the installed package or official docs
   rather than pattern-matching from something that merely looks similar —
   and ask if it's still unclear.
+- **Read a feature's docs before implementing it.** Before writing or
+  changing code for `features/<feature>/`, read that feature's
+  `docs/features/<feature>/FUNCTIONAL.md` and `DATABASE.md` if they exist —
+  they're the source of truth for business rules, lifecycle/status
+  behavior, and scenarios the implementation must satisfy. Don't infer
+  scope from the entity/table shape alone (e.g. a table with no
+  service/controller yet, like `sale` before it had one, doesn't mean the
+  feature has no documented rules to follow). If the docs don't exist yet,
+  create them from the templates in `docs/features/_templates/` as part of
+  the same change rather than skipping straight to code.
 - **Keep `docs/features/<feature>/` in sync with the code.** Whenever a
   change adds, removes, or updates a database table/column/relationship, or
   changes a business rule (who can do what, when something is allowed,

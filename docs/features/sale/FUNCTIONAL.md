@@ -44,6 +44,12 @@ register — a walk-in purchase with no appointment behind it.
   unconfirmed payment.
 - `sale.status` is a high-level summary, not hand-edited — it's kept in sync
   with the underlying transactions.
+- A refund cannot exceed the net amount already paid: total `REFUND`
+  amount for a sale can never exceed the sum of its confirmed (`receivedAt`
+  set) `PAYMENT` transactions. This is checked against the sale's full
+  transaction history, not just the single new transaction being added —
+  e.g. a second refund is rejected once it would push the combined
+  refunded total past what was actually paid.
 
 ## Lifecycle
 
@@ -95,12 +101,19 @@ register — a walk-in purchase with no appointment behind it.
     transactions are left untouched, and the sale's status becomes
     `REFUNDED`
 
+- **Refund larger than what was paid**
+  - Given a sale with R$100 in confirmed `PAYMENT` transactions
+  - When a `REFUND` transaction for R$150 is submitted
+  - Then the operation is rejected — a refund can never push the sale's
+    total refunded amount past its confirmed paid amount
+
+- **Second refund exceeding the remaining paid balance**
+  - Given a sale with R$100 confirmed paid and a R$60 `REFUND` already
+    recorded against it
+  - When a second `REFUND` transaction for R$50 is submitted
+  - Then the operation is rejected — R$60 + R$50 would exceed the R$100
+    confirmed paid, even though neither refund alone does
+
 ## Out of scope
 
-- No API/service layer yet — this pass only covers the data model. Creating,
-  listing, or updating sales isn't possible through the app yet.
-- No automatic `sale.status` derivation logic yet — that's future
-  service-layer work.
 - Discounts and taxes are not modeled.
-- Refund amount validation (e.g. blocking a refund larger than what was
-  paid) is not enforced anywhere yet.

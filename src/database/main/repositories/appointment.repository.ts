@@ -96,6 +96,24 @@ export class AppointmentRepository extends Repository {
     return result;
   }
 
+  findFirstByIdWithItems(id: string) {
+    return this.db.query.appointment.findFirst({
+      where: {
+        id,
+      },
+      with: {
+        appointmentItems: {
+          columns: {
+            id: true,
+            catalogItemId: true,
+            quantity: true,
+            priceApplied: true,
+          },
+        },
+      },
+    });
+  }
+
   async findPaginated({
     page,
     limit,

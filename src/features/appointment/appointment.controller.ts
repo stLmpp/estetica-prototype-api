@@ -9,6 +9,7 @@ import {
   Query,
 } from '@nestjs/common';
 import { AppointmentService } from './appointment.service';
+import { AppointmentReadService } from './appointment-read.service';
 import { UpdateAppointmentRequest } from './dto/input/update-appointment.request';
 import { UpdateAppointmentStatusRequest } from './dto/input/update-appointment-status.request';
 import { AppointmentCreateRequest } from './dto/input/create-appointment.request';
@@ -30,7 +31,10 @@ import { HasPermission } from '../../core/auth/has-permission.decorator';
 })
 @RequireActiveOrg()
 export class AppointmentController {
-  constructor(private readonly appointmentService: AppointmentService) {}
+  constructor(
+    private readonly appointmentService: AppointmentService,
+    private readonly appointmentReadService: AppointmentReadService,
+  ) {}
 
   @ResponseType(CreateAppointmentResponseModel, 201)
   @Post()
@@ -127,7 +131,7 @@ export class AppointmentController {
     @Param('appointmentId') appointmentId: string,
   ): Promise<GetAppointmentResponseModel> {
     const appointment =
-      await this.appointmentService.requireWithCustomerAndEmployeeAndCatalogItem(
+      await this.appointmentReadService.requireWithCustomerAndEmployeeAndCatalogItem(
         appointmentId,
       );
     return { data: { appointment } };
