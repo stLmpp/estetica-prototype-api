@@ -48,4 +48,9 @@ export const coreExceptions = {
     status: 408,
     message: 'Request timeout',
   }),
+  organizationNotFound: exception({
+    code: 'ORGANIZATION_NOT_FOUND',
+    status: 500,
+    message: 'Organization not found',
+  }),
 };

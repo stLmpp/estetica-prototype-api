@@ -10,8 +10,7 @@ import { CustomerExceptions } from './customer-exceptions';
 import { MainTransactional } from '../../database/main/main-database-connection';
 import { PersonRepository } from '../../database/main/repositories/person.repository';
 import { PersonPhoneRepository } from '../../database/main/repositories/person-phone.repository';
-import { AuthOrganizationRepository } from '../../database/main/repositories/auth-organization.repository';
-import { AuthDataService } from '../../core/auth/auth-data.service';
+import { OrganizationService } from '../../core/auth/organization.service';
 
 @Injectable()
 export class CustomerService {
@@ -19,15 +18,13 @@ export class CustomerService {
     private readonly customerRepository: CustomerRepository,
     private readonly personRepository: PersonRepository,
     private readonly personPhoneRepository: PersonPhoneRepository,
-    private readonly authOrganizationRepository: AuthOrganizationRepository,
-    private readonly authDataService: AuthDataService,
+    private readonly organizationService: OrganizationService,
   ) {}
 
   @MainTransactional()
   async create(dto: CreateCustomerDto): Promise<CreateCustomerResDto> {
-    const tenantId = this.authDataService.getTenantId();
     const [organization, customerCount] = await Promise.all([
-      this.authOrganizationRepository.findFirstByIdWithCustomerLimit(tenantId),
+      this.organizationService.getCurrentOrganization(),
       this.customerRepository.count(),
     ]);
     if (organization && customerCount >= organization.customerLimit) {

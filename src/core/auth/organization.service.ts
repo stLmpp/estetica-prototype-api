@@ -1,10 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { AuthOrganizationRepository } from '../../database/main/repositories/auth-organization.repository';
 import { AuthDataService } from './auth-data.service';
-import {
-  parseWorkingHours,
-  type WeeklyWorkingHours,
-} from '../../shared/model/working-hours.model';
+import { parseWorkingHours } from '../../shared/model/working-hours.model';
+import { coreExceptions } from '../core-exceptions';
 
 @Injectable()
 export class OrganizationService {
@@ -17,18 +15,16 @@ export class OrganizationService {
     return this.authDataService.getTenantId();
   }
 
-  async getWorkingHours(tenantId: string): Promise<WeeklyWorkingHours | null> {
-    const organization =
-      await this.organizationRepository.findFirstByIdWithWorkingHours(tenantId);
-    return parseWorkingHours(organization?.workingHours);
-  }
-
-  /**
-   * Working hours of the organization from the current request's session —
-   * lets feature services depend on "the current org's working hours"
-   * without ever resolving a tenant id themselves.
-   */
-  getCurrentWorkingHours(): Promise<WeeklyWorkingHours | null> {
-    return this.getWorkingHours(this.getCurrentTenantId());
+  async getCurrentOrganization() {
+    const organization = await this.organizationRepository.findFirstById(
+      this.getCurrentTenantId(),
+    );
+    if (!organization) {
+      throw coreExceptions.organizationNotFound();
+    }
+    return {
+      ...organization,
+      workingHours: parseWorkingHours(organization.workingHours),
+    };
   }
 }

@@ -78,13 +78,12 @@ export class AppointmentService {
 
   @MainTransactional()
   async create(dto: CreateAppointmentDto): Promise<CreateAppointmentResDto> {
-    const [customer, employee, catalogItem, organizationWorkingHours] =
-      await Promise.all([
-        this.customerRepository.findFirstByIdWithPerson(dto.customerId),
-        this.employeeRepository.findFirstByIdWithPerson(dto.employeeId),
-        this.catalogItemRepository.findFirstById(dto.catalogItemId),
-        this.organizationService.getCurrentWorkingHours(),
-      ]);
+    const [customer, employee, catalogItem, organization] = await Promise.all([
+      this.customerRepository.findFirstByIdWithPerson(dto.customerId),
+      this.employeeRepository.findFirstByIdWithPerson(dto.employeeId),
+      this.catalogItemRepository.findFirstById(dto.catalogItemId),
+      this.organizationService.getCurrentOrganization(),
+    ]);
     if (!customer) {
       throw CustomerExceptions.customerNotFound([
         {
@@ -112,7 +111,7 @@ export class AppointmentService {
 
     this.assertWithinWorkingHours(
       employee.workingHours,
-      organizationWorkingHours,
+      organization.workingHours,
       dto.startTime,
       dto.endTime,
     );
@@ -190,9 +189,9 @@ export class AppointmentService {
     }
 
     if (dto.startTime || dto.endTime) {
-      const [employee, organizationWorkingHours, conflict] = await Promise.all([
+      const [employee, organization, conflict] = await Promise.all([
         this.employeeRepository.findFirstById(appointment.employeeId),
-        this.organizationService.getCurrentWorkingHours(),
+        this.organizationService.getCurrentOrganization(),
         this.appointmentRepository.hasConflict(
           appointment.employeeId,
           newStartTime,
@@ -210,7 +209,7 @@ export class AppointmentService {
       }
       this.assertWithinWorkingHours(
         employee?.workingHours,
-        organizationWorkingHours,
+        organization.workingHours,
         newStartTime,
         newEndTime,
       );
