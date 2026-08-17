@@ -95,6 +95,18 @@ finished — parked here instead of the main list until that's set up.
       check used here. See **Module structure: split into a `Read` module
       and the full module** in `docs/CONVENTIONS.md` for the pattern this is
       meant to guard.
+- [ ] Custom colors per organization (branding). No backend support yet —
+      `workingHours`/`customerLimit`/`membershipLimit` are the existing
+      precedent for org-level settings, declared as `additionalFields` on
+      the organization plugin config in `src/core/auth/auth.ts` and read
+      via `core/auth/organization.service.ts` (see `updateWorkingHours`).
+      A color field (or a small set — primary/accent) would follow the
+      same shape: new `additionalFields` entry, a corresponding
+      `OrganizationService.updateX` method, exposed to the frontend
+      through `activeOrganization` on the session like `customerLimit`
+      already is. Needs a decision on scope (one primary color vs. a
+      small palette) and validation (hex format) before implementing.
+
 - [ ] Figure out the unit test strategy and wire it into CI. Per **Testing**
       in `docs/CONVENTIONS.md`, there are no unit tests in `src` yet — jest
       config (`rootDir: src`, `*.spec.ts`) and the `pnpm test`/`test:watch`/
