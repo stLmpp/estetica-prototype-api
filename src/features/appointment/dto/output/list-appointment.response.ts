@@ -15,6 +15,7 @@ export const AppointmentSchema = z.object({
   employeeName: z.string(),
   catalogItemId: z.string(),
   catalogItemName: z.string(),
+  saleId: z.string().optional(),
 });
 
 export const ListAppointmentResponseSchema =

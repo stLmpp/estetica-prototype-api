@@ -3,6 +3,7 @@ import { AppointmentRepository } from '../../database/main/repositories/appointm
 import { CustomerReadService } from '../customer/customer-read.service';
 import { EmployeeReadService } from '../employee/employee-read.service';
 import { CatalogItemReadService } from '../catalog-item/catalog-item-read.service';
+import { SaleReadService } from '../sale/sale-read.service';
 import { OrganizationService } from '../../core/auth/organization.service';
 import { CreateAppointmentDto } from './dto/input/create-appointment.request';
 import { CreateAppointmentResDto } from './dto/output/create-appointment.response';
@@ -10,6 +11,7 @@ import { UpdateAppointmentDto } from './dto/input/update-appointment.request';
 import { UpdateAppointmentStatusDto } from './dto/input/update-appointment-status.request';
 import { FilterAppointmentDto } from './dto/input/list-appointment.request';
 import { AppointmentReadService } from './appointment-read.service';
+import { GetAppointmentResDto } from './dto/output/get-appointment.response';
 import { GetDayScheduleDto } from './dto/input/get-day-schedule.request';
 import { DayScheduleAppointmentDto } from './dto/output/get-day-schedule.response';
 import { GetCalendarRangeDto } from './dto/input/get-calendar-range.request';
@@ -41,6 +43,7 @@ export class AppointmentService {
     private readonly catalogItemReadService: CatalogItemReadService,
     private readonly organizationService: OrganizationService,
     private readonly appointmentReadService: AppointmentReadService,
+    private readonly saleReadService: SaleReadService,
   ) {}
 
   private assertWithinWorkingHours(
@@ -211,8 +214,31 @@ export class AppointmentService {
   }
 
   @MainTransactional()
+  async getById(id: string): Promise<GetAppointmentResDto> {
+    const [appointment, sale] = await Promise.all([
+      this.appointmentReadService.requireWithCustomerAndEmployeeAndCatalogItem(
+        id,
+      ),
+      this.saleReadService.findByAppointmentId(id),
+    ]);
+    return { ...appointment, saleId: sale?.id };
+  }
+
+  @MainTransactional()
   async listPaginated(dto: FilterAppointmentDto) {
-    return this.appointmentRepository.findPaginated(dto);
+    const { appointments, count } =
+      await this.appointmentRepository.findPaginated(dto);
+    const saleIdByAppointmentId =
+      await this.saleReadService.findAppointmentIdToSaleIdMap(
+        appointments.map((appointment) => appointment.id),
+      );
+    return {
+      appointments: appointments.map((appointment) => ({
+        ...appointment,
+        saleId: saleIdByAppointmentId.get(appointment.id),
+      })),
+      count,
+    };
   }
 
   @MainTransactional()

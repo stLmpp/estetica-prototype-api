@@ -22,6 +22,12 @@ columns, types, and constraints.
   appointment today (see [FUNCTIONAL.md](FUNCTIONAL.md#out-of-scope)) — the
   table isn't restricted to one row by a DB constraint.
 - `appointment_item.catalogItemId` → `catalog_item.id`, required.
+- `sale.appointmentId` → `appointment.id`, nullable and not unique (see
+  [sale/DATABASE.md](../sale/DATABASE.md)) — the reverse lookup ("does this
+  appointment have a sale") is exposed as `saleId` on the get/list
+  responses, resolved via `SaleReadService` rather than a join here, since
+  a plain join in this reverse direction could match more than one row
+  (see [CONVENTIONS.md](../../CONVENTIONS.md#batching-and-cross-feature-joins)).
 
 ## Design decisions
 

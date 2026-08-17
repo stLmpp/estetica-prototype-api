@@ -425,6 +425,54 @@ event (`EventEmitter2`) over a direct service call once that need actually
 comes up. Not implemented anywhere yet; don't build it speculatively ahead
 of a real caller.
 
+### Batching and cross-feature joins
+
+Composing data from another feature — validating existence or just
+enriching a response — costs at least one extra query. How many, and how
+safely, depends on the shape of the relationship:
+
+- **Never query in a loop (N+1).** Enriching N primary rows with related
+  data from another feature means one batched call, not one call per row.
+  Batch methods on a `Read` service return a `Map<id, value>` (or array)
+  keyed for O(1) lookup by the caller — e.g.
+  `SaleReadService.findAppointmentIdToSaleIdMap(appointmentIds)`, used by
+  `AppointmentService.listPaginated` to attach `saleId` to a whole page of
+  appointments in one extra query total, not one per row.
+- **Parallelize independent cross-feature reads.** When a method needs data
+  from more than one other feature to build a single response, and neither
+  depends on the other's result, fire them concurrently with `Promise.all`
+  rather than sequential `await`s — e.g. `AppointmentService.getById`
+  fetching the appointment and its sale together.
+- **A direct cross-feature join in your own repository is fine when the
+  relationship is many-to-one from your side** — you're joining "up" via a
+  foreign key you hold, so the join is guaranteed to match at most one row
+  on the other side. This is already the pattern for
+  `customerName`/`employeeName`/`catalogItemName` in
+  `AppointmentRepository` (joins straight into `customer`/`employee`/
+  `catalogItem`/`person`, no `Read` service involved) — it's display
+  enrichment, not fetch-and-validate, so the "must go through the owning
+  service" rule above (which is about *validation* ownership, not query
+  mechanics) doesn't forbid it.
+- **Don't join the reverse direction (one-to-many, or unenforced-unique)
+  the same way.** A plain join from the "one" side into a table that could
+  have more than one matching row (nothing in the DB prevents it) risks
+  silently duplicating primary rows — e.g. joining `appointment` to `sale`
+  via `sale.appointmentId`, which is nullable and *not* unique. Use a
+  batched separate query instead (see above). A
+  `LEFT JOIN LATERAL ... ORDER BY ... LIMIT 1` can collapse that into one
+  query too, but isn't used anywhere in this codebase yet — treat it as a
+  deliberate, reviewed exception for a hot path that actually needs to
+  shave off the extra round trip, not a default.
+- **Composition that needs another feature's `Read` service belongs in the
+  full `<Feature>Service` (or its controller), never inside your own
+  `<Feature>ReadService`.** A `Read` module may only import
+  `MainDatabaseModule` (see **Module structure** above) — that's what keeps
+  the read side cycle-proof — so it can never import another feature's
+  `Read` module either, no matter how well-intentioned the enrichment.
+  `AppointmentService.getById`, not `AppointmentReadService`, is what calls
+  both `AppointmentReadService` and `SaleReadService` and merges the
+  result.
+
 ## Database schema (drizzle entities)
 
 - All tables are defined in `src/database/main/main-entities.ts`, relations

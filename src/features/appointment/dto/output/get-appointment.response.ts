@@ -17,6 +17,7 @@ export const GetAppointmentResSchema = z.object({
   catalogItemId: z.string(),
   catalogItemName: z.string(),
   priceApplied: z.string(),
+  saleId: z.string().optional(),
 });
 
 export type GetAppointmentResDto = z.input<typeof GetAppointmentResSchema>;
