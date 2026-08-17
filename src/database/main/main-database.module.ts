@@ -9,7 +9,12 @@ import { ClsPluginTransactional } from '@nestjs-cls/transactional';
 import { MAIN_DATABASE_CONNECTION_NAME } from './main-database-connection-name';
 import { PersonRepository } from './repositories/person.repository';
 import { PersonPhoneRepository } from './repositories/person-phone.repository';
+import { AnamnesisFormRepository } from './repositories/anamnesis-form.repository';
+import { AnamnesisSectionRepository } from './repositories/anamnesis-section.repository';
 import { AnamnesisFieldRepository } from './repositories/anamnesis-field.repository';
+import { AnamnesisFieldValidationRepository } from './repositories/anamnesis-field-validation.repository';
+import { CustomerAnamnesisRepository } from './repositories/customer-anamnesis.repository';
+import { CustomerAnamnesisFieldRepository } from './repositories/customer-anamnesis-field.repository';
 import { TransactionalAdapterDrizzleOrmCustom } from '../../core/transactional-adapter-drizzle-orm-custom';
 import { ConfigRepository } from './repositories/config.repository';
 import { ConfigAdminRepository } from './repositories/config-admin.repository';
@@ -25,7 +30,12 @@ const REPOSITORIES = [
   CustomerRepository,
   PersonRepository,
   PersonPhoneRepository,
+  AnamnesisFormRepository,
+  AnamnesisSectionRepository,
   AnamnesisFieldRepository,
+  AnamnesisFieldValidationRepository,
+  CustomerAnamnesisRepository,
+  CustomerAnamnesisFieldRepository,
   ConfigRepository,
   ConfigAdminRepository,
   AuthOrganizationRepository,

@@ -88,6 +88,17 @@ move to `TODO_DONE.md` instead of being deleted outright.
       FUNCTIONAL.md` — this item is specifically about a full field-level
       audit log, worth it once these records are treated as real
       medical/legal documentation rather than internal notes.)
+- [ ] `AnamnesisFieldValidationType`'s `MIN_VALUE`/`MAX_VALUE` compare
+      `Number(value)`, so they're only meaningful on `NUMBER` fields —
+      `DATE` fields currently have no range validation at all (see the
+      field-type/validation-type compatibility table in
+      `docs/features/anamnesis-field/FUNCTIONAL.md`). A date range needs
+      its own validation types instead of reusing the numeric ones — e.g.
+      `MIN_DATE`/`MAX_DATE` with a `{ date: string }` arg compared against
+      the answer parsed as a date, not a number. Possibly other date-
+      specific validations worth having too (e.g. "must be in the past").
+      Add once there's a real need for date-range questions (birth date
+      bounds, "date of last procedure must be within N days", etc.).
 - [ ] No conditional/branching logic between anamnesis fields (e.g. "only
       show field B when field A = yes") — every active field in a form's
       section is always shown. Would need a `dependsOnFieldId`/

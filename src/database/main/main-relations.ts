@@ -80,9 +80,44 @@ export const mainRelations = defineRelations(mainEntities, (r) => ({
   },
 
   // --- ANAMNESIS ---
+  anamnesisForm: {
+    anamnesisSections: r.many.anamnesisSection(),
+    anamnesisFields: r.many.anamnesisField(),
+    customerAnamnesisRecords: r.many.customerAnamnesis(),
+  },
+
+  anamnesisSection: {
+    anamnesisForm: r.one.anamnesisForm({
+      from: r.anamnesisSection.anamnesisFormId,
+      to: r.anamnesisForm.id,
+      optional: false,
+    }),
+    anamnesisFields: r.many.anamnesisField(),
+    previousVersion: r.one.anamnesisSection({
+      from: r.anamnesisSection.previousVersionId,
+      to: r.anamnesisSection.id,
+      optional: true,
+    }),
+  },
+
   anamnesisField: {
+    anamnesisForm: r.one.anamnesisForm({
+      from: r.anamnesisField.anamnesisFormId,
+      to: r.anamnesisForm.id,
+      optional: false,
+    }),
+    anamnesisSection: r.one.anamnesisSection({
+      from: r.anamnesisField.anamnesisSectionId,
+      to: r.anamnesisSection.id,
+      optional: true,
+    }),
     anamnesisFieldValidations: r.many.anamnesisFieldValidation(),
     customerAnamnesisFields: r.many.customerAnamnesisField(),
+    previousVersion: r.one.anamnesisField({
+      from: r.anamnesisField.previousVersionId,
+      to: r.anamnesisField.id,
+      optional: true,
+    }),
   },
 
   anamnesisFieldValidation: {
@@ -98,6 +133,16 @@ export const mainRelations = defineRelations(mainEntities, (r) => ({
       from: r.customerAnamnesis.customerId,
       to: r.customer.id,
       optional: false,
+    }),
+    anamnesisForm: r.one.anamnesisForm({
+      from: r.customerAnamnesis.anamnesisFormId,
+      to: r.anamnesisForm.id,
+      optional: false,
+    }),
+    appointment: r.one.appointment({
+      from: r.customerAnamnesis.appointmentId,
+      to: r.appointment.id,
+      optional: true,
     }),
     customerAnamnesisFields: r.many.customerAnamnesisField(),
   },

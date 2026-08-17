@@ -19,8 +19,17 @@ import { sql } from 'drizzle-orm';
 import { MaritalStatus } from '../../shared/domain/marital-status.enum';
 import { PhoneType } from '../../shared/domain/phone-type.enum';
 import { CatalogItemType } from '../../shared/domain/catalog-item-type.enum';
-import { AnamnesisFieldType } from '../../shared/domain/anamnesis-field.type';
-import { AnamnesisFieldValidationType } from '../../shared/domain/anamnesis-field-validation.enum';
+import {
+  AnamnesisFieldType,
+  type AnamnesisFieldArgs,
+  type AnamnesisFieldExtraLabels,
+} from '../../shared/domain/anamnesis-field.type';
+import {
+  AnamnesisFieldValidationType,
+  type AnamnesisFieldValidationArgs,
+} from '../../shared/domain/anamnesis-field-validation.enum';
+import { CustomerAnamnesisStatus } from '../../shared/domain/customer-anamnesis-status.enum';
+import { type CustomerAnamnesisFieldExtraValues } from '../../shared/domain/customer-anamnesis-field.type';
 import { AppointmentStatus } from '../../shared/domain/appointment-staus.enum';
 import { SaleStatus } from '../../shared/domain/sale-status.enum';
 import { PaymentMethod } from '../../shared/domain/payment-method.enum';
@@ -295,96 +304,6 @@ export const followupItemEntity = pgTable.withRLS(
   ],
 );
 
-export const anamnesisFieldType = pgEnum(
-  'anamnesis_field_type',
-  AnamnesisFieldType,
-);
-
-export const anamnesisFieldEntity = pgTable.withRLS(
-  'anamnesis_field',
-  {
-    ...baseEntity('anf'),
-    fieldType: anamnesisFieldType('field_type').notNull(),
-    fieldArgs: jsonb('field_args'),
-    label: varchar('label', { length: 128 }).notNull(),
-    extraLabels: jsonb('extra_labels'),
-    active: boolean('active').notNull(),
-    displayOrder: integer('display_order').notNull(),
-  },
-  (t) => [
-    addAuthenticatedPolicy(t),
-    ...addDeletedAtPolicies(t),
-  ],
-);
-
-export const anamnesisFieldValidationType = pgEnum(
-  'anamnesis_field_validation_type',
-  AnamnesisFieldValidationType,
-);
-
-export const anamnesisFieldValidationEntity = pgTable.withRLS(
-  'anamnesis_field_validation',
-  {
-    ...baseEntity('anfv'),
-    validationType: anamnesisFieldValidationType('validation_type').notNull(),
-    validationArgs: jsonb('validation_args'),
-    anamnesisFieldId: varchar('anamnesis_field_id', { length: 38 })
-      .notNull()
-      .references(() => anamnesisFieldEntity.id),
-    active: boolean('active').notNull(),
-  },
-  (t) => [
-    index()
-      .on(t.tenantId, t.anamnesisFieldId)
-      .where(sql`${t.isDeleted} = false`),
-    addAuthenticatedPolicy(t),
-    ...addDeletedAtPolicies(t),
-  ],
-);
-
-export const customerAnamnesisEntity = pgTable.withRLS(
-  'customer_anamnesis',
-  {
-    ...baseEntity('canm'),
-    customerId: varchar('customer_id', { length: 38 })
-      .notNull()
-      .references(() => customerEntity.id),
-    date: timestamp('date').notNull(),
-  },
-  (t) => [
-    index()
-      .on(t.tenantId, t.customerId)
-      .where(sql`${t.isDeleted} = false`),
-    addAuthenticatedPolicy(t),
-    ...addDeletedAtPolicies(t),
-  ],
-);
-
-export const customerAnamnesisFieldEntity = pgTable.withRLS(
-  'customer_anamnesis_field',
-  {
-    ...baseEntity('canmf'),
-    customerAnamnesisId: varchar('customer_anamnesis_id', { length: 38 })
-      .notNull()
-      .references(() => customerAnamnesisEntity.id),
-    anamnesisFieldId: varchar('anamnesis_field_id', { length: 38 })
-      .notNull()
-      .references(() => anamnesisFieldEntity.id),
-    value: varchar('value', { length: 2048 }).notNull(),
-    extraValues: jsonb('extra_values'),
-  },
-  (t) => [
-    index()
-      .on(t.tenantId, t.customerAnamnesisId)
-      .where(sql`${t.isDeleted} = false`),
-    index()
-      .on(t.tenantId, t.anamnesisFieldId)
-      .where(sql`${t.isDeleted} = false`),
-    addAuthenticatedPolicy(t),
-    ...addDeletedAtPolicies(t),
-  ],
-);
-
 export const appointmentStatusEnum = pgEnum(
   'appointment_status',
   AppointmentStatus,
@@ -442,6 +361,171 @@ export const appointmentItemEntity = pgTable.withRLS(
       .where(sql`${t.isDeleted} = false`),
     index()
       .on(t.tenantId, t.catalogItemId)
+      .where(sql`${t.isDeleted} = false`),
+    addAuthenticatedPolicy(t),
+    ...addDeletedAtPolicies(t),
+  ],
+);
+
+export const anamnesisFieldType = pgEnum(
+  'anamnesis_field_type',
+  AnamnesisFieldType,
+);
+
+export const anamnesisFormEntity = pgTable.withRLS(
+  'anamnesis_form',
+  {
+    ...baseEntity('anfo'),
+    name: varchar('name', { length: 256 }).notNull(),
+    description: varchar('description', { length: 2048 }),
+    active: boolean('active').notNull(),
+    displayOrder: integer('display_order').notNull(),
+  },
+  (t) => [addAuthenticatedPolicy(t), ...addDeletedAtPolicies(t)],
+);
+
+export const anamnesisSectionEntity = pgTable.withRLS(
+  'anamnesis_section',
+  {
+    ...baseEntity('ansc'),
+    anamnesisFormId: varchar('anamnesis_form_id', { length: 38 })
+      .notNull()
+      .references(() => anamnesisFormEntity.id),
+    label: varchar('label', { length: 128 }).notNull(),
+    displayOrder: integer('display_order').notNull(),
+    active: boolean('active').notNull(),
+    previousVersionId: varchar('previous_version_id', {
+      length: 38,
+    }).references((): AnyPgColumn => anamnesisSectionEntity.id),
+  },
+  (t) => [
+    index()
+      .on(t.tenantId, t.anamnesisFormId)
+      .where(sql`${t.isDeleted} = false`),
+    addAuthenticatedPolicy(t),
+    ...addDeletedAtPolicies(t),
+  ],
+);
+
+export const anamnesisFieldEntity = pgTable.withRLS(
+  'anamnesis_field',
+  {
+    ...baseEntity('anf'),
+    anamnesisFormId: varchar('anamnesis_form_id', { length: 38 })
+      .notNull()
+      .references(() => anamnesisFormEntity.id),
+    anamnesisSectionId: varchar('anamnesis_section_id', {
+      length: 38,
+    }).references(() => anamnesisSectionEntity.id),
+    fieldType: anamnesisFieldType('field_type').notNull(),
+    fieldArgs: jsonb('field_args').$type<AnamnesisFieldArgs>(),
+    label: varchar('label', { length: 128 }).notNull(),
+    extraLabels: jsonb('extra_labels').$type<AnamnesisFieldExtraLabels>(),
+    active: boolean('active').notNull(),
+    displayOrder: integer('display_order').notNull(),
+    previousVersionId: varchar('previous_version_id', {
+      length: 38,
+    }).references((): AnyPgColumn => anamnesisFieldEntity.id),
+  },
+  (t) => [
+    index()
+      .on(t.tenantId, t.anamnesisFormId)
+      .where(sql`${t.isDeleted} = false`),
+    index()
+      .on(t.tenantId, t.anamnesisSectionId)
+      .where(sql`${t.isDeleted} = false`),
+    addAuthenticatedPolicy(t),
+    ...addDeletedAtPolicies(t),
+  ],
+);
+
+export const anamnesisFieldValidationType = pgEnum(
+  'anamnesis_field_validation_type',
+  AnamnesisFieldValidationType,
+);
+
+export const anamnesisFieldValidationEntity = pgTable.withRLS(
+  'anamnesis_field_validation',
+  {
+    ...baseEntity('anfv'),
+    validationType: anamnesisFieldValidationType('validation_type').notNull(),
+    validationArgs:
+      jsonb('validation_args').$type<AnamnesisFieldValidationArgs>(),
+    anamnesisFieldId: varchar('anamnesis_field_id', { length: 38 })
+      .notNull()
+      .references(() => anamnesisFieldEntity.id),
+    active: boolean('active').notNull(),
+  },
+  (t) => [
+    index()
+      .on(t.tenantId, t.anamnesisFieldId)
+      .where(sql`${t.isDeleted} = false`),
+    addAuthenticatedPolicy(t),
+    ...addDeletedAtPolicies(t),
+  ],
+);
+
+export const customerAnamnesisStatusEnum = pgEnum(
+  'customer_anamnesis_status',
+  CustomerAnamnesisStatus,
+);
+
+export const customerAnamnesisEntity = pgTable.withRLS(
+  'customer_anamnesis',
+  {
+    ...baseEntity('canm'),
+    customerId: varchar('customer_id', { length: 38 })
+      .notNull()
+      .references(() => customerEntity.id),
+    anamnesisFormId: varchar('anamnesis_form_id', { length: 38 })
+      .notNull()
+      .references(() => anamnesisFormEntity.id),
+    appointmentId: varchar('appointment_id', { length: 38 }).references(
+      () => appointmentEntity.id,
+    ),
+    date: timestamp('date').notNull(),
+    status: customerAnamnesisStatusEnum('status').notNull(),
+    signedByName: varchar('signed_by_name', { length: 256 }),
+    signedAt: timestamp('signed_at'),
+  },
+  (t) => [
+    index()
+      .on(t.tenantId, t.customerId)
+      .where(sql`${t.isDeleted} = false`),
+    index()
+      .on(t.tenantId, t.anamnesisFormId)
+      .where(sql`${t.isDeleted} = false`),
+    index()
+      .on(t.tenantId, t.appointmentId)
+      .where(sql`${t.isDeleted} = false`),
+    addAuthenticatedPolicy(t),
+    ...addDeletedAtPolicies(t),
+  ],
+);
+
+export const customerAnamnesisFieldEntity = pgTable.withRLS(
+  'customer_anamnesis_field',
+  {
+    ...baseEntity('canmf'),
+    customerAnamnesisId: varchar('customer_anamnesis_id', { length: 38 })
+      .notNull()
+      .references(() => customerAnamnesisEntity.id),
+    anamnesisFieldId: varchar('anamnesis_field_id', { length: 38 })
+      .notNull()
+      .references(() => anamnesisFieldEntity.id),
+    value: varchar('value', { length: 2048 }).notNull(),
+    extraValues:
+      jsonb('extra_values').$type<CustomerAnamnesisFieldExtraValues>(),
+  },
+  (t) => [
+    index()
+      .on(t.tenantId, t.customerAnamnesisId)
+      .where(sql`${t.isDeleted} = false`),
+    index()
+      .on(t.tenantId, t.anamnesisFieldId)
+      .where(sql`${t.isDeleted} = false`),
+    uniqueIndex()
+      .on(t.tenantId, t.customerAnamnesisId, t.anamnesisFieldId)
       .where(sql`${t.isDeleted} = false`),
     addAuthenticatedPolicy(t),
     ...addDeletedAtPolicies(t),
@@ -588,6 +672,8 @@ export const mainEntities = {
   employeeService: employeeServiceEntity,
   customerFollowup: customerFollowupEntity,
   followupItem: followupItemEntity,
+  anamnesisForm: anamnesisFormEntity,
+  anamnesisSection: anamnesisSectionEntity,
   anamnesisField: anamnesisFieldEntity,
   anamnesisFieldValidation: anamnesisFieldValidationEntity,
   customerAnamnesis: customerAnamnesisEntity,

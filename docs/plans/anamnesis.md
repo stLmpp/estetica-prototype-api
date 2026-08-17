@@ -10,6 +10,23 @@ stays as the record of how we got there and why.
 
 # Anamnesis feature — plan
 
+## Post-implementation revision: section/field versioning
+
+While reviewing the backend, we caught a real gap in this plan's original
+design: `anamnesis_field`/`anamnesis_section` were plain in-place-editable
+rows, but `customer_anamnesis_field` answers pin to a specific field id —
+editing a field's type/options/label in place would silently rewrite how
+every past answer referencing it reads. Fixed by never mutating either
+table: editing deactivates the current row and inserts a new one carrying
+a `previousVersionId` pointer back to it (same pattern already used by
+`ConfigService.publish` elsewhere in this codebase). `anamnesis_form`
+stays plain/in-place-editable — a form is a container label, not
+something a past answer is interpreted "as of a version" of. Full detail
+is in `docs/features/anamnesis-field/{FUNCTIONAL,DATABASE}.md`, which are
+the source of truth going forward — this note just records that the plan
+below (written before that correction) understates it wherever it
+describes field/section `update` as a plain mutation.
+
 ## Context
 
 `anamnesis-field` and `customer` already have four DB tables modeled

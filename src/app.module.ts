@@ -21,6 +21,7 @@ import { AllExceptionsFilter } from './core/filter/all-exception.filter';
 import { CustomZodSerializerInterceptor } from './core/interceptor/custom-zod-serializer-interceptor';
 import { ClsModule } from 'nestjs-cls';
 import { AnamnesisFieldModule } from './features/anamnesis-field/anamnesis-field.module';
+import { CustomerAnamnesisModule } from './features/customer-anamnesis/customer-anamnesis.module';
 import { safeAsync } from './shared/utils/safe';
 import { isAPIError } from 'better-auth/api';
 import { LoggerService } from './core/logger/logger.service';
@@ -104,6 +105,7 @@ if (appEnv.environment === Environment.Production) {
     HealthModule,
     CustomerModule,
     AnamnesisFieldModule,
+    CustomerAnamnesisModule,
     ConfigModule,
     CatalogItemModule,
     EmployeeModule,
