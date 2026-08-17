@@ -14,17 +14,6 @@ import { AnamnesisFieldReadService } from './anamnesis-field-read.service';
 import { type AnamnesisFieldValidationInput } from './model/anamnesis-field-validation.model';
 import { type AnamnesisFieldModel } from './model/anamnesis-field.model';
 
-interface FieldContent {
-  anamnesisSectionId?: string | null;
-  fieldType: CreateAnamnesisFieldDto['fieldType'];
-  fieldArgs?: CreateAnamnesisFieldDto['fieldArgs'] | null;
-  label: string;
-  extraLabels?: CreateAnamnesisFieldDto['extraLabels'] | null;
-  active: boolean;
-  displayOrder: number;
-  validations: AnamnesisFieldValidationInput[];
-}
-
 @Injectable()
 export class AnamnesisFieldService {
   constructor(
@@ -42,33 +31,50 @@ export class AnamnesisFieldService {
       dto.anamnesisFormId,
       dto.anamnesisSectionId,
     );
-    return this.insertVersion(dto.anamnesisFormId, dto, null);
+    const entity = await this.anamnesisFieldRepository.insert({
+      anamnesisFormId: dto.anamnesisFormId,
+      anamnesisSectionId: dto.anamnesisSectionId,
+      fieldType: dto.fieldType,
+      fieldArgs: dto.fieldArgs,
+      label: dto.label,
+      extraLabels: dto.extraLabels,
+      active: dto.active,
+      displayOrder: dto.displayOrder,
+    });
+    const validations =
+      await this.anamnesisFieldValidationRepository.insertMany(
+        dto.validations.map((validation) => ({
+          anamnesisFieldId: entity.id,
+          validationType: validation.validationType,
+          validationArgs: validation.validationArgs,
+          active: validation.active ?? true,
+        })),
+      );
+    return {
+      ...this.mapEntityToDto(entity),
+      validations: validations.map((validation) => ({
+        id: validation.id,
+        validationType: validation.validationType,
+        validationArgs: validation.validationArgs ?? undefined,
+        active: validation.active,
+      })),
+    };
   }
 
-  /**
-   * Fields are never edited in place — see `AnamnesisSectionService.update`
-   * for the same reasoning, one level down: a changed fieldType/fieldArgs/
-   * label would retroactively change how every past answer referencing this
-   * field id reads. Editing always supersedes: the current row is
-   * deactivated and a new row is inserted carrying `previousVersionId`.
-   */
   @MainTransactional()
-  async update(
-    id: string,
-    dto: UpdateAnamnesisFieldDto,
-  ): Promise<AnamnesisFieldModel> {
+  async update(id: string, dto: UpdateAnamnesisFieldDto) {
     const field = await this.anamnesisFieldReadService.require(id);
-    if (await this.anamnesisFieldRepository.hasSuccessor(id)) {
-      throw AnamnesisFieldExceptions.anamnesisFieldAlreadySuperseded([
-        { field: 'anamnesisFieldId', issue: `'${id}' is a superseded version` },
-      ]);
+    if (dto.anamnesisSectionId !== undefined) {
+      await this.assertSectionBelongsToForm(
+        field.anamnesisFormId,
+        dto.anamnesisSectionId,
+      );
     }
-    await this.assertSectionBelongsToForm(
-      field.anamnesisFormId,
-      dto.anamnesisSectionId,
-    );
-    await this.anamnesisFieldRepository.update(id, { active: false });
-    return this.insertVersion(field.anamnesisFormId, dto, id);
+    const { validations, ...rest } = dto;
+    await this.anamnesisFieldRepository.update(id, rest);
+    if (validations !== undefined) {
+      await this.syncValidations(id, validations);
+    }
   }
 
   @MainTransactional()
@@ -89,40 +95,25 @@ export class AnamnesisFieldService {
     };
   }
 
-  private async insertVersion(
-    anamnesisFormId: string,
-    content: FieldContent,
-    previousVersionId: string | null,
-  ): Promise<AnamnesisFieldModel> {
-    const entity = await this.anamnesisFieldRepository.insert({
-      anamnesisFormId,
-      anamnesisSectionId: content.anamnesisSectionId,
-      fieldType: content.fieldType,
-      fieldArgs: content.fieldArgs,
-      label: content.label,
-      extraLabels: content.extraLabels,
-      active: content.active,
-      displayOrder: content.displayOrder,
-      previousVersionId,
-    });
-    const validations =
-      await this.anamnesisFieldValidationRepository.insertMany(
-        content.validations.map((validation) => ({
-          anamnesisFieldId: entity.id,
-          validationType: validation.validationType,
-          validationArgs: validation.validationArgs,
-          active: validation.active ?? true,
-        })),
+  private async syncValidations(
+    anamnesisFieldId: string,
+    validations: AnamnesisFieldValidationInput[],
+  ) {
+    const existing =
+      await this.anamnesisFieldValidationRepository.findByAnamnesisFieldId(
+        anamnesisFieldId,
       );
-    return {
-      ...this.mapEntityToDto(entity),
-      validations: validations.map((validation) => ({
-        id: validation.id,
+    await this.anamnesisFieldValidationRepository.deleteMany(
+      existing.map((validation) => validation.id),
+    );
+    await this.anamnesisFieldValidationRepository.insertMany(
+      validations.map((validation) => ({
+        anamnesisFieldId,
         validationType: validation.validationType,
-        validationArgs: validation.validationArgs ?? undefined,
-        active: validation.active,
+        validationArgs: validation.validationArgs,
+        active: validation.active ?? true,
       })),
-    };
+    );
   }
 
   private async assertSectionBelongsToForm(
@@ -157,7 +148,6 @@ export class AnamnesisFieldService {
       extraLabels: entity.extraLabels ?? undefined,
       active: entity.active,
       displayOrder: entity.displayOrder,
-      previousVersionId: entity.previousVersionId ?? undefined,
     };
   }
 }

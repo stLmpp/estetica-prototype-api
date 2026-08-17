@@ -31,7 +31,6 @@ export const AnamnesisFieldModelSchema = z.object({
   extraLabels: AnamnesisFieldExtraLabelsSchema.optional(),
   active: z.boolean(),
   displayOrder: z.int(),
-  previousVersionId: z.string().optional(),
   validations: z.array(AnamnesisFieldValidationModelSchema).optional(),
 });
 

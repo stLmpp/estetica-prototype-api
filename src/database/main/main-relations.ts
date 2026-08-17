@@ -93,11 +93,6 @@ export const mainRelations = defineRelations(mainEntities, (r) => ({
       optional: false,
     }),
     anamnesisFields: r.many.anamnesisField(),
-    previousVersion: r.one.anamnesisSection({
-      from: r.anamnesisSection.previousVersionId,
-      to: r.anamnesisSection.id,
-      optional: true,
-    }),
   },
 
   anamnesisField: {
@@ -113,11 +108,6 @@ export const mainRelations = defineRelations(mainEntities, (r) => ({
     }),
     anamnesisFieldValidations: r.many.anamnesisFieldValidation(),
     customerAnamnesisFields: r.many.customerAnamnesisField(),
-    previousVersion: r.one.anamnesisField({
-      from: r.anamnesisField.previousVersionId,
-      to: r.anamnesisField.id,
-      optional: true,
-    }),
   },
 
   anamnesisFieldValidation: {

@@ -69,12 +69,9 @@ export class CustomerAnamnesisService {
       status: CustomerAnamnesisStatus.DRAFT,
     });
     await this.customerAnamnesisFieldRepository.insertMany(
-      dto.answers.map((answer) => ({
-        customerAnamnesisId: entity.id,
-        anamnesisFieldId: answer.anamnesisFieldId,
-        value: answer.value,
-        extraValues: answer.extraValues,
-      })),
+      dto.answers.map((answer) =>
+        this.buildAnswerInsert(entity.id, answer, fields),
+      ),
     );
 
     return this.getById(customerId, entity.id);
@@ -106,12 +103,7 @@ export class CustomerAnamnesisService {
         id,
       );
       await this.customerAnamnesisFieldRepository.insertMany(
-        dto.answers.map((answer) => ({
-          customerAnamnesisId: id,
-          anamnesisFieldId: answer.anamnesisFieldId,
-          value: answer.value,
-          extraValues: answer.extraValues,
-        })),
+        dto.answers.map((answer) => this.buildAnswerInsert(id, answer, fields)),
       );
     }
 
@@ -166,17 +158,25 @@ export class CustomerAnamnesisService {
       await this.customerAnamnesisFieldRepository.findByCustomerAnamnesisId(id);
     return {
       ...this.mapEntityToDto(record),
-      answers: answers.map((answer) => ({
-        id: answer.id,
-        anamnesisFieldId: answer.anamnesisFieldId,
-        value: answer.value,
-        extraValues: answer.extraValues ?? undefined,
-        anamnesisFieldLabel: answer.anamnesisField?.label,
-        anamnesisFieldType: answer.anamnesisField?.fieldType,
-        anamnesisFieldOptions: answer.anamnesisField?.fieldArgs?.options,
-        anamnesisSectionId: answer.anamnesisField?.anamnesisSection?.id,
-        anamnesisSectionLabel: answer.anamnesisField?.anamnesisSection?.label,
-      })),
+      answers: [...answers]
+        .sort(
+          (a, b) =>
+            (a.sectionDisplayOrder ?? Infinity) -
+              (b.sectionDisplayOrder ?? Infinity) ||
+            a.fieldDisplayOrder - b.fieldDisplayOrder,
+        )
+        .map((answer) => ({
+          id: answer.id,
+          anamnesisFieldId: answer.anamnesisFieldId,
+          value: answer.value,
+          extraValues: answer.extraValues ?? undefined,
+          anamnesisFieldLabel: answer.fieldLabel,
+          anamnesisFieldType: answer.fieldType,
+          anamnesisFieldOptions: answer.fieldOptions?.options,
+          anamnesisFieldDisplayOrder: answer.fieldDisplayOrder,
+          anamnesisSectionLabel: answer.sectionLabel ?? undefined,
+          anamnesisSectionDisplayOrder: answer.sectionDisplayOrder ?? undefined,
+        })),
     };
   }
 
@@ -201,6 +201,32 @@ export class CustomerAnamnesisService {
         anamnesisFormId,
       );
     return new Map(fields.map((field) => [field.id, field]));
+  }
+
+  /**
+   * Snapshots the field/section as they are right now onto the answer —
+   * same reasoning as sale_item/appointment_item.priceApplied. Once
+   * written, this answer must keep reading exactly as it does here, even
+   * if the field is later edited, deactivated, or deleted.
+   */
+  private buildAnswerInsert(
+    customerAnamnesisId: string,
+    answer: CustomerAnamnesisAnswerInput,
+    fields: Map<string, AnamnesisFieldWithValidations>,
+  ) {
+    const field = fields.get(answer.anamnesisFieldId)!;
+    return {
+      customerAnamnesisId,
+      anamnesisFieldId: answer.anamnesisFieldId,
+      value: answer.value,
+      extraValues: answer.extraValues,
+      fieldLabel: field.label,
+      fieldType: field.fieldType,
+      fieldOptions: field.fieldArgs,
+      fieldDisplayOrder: field.displayOrder,
+      sectionLabel: field.anamnesisSection?.label,
+      sectionDisplayOrder: field.anamnesisSection?.displayOrder,
+    };
   }
 
   private assertAnswersValid(

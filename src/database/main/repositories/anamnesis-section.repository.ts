@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { and, asc, eq, exists, InferInsertModel, sql } from 'drizzle-orm';
-import { alias } from 'drizzle-orm/pg-core';
+import { asc, eq, InferInsertModel } from 'drizzle-orm';
 import { mainEntities } from '../main-entities';
 import { Repository } from './repository';
 
@@ -39,35 +38,12 @@ export class AnamnesisSectionRepository extends Repository {
     });
   }
 
-  /** Excludes superseded versions — only the current row per version chain. */
   findByAnamnesisFormId(anamnesisFormId: string) {
-    const successor = alias(mainEntities.anamnesisSection, 'successor');
-    const successorExistsQuery = this.db
-      .select({ 1: sql`1` })
-      .from(successor)
-      .where(eq(successor.previousVersionId, this.db.e.anamnesisSection.id));
-    return this.db
-      .select()
-      .from(this.db.e.anamnesisSection)
-      .where(
-        and(
-          eq(this.db.e.anamnesisSection.anamnesisFormId, anamnesisFormId),
-          sql`NOT ${exists(successorExistsQuery)}`,
-        ),
-      )
-      .orderBy(
-        asc(this.db.e.anamnesisSection.displayOrder),
-        asc(this.db.e.anamnesisSection.id),
-      )
-      .execute();
-  }
-
-  hasSuccessor(id: string) {
-    return this.db.query.anamnesisSection
-      .findFirst({
-        where: { previousVersionId: id },
-        columns: { id: true },
-      })
-      .then((row) => !!row);
+    return this.db.query.anamnesisSection.findMany({
+      where: {
+        anamnesisFormId,
+      },
+      orderBy: (section) => [asc(section.displayOrder), asc(section.id)],
+    });
   }
 }

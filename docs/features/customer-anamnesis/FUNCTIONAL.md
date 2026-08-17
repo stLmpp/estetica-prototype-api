@@ -65,12 +65,17 @@ over time (see "history, not a profile" below).
   admin/owner roles (day-to-day staff can create/edit/finalize but not
   delete a health record — see the feature's permission definition in
   `src/core/auth/organization-access-control.ts`).
-- **Viewing resolves against the current field definitions**, not a
-  snapshot taken when the record was filled out — the same field's
-  current label, section, and options are shown. If a field or one of its
-  options was since deactivated or removed, the record still shows the
-  raw value that was recorded, with an indication that the field is no
-  longer available, rather than erroring.
+- **Viewing renders from a snapshot taken when the record was filled
+  out** — each answer stores the field's label/type/options/display order
+  and its section's label/display order as they were at that moment, not
+  resolved live against the current
+  [anamnesis-field](../anamnesis-field/FUNCTIONAL.md) definitions —
+  including the order answers are displayed in, which matches how the
+  form was actually laid out at fill-out time, not its current layout.
+  Editing, deactivating, or deleting a field afterward never changes how
+  an existing answer displays — only *new* fill-outs see the
+  updated definition. See
+  [DATABASE.md](DATABASE.md#design-decisions) for why.
 
 ## Lifecycle
 
@@ -144,11 +149,12 @@ Enforced in `CustomerAnamnesisService.update`/`finalize`.
   - Then it succeeds as a no-op — the original signature is unchanged
 
 - **Viewing a record after its field changed**
-  - Given a record with an answer for a field that's since been
-    deactivated or had an option removed
+  - Given a record with an answer for a field that's since been edited,
+    deactivated, or deleted
   - When the record is viewed
-  - Then the previously recorded raw value is still shown, marked as
-    referencing a field/option that's no longer available
+  - Then the answer still displays exactly as recorded — its own
+    snapshotted label/type/options/section — regardless of what the live
+    field looks like now
 
 ## Out of scope
 

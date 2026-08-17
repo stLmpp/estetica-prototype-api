@@ -28,16 +28,4 @@ export const AnamnesisFieldExceptions = {
       "Anamnesis section does not belong to the field's own anamnesis form",
     status: 422,
   }),
-  anamnesisSectionAlreadySuperseded: exception({
-    code: 'ANAMNESIS_SECTION_ALREADY_SUPERSEDED',
-    message:
-      'Anamnesis section is a superseded version and can no longer be edited',
-    status: 409,
-  }),
-  anamnesisFieldAlreadySuperseded: exception({
-    code: 'ANAMNESIS_FIELD_ALREADY_SUPERSEDED',
-    message:
-      'Anamnesis field is a superseded version and can no longer be edited',
-    status: 409,
-  }),
 } as const;

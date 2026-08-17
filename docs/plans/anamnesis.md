@@ -10,22 +10,40 @@ stays as the record of how we got there and why.
 
 # Anamnesis feature — plan
 
-## Post-implementation revision: section/field versioning
+## Post-implementation revision: snapshot the answer, not the definition
 
 While reviewing the backend, we caught a real gap in this plan's original
 design: `anamnesis_field`/`anamnesis_section` were plain in-place-editable
 rows, but `customer_anamnesis_field` answers pin to a specific field id —
 editing a field's type/options/label in place would silently rewrite how
-every past answer referencing it reads. Fixed by never mutating either
-table: editing deactivates the current row and inserts a new one carrying
-a `previousVersionId` pointer back to it (same pattern already used by
-`ConfigService.publish` elsewhere in this codebase). `anamnesis_form`
-stays plain/in-place-editable — a form is a container label, not
-something a past answer is interpreted "as of a version" of. Full detail
-is in `docs/features/anamnesis-field/{FUNCTIONAL,DATABASE}.md`, which are
-the source of truth going forward — this note just records that the plan
-below (written before that correction) understates it wherever it
-describes field/section `update` as a plain mutation.
+every past answer referencing it reads.
+
+Two fixes were tried, in order:
+
+1. **Version the definitions** (`anamnesis_field`/`anamnesis_section`
+   append-only, edit = deactivate + insert a new row with a
+   `previousVersionId` pointer). Built first, then reverted — it protects
+   the *definition* rather than the *answer*, which pushed real complexity
+   onto anything that referenced the versioned rows (a plain section
+   rename raised genuinely unresolved questions about whether it should
+   cascade into re-versioning every field grouped under it), without a
+   clean answer either way.
+2. **Snapshot onto the answer instead** (chosen). `anamnesis_field`/
+   `anamnesis_section` stay ordinary mutable rows;
+   `customer_anamnesis_field` copies the label/type/options/section it
+   needs onto itself at answer time — same pattern already used by
+   `sale_item.priceApplied`/`appointment_item.priceApplied` elsewhere in
+   this codebase. Full reasoning (including why the versioning attempt was
+   abandoned) is in
+   [customer-anamnesis/DATABASE.md](../features/customer-anamnesis/DATABASE.md)'s
+   Design decisions.
+
+Full detail is in `docs/features/{anamnesis-field,customer-anamnesis}/
+{FUNCTIONAL,DATABASE}.md`, which are the source of truth going forward —
+this note just records that the plan below (written before either
+correction) understates it wherever it describes
+`customer_anamnesis_field` as storing only `value`/`extraValues`, or
+field/section `update` as changing the row's id.
 
 ## Context
 

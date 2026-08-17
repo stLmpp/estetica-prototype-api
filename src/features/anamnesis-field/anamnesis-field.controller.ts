@@ -15,7 +15,6 @@ import { ResponseType } from '../../shared/decorator/response-type.decorator';
 import { CreateAnamnesisFieldRequest } from './dto/input/create-anamnesis-field.request';
 import { CreateAnamnesisFieldResponseModel } from './dto/output/create-anamnesis-field.response';
 import { UpdateAnamnesisFieldRequest } from './dto/input/update-anamnesis-field.request';
-import { UpdateAnamnesisFieldResponseModel } from './dto/output/update-anamnesis-field.response';
 import { FilterAnamnesisFieldDto } from './dto/input/list-anamnesis-field.request';
 import { ListAnamnesisFieldResponseModel } from './dto/output/list-anamnesis-field.response';
 import { GetAnamnesisFieldResponseModel } from './dto/output/get-anamnesis-field.response';
@@ -44,18 +43,16 @@ export class AnamnesisFieldController {
     return { data: { anamnesisField } };
   }
 
-  @ResponseType(UpdateAnamnesisFieldResponseModel)
   @Patch(':anamnesisFieldId')
   @HasPermission({ orgPermissions: { anamnesisField: ['update'] } })
   async update(
     @Param('anamnesisFieldId') anamnesisFieldId: string,
     @Body() body: UpdateAnamnesisFieldRequest,
-  ): Promise<UpdateAnamnesisFieldResponseModel> {
-    const anamnesisField = await this.anamnesisFieldService.update(
+  ): Promise<void> {
+    await this.anamnesisFieldService.update(
       anamnesisFieldId,
       body.anamnesisField,
     );
-    return { data: { anamnesisField } };
   }
 
   @Delete(':anamnesisFieldId')

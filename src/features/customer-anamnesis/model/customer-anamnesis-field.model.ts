@@ -15,11 +15,17 @@ export const CustomerAnamnesisFieldModelSchema = z.object({
   anamnesisFieldId: z.string(),
   value: z.string(),
   extraValues: CustomerAnamnesisFieldExtraValuesSchema.optional(),
-  anamnesisFieldLabel: z.string().optional(),
-  anamnesisFieldType: z.enum(AnamnesisFieldType).optional(),
+  // Snapshotted at answer time — see customer_anamnesis_field's
+  // fieldLabel/fieldType/fieldOptions/sectionLabel columns. Always present
+  // (not resolved live), so this keeps reading correctly forever, even if
+  // the underlying anamnesis_field/anamnesis_section is later edited,
+  // deactivated, or deleted.
+  anamnesisFieldLabel: z.string(),
+  anamnesisFieldType: z.enum(AnamnesisFieldType),
   anamnesisFieldOptions: z.array(AnamnesisFieldOptionSchema).optional(),
-  anamnesisSectionId: z.string().optional(),
+  anamnesisFieldDisplayOrder: z.int(),
   anamnesisSectionLabel: z.string().optional(),
+  anamnesisSectionDisplayOrder: z.int().optional(),
 });
 
 export type CustomerAnamnesisFieldModel = z.input<

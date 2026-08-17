@@ -26,11 +26,6 @@ columns, types, and constraints.
   consistency rule the database can't express on its own.
 - `anamnesis_field_validation.anamnesisFieldId` → `anamnesis_field.id`,
   required.
-- `anamnesis_section.previousVersionId` → `anamnesis_section.id` and
-  `anamnesis_field.previousVersionId` → `anamnesis_field.id`, both
-  nullable, self-referencing. Points at the row a given version
-  supersedes — see **Versioning** below. `anamnesis_form` has no such
-  column; forms aren't versioned.
 - `customer_anamnesis.anamnesisFormId` and
   `customer_anamnesis_field.anamnesisFieldId` reference these tables from
   the [customer-anamnesis](../customer-anamnesis/DATABASE.md) feature —
@@ -63,40 +58,13 @@ columns, types, and constraints.
   distinct from `CHECKBOX` (which is a multi-select checklist — see
   [customer-anamnesis/DATABASE.md](../customer-anamnesis/DATABASE.md) for
   how each type's answer is stored).
-
-## Versioning
-
-`anamnesis_section` and `anamnesis_field` are append-only: editing never
-mutates a row's content in place (see
-[FUNCTIONAL.md](FUNCTIONAL.md#business-rules) for why — a
-`customer_anamnesis_field` answer pins to a specific field id, so a live-
-editable field would silently rewrite the meaning of past answers).
-Instead, an edit:
-
-1. Sets the current row's `active` to `false`.
-2. Inserts a new row with the edited content and
-   `previousVersionId = <the row it replaces>`.
-
-Consequences worth knowing when querying this schema directly (rather
-than through `AnamnesisFieldService`/`AnamnesisSectionService`):
-
-- **"Current version" means "no other row's `previousVersionId` points at
-  it."** `active` alone doesn't mean that — a row can be the *current*
-  version and still be `active: false` (a field/section deliberately
-  retired, with no replacement). `AnamnesisFieldRepository.hasSuccessor`/
-  `AnamnesisSectionRepository.hasSuccessor` is the actual "is this
-  superseded" check, and `findPaginated`/`findByAnamnesisFormId` filter
-  admin list views down to current-version rows only (`NOT EXISTS` a row
-  whose `previousVersionId` matches), via a self-join aliased with
-  drizzle's `alias()` — see the `AppointmentRepository`/`SaleRepository`
-  `customerPerson`/`employeePerson` aliases for the existing precedent of
-  that pattern in this codebase.
-- **`anamnesis_field_validation` rows aren't versioned independently** —
-  they belong to one specific field-version row. Editing a field always
-  inserts a fresh set of validation rows for the new version; the old
-  version's validation rows are left untouched, orphaned under the now-
-  superseded field.
-- **No cascading**: superseding a section does not touch any field that
-  points at it, and superseding a field's `anamnesisFormId`/
-  `anamnesisSectionId` never happens automatically — every version chain
-  is the result of an explicit edit to that specific row.
+- **`anamnesis_form`/`anamnesis_section`/`anamnesis_field` are ordinary
+  mutable rows — editing updates in place, no version history kept here.**
+  An earlier design made `anamnesis_section`/`anamnesis_field` append-only
+  (edit = deactivate + insert a new row) specifically so an edit could
+  never retroactively change how a past `customer_anamnesis_field` answer
+  reads. That's now solved on the *answer* side instead — see
+  [customer-anamnesis/DATABASE.md](../customer-anamnesis/DATABASE.md)'s
+  Design decisions for the snapshot approach and why it was chosen over
+  versioning the definitions. That's the reason this table can stay
+  boring.

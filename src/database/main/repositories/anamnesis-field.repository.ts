@@ -1,14 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import {
-  and,
-  asc,
-  eq,
-  exists,
-  inArray,
-  InferInsertModel,
-  sql,
-} from 'drizzle-orm';
-import { alias } from 'drizzle-orm/pg-core';
+import { and, asc, eq, inArray, InferInsertModel, sql } from 'drizzle-orm';
 import { mainEntities } from '../main-entities';
 import { FilterAnamnesisFieldDto } from '../../../features/anamnesis-field/dto/input/list-anamnesis-field.request';
 import { promiseAllObject } from '../../../shared/utils/promise-all-object';
@@ -79,17 +70,9 @@ export class AnamnesisFieldRepository extends Repository {
         anamnesisFieldValidations: {
           where: { active: true },
         },
+        anamnesisSection: true,
       },
     });
-  }
-
-  hasSuccessor(id: string) {
-    return this.db.query.anamnesisField
-      .findFirst({
-        where: { previousVersionId: id },
-        columns: { id: true },
-      })
-      .then((row) => !!row);
   }
 
   async findPaginated({
@@ -100,18 +83,12 @@ export class AnamnesisFieldRepository extends Repository {
     active,
   }: FilterAnamnesisFieldDto) {
     const offset = (page - 1) * limit;
-    const successor = alias(mainEntities.anamnesisField, 'successor');
-    const successorExistsQuery = this.db
-      .select({ 1: sql`1` })
-      .from(successor)
-      .where(eq(successor.previousVersionId, this.db.e.anamnesisField.id));
     const where = and(
       eq(this.db.e.anamnesisField.anamnesisFormId, anamnesisFormId),
       eq(this.db.e.anamnesisField.anamnesisSectionId, anamnesisSectionId!).if(
         anamnesisSectionId,
       ),
       eq(this.db.e.anamnesisField.active, active!).if(active !== undefined),
-      sql`NOT ${exists(successorExistsQuery)}`,
     );
     const anamnesisFields = this.db
       .select()

@@ -28,34 +28,10 @@ export class AnamnesisSectionService {
     return this.mapEntityToDto(entity);
   }
 
-  /**
-   * Sections are never edited in place — a stale label/order retroactively
-   * changes how any customer-anamnesis field grouped under it (and, through
-   * that field, any past answer) reads. Editing always supersedes: the
-   * current row is deactivated and a new row is inserted carrying
-   * `previousVersionId`. Existing fields keep pointing at the superseded
-   * row (still resolvable, just no longer offered) unless explicitly moved.
-   */
   @MainTransactional()
   async update(formId: string, id: string, dto: UpdateAnamnesisSectionDto) {
     await this.require(formId, id);
-    if (await this.anamnesisSectionRepository.hasSuccessor(id)) {
-      throw AnamnesisFieldExceptions.anamnesisSectionAlreadySuperseded([
-        {
-          field: 'anamnesisSectionId',
-          issue: `'${id}' is a superseded version`,
-        },
-      ]);
-    }
-    await this.anamnesisSectionRepository.update(id, { active: false });
-    const entity = await this.anamnesisSectionRepository.insert({
-      anamnesisFormId: formId,
-      label: dto.label,
-      active: dto.active,
-      displayOrder: dto.displayOrder,
-      previousVersionId: id,
-    });
-    return this.mapEntityToDto(entity);
+    await this.anamnesisSectionRepository.update(id, dto);
   }
 
   @MainTransactional()
@@ -92,7 +68,6 @@ export class AnamnesisSectionService {
       label: entity.label,
       displayOrder: entity.displayOrder,
       active: entity.active,
-      previousVersionId: entity.previousVersionId ?? undefined,
     };
   }
 }

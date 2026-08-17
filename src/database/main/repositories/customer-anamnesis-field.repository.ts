@@ -23,13 +23,6 @@ export class CustomerAnamnesisFieldRepository extends Repository {
   findByCustomerAnamnesisId(customerAnamnesisId: string) {
     return this.db.query.customerAnamnesisField.findMany({
       where: { customerAnamnesisId },
-      with: {
-        anamnesisField: {
-          with: {
-            anamnesisSection: true,
-          },
-        },
-      },
     });
   }
 

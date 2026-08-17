@@ -13,7 +13,6 @@ import { ResponseType } from '../../shared/decorator/response-type.decorator';
 import { CreateAnamnesisSectionRequest } from './dto/input/create-anamnesis-section.request';
 import { CreateAnamnesisSectionResponseModel } from './dto/output/create-anamnesis-section.response';
 import { UpdateAnamnesisSectionRequest } from './dto/input/update-anamnesis-section.request';
-import { UpdateAnamnesisSectionResponseModel } from './dto/output/update-anamnesis-section.response';
 import { ListAnamnesisSectionResponseModel } from './dto/output/list-anamnesis-section.response';
 import { HasPermission } from '../../core/auth/has-permission.decorator';
 
@@ -41,20 +40,18 @@ export class AnamnesisSectionController {
     return { data: { anamnesisSection } };
   }
 
-  @ResponseType(UpdateAnamnesisSectionResponseModel)
   @Patch(':anamnesisSectionId')
   @HasPermission({ orgPermissions: { anamnesisField: ['update'] } })
   async update(
     @Param('anamnesisFormId') anamnesisFormId: string,
     @Param('anamnesisSectionId') anamnesisSectionId: string,
     @Body() body: UpdateAnamnesisSectionRequest,
-  ): Promise<UpdateAnamnesisSectionResponseModel> {
-    const anamnesisSection = await this.anamnesisSectionService.update(
+  ): Promise<void> {
+    await this.anamnesisSectionService.update(
       anamnesisFormId,
       anamnesisSectionId,
       body.anamnesisSection,
     );
-    return { data: { anamnesisSection } };
   }
 
   @Delete(':anamnesisSectionId')
