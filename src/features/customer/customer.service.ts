@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { CustomerRepository } from '../../database/main/repositories/customer.repository';
 import { UpdateCustomerDto } from './dto/input/update-customer.request';
 import { CreateCustomerDto } from './dto/input/create-customer.request';
+import { SyncCustomerPhonesDto } from './dto/input/sync-customer-phones.request';
 
 import { CreateCustomerResDto } from './dto/output/create-customer.response';
 import { FilterCustomerDto } from './dto/input/list-customer.request';
@@ -86,6 +87,40 @@ export class CustomerService {
   async delete(id: string) {
     await this.customerReadService.require(id);
     await this.customerRepository.delete(id);
+  }
+
+  @MainTransactional()
+  async syncPhones(id: string, dto: SyncCustomerPhonesDto['phones']) {
+    const customer = await this.customerReadService.require(id);
+    const existingPhones = await this.personPhoneRepository.findAllByPersonId(
+      customer.personId,
+    );
+
+    const toKey = (phone: { type: string; number: string }) =>
+      `${phone.type}:${phone.number}`;
+    const existingKeys = new Set(existingPhones.map(toKey));
+    const desiredKeys = new Set(dto.map(toKey));
+
+    const toInsert = dto.filter((phone) => !existingKeys.has(toKey(phone)));
+    const toDeleteIds = existingPhones
+      .filter((phone) => !desiredKeys.has(toKey(phone)))
+      .map((phone) => phone.id);
+
+    const [insertedPhones] = await Promise.all([
+      this.personPhoneRepository.insertMany(
+        toInsert.map((phone) => ({
+          type: phone.type,
+          number: phone.number,
+          personId: customer.personId,
+        })),
+      ),
+      this.personPhoneRepository.deleteMany(toDeleteIds),
+    ]);
+
+    const keptPhones = existingPhones.filter((phone) =>
+      desiredKeys.has(toKey(phone)),
+    );
+    return [...keptPhones, ...insertedPhones];
   }
 
   @MainTransactional()
