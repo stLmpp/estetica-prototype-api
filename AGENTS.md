@@ -109,3 +109,5 @@ test/                     e2e tests (jest-e2e.json)
   `docs/features/_templates/` rather than skipping documentation. Purely
   internal refactors with no schema or business-rule change don't need a
   doc update.
+- **When a `TODO.md` item is done, move it to `TODO_DONE.md` — do not delete
+  it outright.** Same rule on the frontend's `TODO.md`/`TODO_DONE.md`.
