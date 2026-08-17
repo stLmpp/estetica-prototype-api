@@ -80,6 +80,26 @@ move to `TODO_DONE.md` instead of being deleted outright.
       re-exporting everything so existing imports elsewhere don't need to
       change.
 
+- [ ] `customer_anamnesis` has no change-history/audit trail beyond the
+      plain `lastUpdatedBy`/`updatedAt` every table gets from `baseEntity`
+      — those only show the *last* edit, not a full history of what
+      changed. (Locking a record after signing is already handled — see
+      the `status`/`finalize` design in `docs/features/customer-anamnesis/
+      FUNCTIONAL.md` — this item is specifically about a full field-level
+      audit log, worth it once these records are treated as real
+      medical/legal documentation rather than internal notes.)
+- [ ] No conditional/branching logic between anamnesis fields (e.g. "only
+      show field B when field A = yes") — every active field in a form's
+      section is always shown. Would need a `dependsOnFieldId`/
+      `dependsOnValue` concept on `anamnesis_field` if this becomes a real
+      requirement — not built speculatively ahead of one.
+- [ ] The EAV-style `customer_anamnesis_field.value` (`varchar(2048)`)
+      trades queryability for flexibility — filtering/reporting across
+      customers by answer (e.g. "list everyone allergic to X") means
+      parsing strings at the app layer, not a SQL `WHERE`. Fine for
+      rendering a form back, not for analytics. Revisit (e.g. a
+      materialized/indexed view) only if a real reporting need shows up.
+
 ## CI/CD dependencies
 
 Items that need actual CI/CD infrastructure to exist before they can be
