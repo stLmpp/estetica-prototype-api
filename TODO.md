@@ -60,6 +60,26 @@ move to `TODO_DONE.md` instead of being deleted outright.
       the status-code audit above is done, so the Swagger list matches
       whatever the final set of codes in active use turns out to be.
 
+- [ ] `src/features/sale/sale.service.ts` (467 lines) has accumulated too
+      much business logic in one place — most of it end-point-specific
+      rules rather than shared logic. Consider splitting into per-endpoint
+      "UseCase" services (one class per operation: create, addTransaction,
+      refund, etc.), with `SaleService`/`SaleController` delegating to them,
+      instead of one large service handling every route's rules.
+- [ ] `src/database/main/main-entities.ts` (602 lines) defines every table
+      across every domain in one file — split it into one file per domain
+      (person/employee/customer, catalog-item, appointment, sale, config,
+      etc.) inside `src/database/main/`. Two things to sort out before
+      doing this: (1) `docs/CONVENTIONS.md`'s **Database schema (drizzle
+      entities)** section says flatly "all tables are defined in
+      `main-entities.ts`" — update that doc to describe the new layout;
+      (2) cross-domain relations in `main-relations.ts` (e.g. sale →
+      appointment → employee) could introduce circular imports between the
+      new per-domain files — run the `madge --circular` check (see the
+      CI/CD item below) after splitting. Keep a barrel `main-entities.ts`
+      re-exporting everything so existing imports elsewhere don't need to
+      change.
+
 ## CI/CD dependencies
 
 Items that need actual CI/CD infrastructure to exist before they can be
