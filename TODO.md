@@ -54,22 +54,6 @@ move to `TODO_DONE.md` instead of being deleted outright.
       the status-code audit above is done, so the Swagger list matches
       whatever the final set of codes in active use turns out to be.
 
-- [ ] `GET /v1/health` (`src/features/health/`) unconditionally returns
-      `{ status: 'OK' }` — it doesn't check anything, so it can't tell a
-      genuinely healthy instance from one that's up but can't reach
-      Postgres. Replace with real readiness/liveness semantics: liveness
-      (is the process itself alive, safe to restart if not) can stay as
-      close to the current no-op as it is; readiness (safe to receive
-      traffic) needs an actual check — at minimum the main DB connection
-      (`MainDatabaseModule`), since every route depends on it. `@nestjs
-      /terminus` is the standard NestJS package for this (health
-      indicators, `/health` composed of checks) and isn't installed yet —
-      evaluate it over hand-rolling. Decide the route shape (separate
-      `/health/live` + `/health/ready`, vs. one endpoint with a query
-      param) based on whatever's deploying this (k8s-style probes are the
-      usual reason to split them) — not decided yet since there's no
-      deployment/CI story for this app currently (see the CI/CD section
-      below).
 - [ ] `src/features/sale/sale.service.ts` (467 lines) has accumulated too
       much business logic in one place — most of it end-point-specific
       rules rather than shared logic. Consider splitting into per-endpoint

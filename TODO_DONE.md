@@ -67,6 +67,29 @@ outright.
       one. Re-run this check once `Appointment` or anything else starts
       being consumed cross-feature (e.g. by the upcoming `Sale` feature).
 
+- [x] (2026-08-18) `GET /v1/health` unconditionally returned
+      `{ status: 'OK' }` with no actual check, so it couldn't distinguish
+      a genuinely healthy instance from one that's up but can't reach
+      Postgres or Redis. Installed `@nestjs/terminus` (v11.1.1,
+      peer-compatible with this app's Nest 11) and split it into two
+      routes matching the standard liveness/readiness distinction: `GET
+      /v1/health/live` (unchanged no-op, kept on the existing
+      `@ZodResponse`/`HealthResponse` pattern) and `GET /v1/health/ready`
+      (new — `@HealthCheck()` + `HealthCheckService.check()`, composing
+      `MainDatabaseHealthIndicator` (pings the main DB via
+      `MainDatasource.execute(sql\`select 1\`)`) and `RedisHealthIndicator`
+      (pings via `Redis.ping()`) — 503 automatically when either is down.
+      Redis included because `ThrottlerGuard` is a global `APP_GUARD`
+      backed by Upstash Redis, so it's a hard dependency for effectively
+      every request, not an optional feature. Route shape (split
+      live/ready, not query-param-based) picked as the de facto standard
+      regardless of what ends up deploying this, since it doesn't
+      foreclose any future target. `tsc`/lint/`pnpm build` all clean;
+      `/v1/health/ready` verified against the running dev server showing
+      `mainDatabase: up` — the paired `redis` check is code-complete and
+      typechecked but not yet confirmed live, since the dev server's
+      watcher hadn't picked up the latest edit by the time this was
+      written down.
 - [x] (2026-08-18) `src/core/filter/all-exception.filter.ts` hardcoded the
       Postgres error code `'42704'` as a raw string literal (used to detect
       `coreExceptions.databaseSessionNotSet`). Extracted into
