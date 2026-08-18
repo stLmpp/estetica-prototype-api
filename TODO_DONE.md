@@ -3,7 +3,7 @@
 Completed items moved out of `TODO.md`, kept for history instead of deleted
 outright.
 
-- [x] (2026-08-15) `employee_service`, `sale`, `sale_item`, and
+- [x] **BE-19** (2026-08-15) `employee_service`, `sale`, `sale_item`, and
       `sale_transaction` were missing the `tg_soft_delete` trigger
       (`fn_soft_delete_trigger()`, created in
       `migrations/main/20260520144049_initial`, attached per-table in
@@ -15,7 +15,7 @@ outright.
       (`migrations/main/20260815021753_bizarre_shriek`) adding the trigger
       to all four. See **Custom / hand-written SQL migrations** in
       `docs/MIGRATIONS.md` for the workflow used.
-- [x] (2026-08-15) `EmployeeServiceService.syncForEmployee` injected
+- [x] **BE-20** (2026-08-15) `EmployeeServiceService.syncForEmployee` injected
       `CatalogItemRepository` directly for its bulk catalog-item existence
       check (`findManyByIds` + compare counts), violating **Cross-feature
       access**. Fixed by adding `CatalogItemReadService.requireMany(ids)`
@@ -25,7 +25,7 @@ outright.
       now-unused `CatalogItemRepository` and `CatalogItemExceptions`
       imports entirely. Documented the `requireMany` pattern in
       **Service method naming** in `docs/CONVENTIONS.md`.
-- [x] (2026-08-15) `core/auth/auth.ts` and
+- [x] **BE-21** (2026-08-15) `core/auth/auth.ts` and
       `core/auth/extra-auth-end-points.plugin.ts` had a real circular
       dependency (`auth.ts` builds `auth` from a plugin list that includes
       `extraAuthEndPointsPlugin()`; that plugin's handler called
@@ -36,7 +36,7 @@ outright.
       deleted outright rather than restructured. `madge` now reports no
       circular dependencies anywhere in `src` (previously only verified
       clean under `src/features`).
-- [x] (2026-08-15) Audited every `src/features/*/*.service.ts` against
+- [x] **BE-22** (2026-08-15) Audited every `src/features/*/*.service.ts` against
       **Service method naming** in `docs/CONVENTIONS.md`. No violations —
       `ConfigService.get`/`listGroup` and
       `EmployeeServiceService.syncForEmployee` were already the doc's own
@@ -44,7 +44,7 @@ outright.
       `sync<Relation>`; `Customer`/`Employee`/`CatalogItem`/`Appointment`
       were already brought in line by the earlier `require`/`get` refactor.
       `AnamnesisFieldService` is an empty stub with no methods to check.
-- [x] (2026-08-15) Audited every `src/features/*/*.service.ts` for direct
+- [x] **BE-23** (2026-08-15) Audited every `src/features/*/*.service.ts` for direct
       injection of another feature's repository, per **Cross-feature
       access** in `docs/CONVENTIONS.md`. No remaining violations —
       every repository injection is either the feature's own
@@ -55,7 +55,7 @@ outright.
       documented `PersonRepository`/`PersonPhoneRepository` sub-entity
       exception (`Customer`/`Employee`). `AnamnesisFieldService` is an
       empty stub with no repositories injected.
-- [x] (2026-08-15) Audited every feature consumed cross-feature against
+- [x] **BE-24** (2026-08-15) Audited every feature consumed cross-feature against
       **Module structure: split into a `Read` module and the full module**
       in `docs/CONVENTIONS.md`. Only `Customer`, `Employee`, and
       `CatalogItem` are actually imported by another feature's module
@@ -67,7 +67,7 @@ outright.
       one. Re-run this check once `Appointment` or anything else starts
       being consumed cross-feature (e.g. by the upcoming `Sale` feature).
 
-- [x] (2026-08-18) `GET /v1/health` unconditionally returned
+- [x] **BE-25** (2026-08-18) `GET /v1/health` unconditionally returned
       `{ status: 'OK' }` with no actual check, so it couldn't distinguish
       a genuinely healthy instance from one that's up but can't reach
       Postgres or Redis. Installed `@nestjs/terminus` (v11.1.1,
@@ -90,12 +90,12 @@ outright.
       typechecked but not yet confirmed live, since the dev server's
       watcher hadn't picked up the latest edit by the time this was
       written down.
-- [x] (2026-08-18) `src/core/filter/all-exception.filter.ts` hardcoded the
+- [x] **BE-26** (2026-08-18) `src/core/filter/all-exception.filter.ts` hardcoded the
       Postgres error code `'42704'` as a raw string literal (used to detect
       `coreExceptions.databaseSessionNotSet`). Extracted into
       `PostgresErrorCode.UndefinedObject` in the new
       `src/core/filter/postgres-error-code.enum.ts`.
-- [x] (2026-08-18) `GET /v1/anamnesis-field` was paginated
+- [x] **BE-27** (2026-08-18) `GET /v1/anamnesis-field` was paginated
       (`AnamnesisFieldController.listPaginated` →
       `AnamnesisFieldRepository.findPaginated`) though every real caller
       wanted the full flat list, unlike `anamnesis-section`'s correctly

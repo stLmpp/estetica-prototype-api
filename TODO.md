@@ -4,7 +4,11 @@ Things noticed in passing that aren't worth stopping the current task for.
 Pull from this list when there's no specific task in flight. Finished items
 move to `TODO_DONE.md` instead of being deleted outright.
 
-- [ ] `patches/nestjs-zod.patch` (`pnpm-workspace.yaml`'s `patchedDependencies`)
+Each item has a stable ID (`BE-N`) for easy reference — keep the ID when an
+item moves to `TODO_DONE.md`, and give any new item the next unused number
+(highest across both files, plus one).
+
+- [ ] **BE-1** `patches/nestjs-zod.patch` (`pnpm-workspace.yaml`'s `patchedDependencies`)
       patches `nestjs-zod`'s compiled `dist/dto-*.{d.mts,mjs,cjs}` files
       directly, backporting the `createZodDto(schema, { type: 'input' |
       'output' })` API (used everywhere per **DTOs & validation (zod)** in
@@ -25,19 +29,19 @@ move to `TODO_DONE.md` instead of being deleted outright.
       upstream first — a `type: 'input' | 'output'` option might already
       be planned/merged in a later release, which would make this whole
       patch (and the fork) unnecessary.
-- [ ] `email` sending isn't set up yet, so two better-auth flags in
+- [ ] **BE-2** `email` sending isn't set up yet, so two better-auth flags in
       `src/core/auth/auth.ts` are `false` as a placeholder:
       `requireEmailVerificationOnInvitation` (organization plugin config)
       and `requireEmailVerification` (`emailAndPassword` config). Figure out
       the email-sending story (provider, templates) and flip both once it
       exists — right now anyone can sign up or accept an org invitation
       without proving they own the address.
-- [ ] `src/app.module.ts`'s `ThrottlerModule.forRootAsync` throttler config
+- [ ] **BE-3** `src/app.module.ts`'s `ThrottlerModule.forRootAsync` throttler config
       doesn't set a custom key/tracker — improve it (currently whatever
       `@nestjs/throttler`'s default tracker resolves to, presumably raw
       client IP) once it's clear what should actually key the rate limit
       here (e.g. per-tenant, per-route).
-- [ ] Audit existing exception status codes against the new HTTP status
+- [ ] **BE-4** Audit existing exception status codes against the new HTTP status
       code convention in `docs/CONVENTIONS.md` (**Exceptions**) — most
       exceptions predate that rule and weren't written with it in mind.
       Two known categories of likely violations, not yet fixed:
@@ -75,13 +79,13 @@ move to `TODO_DONE.md` instead of being deleted outright.
       the status-code audit above is done, so the Swagger list matches
       whatever the final set of codes in active use turns out to be.
 
-- [ ] `src/features/sale/sale.service.ts` (467 lines) has accumulated too
+- [ ] **BE-5** `src/features/sale/sale.service.ts` (467 lines) has accumulated too
       much business logic in one place — most of it end-point-specific
       rules rather than shared logic. Consider splitting into per-endpoint
       "UseCase" services (one class per operation: create, addTransaction,
       refund, etc.), with `SaleService`/`SaleController` delegating to them,
       instead of one large service handling every route's rules.
-- [ ] `src/database/main/main-entities.ts` (602 lines) defines every table
+- [ ] **BE-6** `src/database/main/main-entities.ts` (602 lines) defines every table
       across every domain in one file — split it into one file per domain
       (person/employee/customer, catalog-item, appointment, sale, config,
       etc.) inside `src/database/main/`. Two things to sort out before
@@ -95,7 +99,7 @@ move to `TODO_DONE.md` instead of being deleted outright.
       re-exporting everything so existing imports elsewhere don't need to
       change.
 
-- [ ] `customer_followup`/`followup_item` (`database/main/main-entities.ts`)
+- [ ] **BE-7** `customer_followup`/`followup_item` (`database/main/main-entities.ts`)
       have a full DB schema — a follow-up is a dated note (`text`, `date`)
       tied to a customer, with `followupItem`s underneath (`description`,
       `catalogItemId`, `priceApplied`, `quantity`, mirroring `sale_item`'s
@@ -109,7 +113,7 @@ move to `TODO_DONE.md` instead of being deleted outright.
       recommended follow-up services/products priced in) but the actual
       UX/workflow hasn't been designed, paired with the frontend TODO of
       the same name.
-- [ ] `customer_followup`/`followup_item` (see the `CustomerFollowup`
+- [ ] **BE-8** `customer_followup`/`followup_item` (see the `CustomerFollowup`
       feature TODO above) needs before/after photo support — an employee
       should be able to attach and later view photos per follow-up. Photos
       shouldn't live in Postgres or on the API's own disk; needs an
@@ -126,7 +130,7 @@ move to `TODO_DONE.md` instead of being deleted outright.
       generated file outside the API). Needs a real design pass (which
       provider, key structure, upload flow) before building — paired with
       a frontend TODO of the same name once the API side exists.
-- [ ] Sale receipts (PDF) don't exist yet — no generation, no storage, no
+- [ ] **BE-9** Sale receipts (PDF) don't exist yet — no generation, no storage, no
       endpoint. Suggested shape based on what's already been discussed:
       its own feature module (`src/features/receipt/`) depending on
       `SaleReadModule` (per **Cross-feature access** in
@@ -142,7 +146,7 @@ move to `TODO_DONE.md` instead of being deleted outright.
       once a sale is in a state receipts apply to (paid/completed) —
       confirm against the `SaleStatus`/transaction model before designing
       further.
-- [ ] `customer_anamnesis` has no change-history/audit trail beyond the
+- [ ] **BE-10** `customer_anamnesis` has no change-history/audit trail beyond the
       plain `lastUpdatedBy`/`updatedAt` every table gets from `baseEntity`
       — those only show the *last* edit, not a full history of what
       changed. (Locking a record after signing is already handled — see
@@ -150,7 +154,7 @@ move to `TODO_DONE.md` instead of being deleted outright.
       FUNCTIONAL.md` — this item is specifically about a full field-level
       audit log, worth it once these records are treated as real
       medical/legal documentation rather than internal notes.)
-- [ ] `AnamnesisFieldValidationType`'s `MIN_VALUE`/`MAX_VALUE` compare
+- [ ] **BE-11** `AnamnesisFieldValidationType`'s `MIN_VALUE`/`MAX_VALUE` compare
       `Number(value)`, so they're only meaningful on `NUMBER` fields —
       `DATE` fields currently have no range validation at all (see the
       field-type/validation-type compatibility table in
@@ -161,19 +165,19 @@ move to `TODO_DONE.md` instead of being deleted outright.
       specific validations worth having too (e.g. "must be in the past").
       Add once there's a real need for date-range questions (birth date
       bounds, "date of last procedure must be within N days", etc.).
-- [ ] No conditional/branching logic between anamnesis fields (e.g. "only
+- [ ] **BE-12** No conditional/branching logic between anamnesis fields (e.g. "only
       show field B when field A = yes") — every active field in a form's
       section is always shown. Would need a `dependsOnFieldId`/
       `dependsOnValue` concept on `anamnesis_field` if this becomes a real
       requirement — not built speculatively ahead of one.
-- [ ] The EAV-style `customer_anamnesis_field.value` (`varchar(2048)`)
+- [ ] **BE-13** The EAV-style `customer_anamnesis_field.value` (`varchar(2048)`)
       trades queryability for flexibility — filtering/reporting across
       customers by answer (e.g. "list everyone allergic to X") means
       parsing strings at the app layer, not a SQL `WHERE`. Fine for
       rendering a form back, not for analytics. Revisit (e.g. a
       materialized/indexed view) only if a real reporting need shows up.
 
-- [ ] No statistics/aggregation endpoints exist yet — every current `GET`
+- [ ] **BE-14** No statistics/aggregation endpoints exist yet — every current `GET`
       route returns entity rows (paginated or flat), nothing pre-aggregated
       (counts, sums, time-series). Needed for the frontend's home-page
       dashboard TODO (`estetica-prototype-fe`'s `TODO.md`, same date) —
@@ -184,7 +188,7 @@ move to `TODO_DONE.md` instead of being deleted outright.
       of widgets the frontend TODO settles on, add the endpoints those
       specific widgets need.
 
-- [ ] No platform-admin / cross-tenant capability exists yet — every query
+- [ ] **BE-15** No platform-admin / cross-tenant capability exists yet — every query
       goes through RLS policies keyed on `current_setting('tenant.id')`
       (set per-request, see `main-entities.ts`'s `using`/`withCheck` and
       `MainTransactional()` in `database/main/main-database-connection.ts`),
@@ -205,7 +209,7 @@ move to `TODO_DONE.md` instead of being deleted outright.
 Items that need actual CI/CD infrastructure to exist before they can be
 finished — parked here instead of the main list until that's set up.
 
-- [ ] Wire `madge` up as an actual project check (`pnpm` script, and ideally
+- [ ] **BE-16** Wire `madge` up as an actual project check (`pnpm` script, and ideally
       a CI step), scoped to all of `src` — `madge --circular --extensions ts
       src/app.module.ts`. Confirmed via `pnpm dlx madge` that `src` is clean
       right now (exit code 0); the one blocker
@@ -215,7 +219,7 @@ finished — parked here instead of the main list until that's set up.
       check used here. See **Module structure: split into a `Read` module
       and the full module** in `docs/CONVENTIONS.md` for the pattern this is
       meant to guard.
-- [ ] Custom colors per organization (branding). No backend support yet —
+- [ ] **BE-17** Custom colors per organization (branding). No backend support yet —
       `workingHours`/`customerLimit`/`membershipLimit` are the existing
       precedent for org-level settings, declared as `additionalFields` on
       the organization plugin config in `src/core/auth/auth.ts` and read
@@ -227,7 +231,7 @@ finished — parked here instead of the main list until that's set up.
       already is. Needs a decision on scope (one primary color vs. a
       small palette) and validation (hex format) before implementing.
 
-- [ ] Figure out the unit test strategy and wire it into CI. Per **Testing**
+- [ ] **BE-18** Figure out the unit test strategy and wire it into CI. Per **Testing**
       in `docs/CONVENTIONS.md`, there are no unit tests in `src` yet — jest
       config (`rootDir: src`, `*.spec.ts`) and the `pnpm test`/`test:watch`/
       `test:cov` scripts already exist, just unused. Needs a decision on:
