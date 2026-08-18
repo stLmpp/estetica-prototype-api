@@ -4,6 +4,27 @@ Things noticed in passing that aren't worth stopping the current task for.
 Pull from this list when there's no specific task in flight. Finished items
 move to `TODO_DONE.md` instead of being deleted outright.
 
+- [ ] `patches/nestjs-zod.patch` (`pnpm-workspace.yaml`'s `patchedDependencies`)
+      patches `nestjs-zod`'s compiled `dist/dto-*.{d.mts,mjs,cjs}` files
+      directly, backporting the `createZodDto(schema, { type: 'input' |
+      'output' })` API (used everywhere per **DTOs & validation (zod)** in
+      `docs/CONVENTIONS.md`) and forcing `codec = true`, since neither
+      5.4.0 nor 5.5.0 ship it natively. Because it targets *compiled*
+      files, and `nestjs-zod`'s bundler content-hashes those filenames
+      (`dto-BBR1Ry2A.d.mts` → `dto-BYMDb-k9.d.mts` between 5.4.0 → 5.5.0),
+      the patch breaks on every version bump — confirmed 2026-08-18
+      bumping 5.4.0 → 5.5.0 (`ERR_PNPM_PATCH_FAILED`), fixed by manually
+      regenerating the patch against the new hash-named files (see
+      `TODO_DONE.md`). This will keep happening on every future bump.
+      Fork `nestjs-zod` (`github.com/BenLorantfy/nestjs-zod`) instead:
+      apply the same change at the *source* level (a real, reviewable
+      diff against `src/dto.ts` or wherever it lives upstream, not a
+      compiled-output patch), consume it via a git dependency or a
+      published fork under an org scope, and drop `pnpm patch`/
+      `patches/nestjs-zod.patch` for this package entirely. Check
+      upstream first — a `type: 'input' | 'output'` option might already
+      be planned/merged in a later release, which would make this whole
+      patch (and the fork) unnecessary.
 - [ ] `email` sending isn't set up yet, so two better-auth flags in
       `src/core/auth/auth.ts` are `false` as a placeholder:
       `requireEmailVerificationOnInvitation` (organization plugin config)
