@@ -67,6 +67,12 @@ outright.
       one. Re-run this check once `Appointment` or anything else starts
       being consumed cross-feature (e.g. by the upcoming `Sale` feature).
 
-This closed out every item that was in the main `TODO.md` list — remaining
-items live under **CI/CD dependencies** in `TODO.md`, parked until that
-infrastructure exists.
+- [x] (2026-08-18) `src/core/filter/all-exception.filter.ts` hardcoded the
+      Postgres error code `'42704'` as a raw string literal (used to detect
+      `coreExceptions.databaseSessionNotSet`). Extracted into
+      `PostgresErrorCode.UndefinedObject` in the new
+      `src/core/filter/postgres-error-code.enum.ts`.
+
+Remaining items live under **CI/CD dependencies** in `TODO.md`, parked until
+that infrastructure exists, plus whatever's currently in the main list
+above that.

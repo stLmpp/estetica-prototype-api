@@ -17,6 +17,7 @@ import { DrizzleQueryError } from 'drizzle-orm';
 import { ThrottlerException } from '@nestjs/throttler';
 import { isAPIError } from 'better-auth/api';
 import { dynamicException } from '../exception/exception';
+import { PostgresErrorCode } from './postgres-error-code.enum';
 
 const NotFoundResponseSchema = z.object({
   message: z.string(),
@@ -86,7 +87,7 @@ export class AllExceptionsFilter extends BaseExceptionFilter {
         cause &&
         typeof cause === 'object' &&
         'code' in cause &&
-        cause.code === '42704'
+        cause.code === PostgresErrorCode.UndefinedObject
       ) {
         unknownException = coreExceptions.databaseSessionNotSet([
           {

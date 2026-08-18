@@ -16,12 +16,6 @@ move to `TODO_DONE.md` instead of being deleted outright.
       `@nestjs/throttler`'s default tracker resolves to, presumably raw
       client IP) once it's clear what should actually key the rate limit
       here (e.g. per-tenant, per-route).
-- [ ] `src/core/filter/all-exception.filter.ts` hardcodes the Postgres error
-      code `'42704'` as a raw string literal (used to detect
-      `coreExceptions.databaseSessionNotSet` — see **Repositories** →
-      `@MainTransactional()` in `docs/CONVENTIONS.md`). Extract it into a
-      named enum/constant instead, for readability and so future error-code
-      checks elsewhere don't repeat the same magic string.
 - [ ] Audit existing exception status codes against the new HTTP status
       code convention in `docs/CONVENTIONS.md` (**Exceptions**) — most
       exceptions predate that rule and weren't written with it in mind.
