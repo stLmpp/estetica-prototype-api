@@ -105,6 +105,33 @@ move to `TODO_DONE.md` instead of being deleted outright.
       rendering a form back, not for analytics. Revisit (e.g. a
       materialized/indexed view) only if a real reporting need shows up.
 
+- [ ] No statistics/aggregation endpoints exist yet — every current `GET`
+      route returns entity rows (paginated or flat), nothing pre-aggregated
+      (counts, sums, time-series). Needed for the frontend's home-page
+      dashboard TODO (`estetica-prototype-fe`'s `TODO.md`, same date) —
+      widgets like today's appointment count, revenue over time, or
+      customer counts need dedicated endpoints (e.g. a `dashboard` or
+      `statistics` feature) rather than the frontend fetching full entity
+      lists and aggregating client-side. Start with whatever hardcoded set
+      of widgets the frontend TODO settles on, add the endpoints those
+      specific widgets need.
+
+- [ ] No platform-admin / cross-tenant capability exists yet — every query
+      goes through RLS policies keyed on `current_setting('tenant.id')`
+      (set per-request, see `main-entities.ts`'s `using`/`withCheck` and
+      `MainTransactional()` in `database/main/main-database-connection.ts`),
+      so today there's no way to query or administer across organizations
+      at all. Once there's an actual need (managing orgs, cross-tenant
+      reporting, support tooling), this needs deliberate design, not just
+      "skip RLS": likely a separate platform-admin auth path (its own role/
+      guard, not just an org member with elevated permissions) and
+      explicit escape hatches for the tenant-scoped queries it's allowed to
+      run (e.g. a raw connection/role that bypasses the RLS policy, used
+      only by that path) — everything else in the app should keep going
+      through the tenant-scoped connection as-is. Don't build this
+      speculatively; start once a concrete platform-admin endpoint is
+      actually needed.
+
 ## CI/CD dependencies
 
 Items that need actual CI/CD infrastructure to exist before they can be
