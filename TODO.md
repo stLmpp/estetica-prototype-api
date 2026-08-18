@@ -88,6 +88,39 @@ move to `TODO_DONE.md` instead of being deleted outright.
       recommended follow-up services/products priced in) but the actual
       UX/workflow hasn't been designed, paired with the frontend TODO of
       the same name.
+- [ ] `customer_followup`/`followup_item` (see the `CustomerFollowup`
+      feature TODO above) needs before/after photo support — an employee
+      should be able to attach and later view photos per follow-up. Photos
+      shouldn't live in Postgres or on the API's own disk; needs an
+      external object storage bucket (S3-compatible — AWS S3, Cloudflare
+      R2, etc., not decided; there's no deployment story yet either, see
+      the CI/CD section below), with only the object key stored in the DB
+      (a new `followup_photo` table: `followupId`, `key`, maybe a
+      `type: BEFORE | AFTER`) and short-lived presigned URLs for
+      upload/read rather than a public bucket — these are sensitive
+      medical/aesthetic photos. Worth building as one shared storage
+      abstraction (a `StorageModule`/`StorageService`, tenant-prefixed
+      object keys like everything else) rather than a one-off, since the
+      receipt-PDF TODO below needs the same underlying piece (persisting a
+      generated file outside the API). Needs a real design pass (which
+      provider, key structure, upload flow) before building — paired with
+      a frontend TODO of the same name once the API side exists.
+- [ ] Sale receipts (PDF) don't exist yet — no generation, no storage, no
+      endpoint. Suggested shape based on what's already been discussed:
+      its own feature module (`src/features/receipt/`) depending on
+      `SaleReadModule` (per **Cross-feature access** in
+      `docs/CONVENTIONS.md`) rather than folding into
+      `sale.service.ts` (already flagged above as overloaded). Needs to be
+      idempotent but produce a stateful artifact (a PDF file) — one way to
+      get both: key the generated file off `(saleId, a hash/version of the
+      sale's finalized state)`; a repeat request for the same inputs
+      returns the already-generated file (from the storage bucket in the
+      TODO above) instead of regenerating. PDF generation approach (HTML
+      template + headless render vs. a PDF-building library) and the
+      actual receipt content/layout aren't decided yet. Only makes sense
+      once a sale is in a state receipts apply to (paid/completed) —
+      confirm against the `SaleStatus`/transaction model before designing
+      further.
 - [ ] `customer_anamnesis` has no change-history/audit trail beyond the
       plain `lastUpdatedBy`/`updatedAt` every table gets from `baseEntity`
       — those only show the *last* edit, not a full history of what
