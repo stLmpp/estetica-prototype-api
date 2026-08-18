@@ -159,10 +159,25 @@ item moves to `TODO_DONE.md`, and give any new item the next unused number
       `DATE` fields currently have no range validation at all (see the
       field-type/validation-type compatibility table in
       `docs/features/anamnesis-field/FUNCTIONAL.md`). A date range needs
-      its own validation types instead of reusing the numeric ones — e.g.
-      `MIN_DATE`/`MAX_DATE` with a `{ date: string }` arg compared against
-      the answer parsed as a date, not a number. Possibly other date-
-      specific validations worth having too (e.g. "must be in the past").
+      its own validation types instead of reusing the numeric ones — two
+      distinct shapes, both worth having:
+      - Fixed-date bounds — e.g. `MIN_DATE`/`MAX_DATE` with a `{ date:
+        string }` arg compared against the answer parsed as a date, not a
+        number (for things like a hard cutoff birth date).
+      - Relative-to-today comparisons — e.g. "must be in the future"
+        (`> TODAY`), "must be in the past" (`< TODAY`), and their
+        inclusive variants (`>= TODAY`, `<= TODAY`), evaluated against the
+        current date at validation time rather than a fixed stored date.
+        Direct feedback flagged this specifically (2026-08-18) — these are
+        common enough (birth date must be in the past, appointment/
+        procedure date must not be in the past, etc.) to deserve their own
+        validation types rather than being expressed as a `MIN_DATE`/
+        `MAX_DATE` with a recomputed "today" value on every read.
+      Naming/arg shape for the relative ones isn't decided (dedicated enum
+      values like `MIN_DATE_TODAY`/`MAX_DATE_TODAY` plus an `inclusive`
+      flag, vs. reusing `MIN_DATE`/`MAX_DATE` with a `relativeToToday: true`
+      arg instead of a fixed `date`) — decide alongside the fixed-bound
+      shape so both fit the same `AnamnesisFieldValidationArgs` pattern.
       Add once there's a real need for date-range questions (birth date
       bounds, "date of last procedure must be within N days", etc.).
 - [ ] **BE-12** No conditional/branching logic between anamnesis fields (e.g. "only
