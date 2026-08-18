@@ -66,19 +66,11 @@ export class AnamnesisFieldController {
   @ResponseType(ListAnamnesisFieldResponseModel)
   @Get()
   @HasPermission({ orgPermissions: { anamnesisField: ['get'] } })
-  async listPaginated(
+  async listByForm(
     @Query() query: FilterAnamnesisFieldDto,
   ): Promise<ListAnamnesisFieldResponseModel> {
-    const { anamnesisFields, count } =
-      await this.anamnesisFieldService.listPaginated(query);
-    return {
-      data: { items: anamnesisFields },
-      meta: {
-        total: count,
-        limit: query.limit,
-        page: query.page,
-      },
-    };
+    const anamnesisFields = await this.anamnesisFieldService.listByForm(query);
+    return { data: { anamnesisFields } };
   }
 
   @ResponseType(GetAnamnesisFieldResponseModel)

@@ -98,31 +98,6 @@ move to `TODO_DONE.md` instead of being deleted outright.
       section is always shown. Would need a `dependsOnFieldId`/
       `dependsOnValue` concept on `anamnesis_field` if this becomes a real
       requirement — not built speculatively ahead of one.
-- [ ] `GET /v1/anamnesis-field` (`AnamnesisFieldController.listPaginated` →
-      `AnamnesisFieldRepository.findPaginated`,
-      `src/features/anamnesis-field/`) is paginated (`page`/`limit` up to
-      100, `meta.total`), but every real caller wants "every field for this
-      form" in one shot — there's no UI anywhere that paginates fields.
-      Compare `GET /v1/anamnesis-form/:anamnesisFormId/section`
-      (`AnamnesisSectionService.listByForm` →
-      `AnamnesisSectionRepository.findByAnamnesisFormId`), which is
-      correctly a flat, non-paginated list for the exact same "small,
-      always-fetch-all, per-form collection" shape. On the frontend, both
-      `AnamnesisFormDetailStore` (`anamnesis-form-detail.store.ts`) and
-      `CustomerAnamnesisFormPageComponent`
-      (`customer-anamnesis-form-page.component.ts`) already work around
-      this by hardcoding `limit: 100` (the schema's own max) to `list()` —
-      not real pagination, just the largest page size allowed, which would
-      silently truncate if a form ever had more than 100 fields. Make
-      `anamnesis-field`'s list endpoint match `anamnesis-section`'s
-      shape: drop `page`/`limit` from `FilterAnamnesisFieldDto`
-      (`RequestPaginatedSchema` inheritance), switch
-      `AnamnesisFieldRepository.findPaginated` to a plain `findMany`-style
-      method (mirroring `findByAnamnesisFormId`), and update
-      `ListAnamnesisFieldResponseModel` to the flat-array shape
-      (`createResponseSchema` instead of `createPaginatedResponseSchema`).
-      Frontend needs the matching update — see the paired TODO in
-      `estetica-prototype-fe`'s `TODO.md`.
 - [ ] The EAV-style `customer_anamnesis_field.value` (`varchar(2048)`)
       trades queryability for flexibility — filtering/reporting across
       customers by answer (e.g. "list everyone allergic to X") means

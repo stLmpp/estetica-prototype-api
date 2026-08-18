@@ -1,8 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { and, asc, eq, inArray, InferInsertModel, sql } from 'drizzle-orm';
+import { and, asc, eq, inArray, InferInsertModel } from 'drizzle-orm';
 import { mainEntities } from '../main-entities';
 import { FilterAnamnesisFieldDto } from '../../../features/anamnesis-field/dto/input/list-anamnesis-field.request';
-import { promiseAllObject } from '../../../shared/utils/promise-all-object';
 import { Repository } from './repository';
 
 type Insert = Omit<InferInsertModel<typeof mainEntities.anamnesisField>, 'id'>;
@@ -75,40 +74,28 @@ export class AnamnesisFieldRepository extends Repository {
     });
   }
 
-  async findPaginated({
-    page,
-    limit,
+  findByAnamnesisFormId({
     anamnesisFormId,
     anamnesisSectionId,
     active,
   }: FilterAnamnesisFieldDto) {
-    const offset = (page - 1) * limit;
-    const where = and(
-      eq(this.db.e.anamnesisField.anamnesisFormId, anamnesisFormId),
-      eq(this.db.e.anamnesisField.anamnesisSectionId, anamnesisSectionId!).if(
-        anamnesisSectionId,
-      ),
-      eq(this.db.e.anamnesisField.active, active!).if(active !== undefined),
-    );
-    const anamnesisFields = this.db
+    return this.db
       .select()
       .from(this.db.e.anamnesisField)
-      .where(where)
+      .where(
+        and(
+          eq(this.db.e.anamnesisField.anamnesisFormId, anamnesisFormId),
+          eq(
+            this.db.e.anamnesisField.anamnesisSectionId,
+            anamnesisSectionId!,
+          ).if(anamnesisSectionId),
+          eq(this.db.e.anamnesisField.active, active!).if(active !== undefined),
+        ),
+      )
       .orderBy(
         asc(this.db.e.anamnesisField.displayOrder),
         asc(this.db.e.anamnesisField.id),
       )
-      .limit(limit)
-      .offset(offset)
       .execute();
-    const count = this.db
-      .select({
-        count: sql<number>`count(*)`.mapWith(Number),
-      })
-      .from(this.db.e.anamnesisField)
-      .where(where)
-      .execute()
-      .then((results) => results[0]?.count ?? 0);
-    return promiseAllObject({ anamnesisFields, count });
   }
 }

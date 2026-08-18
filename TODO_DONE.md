@@ -72,6 +72,21 @@ outright.
       `coreExceptions.databaseSessionNotSet`). Extracted into
       `PostgresErrorCode.UndefinedObject` in the new
       `src/core/filter/postgres-error-code.enum.ts`.
+- [x] (2026-08-18) `GET /v1/anamnesis-field` was paginated
+      (`AnamnesisFieldController.listPaginated` →
+      `AnamnesisFieldRepository.findPaginated`) though every real caller
+      wanted the full flat list, unlike `anamnesis-section`'s correctly
+      non-paginated equivalent. Dropped `page`/`limit` from
+      `FilterAnamnesisFieldDto`, renamed `AnamnesisFieldRepository
+      .findPaginated` → `findByAnamnesisFormId` (plain `findMany`-style,
+      mirroring `AnamnesisSectionRepository.findByAnamnesisFormId`),
+      renamed `AnamnesisFieldService.listPaginated` → `listByForm`
+      (matching the `list<Grouping>` convention in
+      **Service method naming**, `docs/CONVENTIONS.md`), and switched
+      `ListAnamnesisFieldResponseModel` to the flat-array shape
+      (`createResponseSchema` instead of `createPaginatedResponseSchema`).
+      Paired with the frontend update in `estetica-prototype-fe`'s
+      `TODO_DONE.md`.
 
 Remaining items live under **CI/CD dependencies** in `TODO.md`, parked until
 that infrastructure exists, plus whatever's currently in the main list

@@ -84,15 +84,10 @@ export class AnamnesisFieldService {
   }
 
   @MainTransactional()
-  async listPaginated(dto: FilterAnamnesisFieldDto) {
-    const { anamnesisFields, count } =
-      await this.anamnesisFieldRepository.findPaginated(dto);
-    return {
-      anamnesisFields: anamnesisFields.map((entity) =>
-        this.mapEntityToDto(entity),
-      ),
-      count,
-    };
+  async listByForm(dto: FilterAnamnesisFieldDto) {
+    const anamnesisFields =
+      await this.anamnesisFieldRepository.findByAnamnesisFormId(dto);
+    return anamnesisFields.map((entity) => this.mapEntityToDto(entity));
   }
 
   private async syncValidations(
