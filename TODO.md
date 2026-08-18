@@ -90,6 +90,20 @@ move to `TODO_DONE.md` instead of being deleted outright.
       re-exporting everything so existing imports elsewhere don't need to
       change.
 
+- [ ] `customer_followup`/`followup_item` (`database/main/main-entities.ts`)
+      have a full DB schema — a follow-up is a dated note (`text`, `date`)
+      tied to a customer, with `followupItem`s underneath (`description`,
+      `catalogItemId`, `priceApplied`, `quantity`, mirroring `sale_item`'s
+      shape) — but no backend feature module exists yet (no `src/features
+      /customer-followup` or similar; every other entity in
+      `main-entities.ts` has one). Build the `CustomerFollowup` feature
+      following the established pattern (module split into `Read`/full
+      per **Module structure** in `docs/CONVENTIONS.md`, DTOs, etc.) once
+      there's a concrete need — this looks aimed at post-procedure
+      follow-up tracking (e.g. "check healing in 2 weeks", with
+      recommended follow-up services/products priced in) but the actual
+      UX/workflow hasn't been designed, paired with the frontend TODO of
+      the same name.
 - [ ] `customer_anamnesis` has no change-history/audit trail beyond the
       plain `lastUpdatedBy`/`updatedAt` every table gets from `baseEntity`
       — those only show the *last* edit, not a full history of what
