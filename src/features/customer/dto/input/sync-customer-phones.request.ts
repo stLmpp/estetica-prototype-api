@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { createZodDto } from 'nestjs-zod';
+import { createZodDto } from '@stlmpp/nestjs-zod';
 import { PhoneType } from '../../../../shared/domain/phone-type.enum';
 import { PhoneNumberSchema } from '../../../../shared/model/common.model';
 

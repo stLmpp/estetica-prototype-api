@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { createResponseSchema } from '../../../../shared/model/response.model';
-import { createZodDto } from 'nestjs-zod';
+import { createZodDto } from '@stlmpp/nestjs-zod';
 import { ConfigModelSchema } from '../../model/config.model';
 
 export const GetConfigResponseSchema = createResponseSchema(

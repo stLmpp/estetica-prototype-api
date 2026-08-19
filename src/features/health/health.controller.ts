@@ -3,9 +3,9 @@ import { HealthCheck, HealthCheckService } from '@nestjs/terminus';
 import { HealthResponse, HealthStatus } from './health.response';
 import { ApiTags } from '@nestjs/swagger';
 import { OptionalAuth } from '@thallesp/nestjs-better-auth';
-import { ZodResponse } from 'nestjs-zod';
 import { MainDatabaseHealthIndicator } from './main-database.health-indicator';
 import { RedisHealthIndicator } from './redis.health-indicator';
+import { ResponseType } from '../../shared/decorator/response-type.decorator';
 
 @Controller({
   path: 'health',
@@ -20,7 +20,7 @@ export class HealthController {
     private readonly redisHealthIndicator: RedisHealthIndicator,
   ) {}
 
-  @ZodResponse({ type: HealthResponse })
+  @ResponseType(HealthResponse)
   @Get('live')
   live(): HealthResponse {
     return {

@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { createZodDto } from 'nestjs-zod';
+import { createZodDto } from '@stlmpp/nestjs-zod';
 import { CatalogItemType } from '../../../../shared/domain/catalog-item-type.enum';
 import { DurationSchema } from '../../../../shared/model/common.model';
 

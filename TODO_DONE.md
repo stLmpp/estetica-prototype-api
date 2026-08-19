@@ -110,6 +110,19 @@ outright.
       (`createResponseSchema` instead of `createPaginatedResponseSchema`).
       Paired with the frontend update in `estetica-prototype-fe`'s
       `TODO_DONE.md`.
+- [x] **BE-1** (2026-08-18) `patches/nestjs-zod.patch` patched `nestjs-zod`'s
+      compiled `dist/dto-*.{d.mts,mjs,cjs}` files directly to backport the
+      `createZodDto(schema, { type: 'input' | 'output' })` API, and broke on
+      every version bump because the bundler content-hashes those compiled
+      filenames — confirmed twice, most recently bumping 5.4.0 → 5.5.0.
+      Forked `nestjs-zod` instead: published `@stlmpp/nestjs-zod` (own repo,
+      `github.com/stLmpp/nestjs-zod`, published to npm as `1.0.0`) with the
+      `type` option applied at the source level, replaced every `import ...
+      from 'nestjs-zod'` across the codebase with `@stlmpp/nestjs-zod`,
+      dropped the plain `nestjs-zod` dependency, and deleted
+      `patches/nestjs-zod.patch` along with its `patchedDependencies` entry
+      in `pnpm-workspace.yaml` — `pnpm patch` is no longer part of this
+      project's dependency story for this package.
 
 Remaining items live under **CI/CD dependencies** in `TODO.md`, parked until
 that infrastructure exists, plus whatever's currently in the main list

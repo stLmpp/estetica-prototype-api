@@ -2,7 +2,7 @@ import {
   createPaginatedResponseSchema,
   createResponseSchema,
 } from '../../../../shared/model/response.model';
-import { createZodDto } from 'nestjs-zod';
+import { createZodDto } from '@stlmpp/nestjs-zod';
 import { z } from 'zod';
 import { ConfigModelSchema } from '../../model/config.model';
 

@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { GLOBAL_TENANT, GLOBAL_USER } from '../../../../core/auth/constants';
-import { createZodDto } from 'nestjs-zod';
+import { createZodDto } from '@stlmpp/nestjs-zod';
 import { BooleanParamSchema } from '../../../../shared/model/common.model';
 
 export const GetGroupRequestSchema = z.object({

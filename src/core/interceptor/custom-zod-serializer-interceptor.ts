@@ -7,7 +7,7 @@ import {
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { Observable, switchMap } from 'rxjs';
-import { ZodDto, ZodSerializationException } from 'nestjs-zod';
+import { ZodDto, ZodSerializationException } from '@stlmpp/nestjs-zod';
 
 @Injectable()
 export class CustomZodSerializerInterceptor implements NestInterceptor {

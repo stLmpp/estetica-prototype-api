@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { createZodDto } from 'nestjs-zod';
+import { createZodDto } from '@stlmpp/nestjs-zod';
 
 export const CreateEmployeeServiceSchema = z.object({
   employeeId: z.string().trim().min(1),

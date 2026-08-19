@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { createZodDto } from 'nestjs-zod';
+import { createZodDto } from '@stlmpp/nestjs-zod';
 
 export const FinalizeCustomerAnamnesisSchema = z.object({
   signedByName: z.string().trim().min(1).max(256),

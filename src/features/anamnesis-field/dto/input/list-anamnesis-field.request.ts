@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { createZodDto } from 'nestjs-zod';
+import { createZodDto } from '@stlmpp/nestjs-zod';
 import { BooleanParamSchema } from '../../../../shared/model/common.model';
 
 export const FilterAnamnesisFieldSchema = z.object({

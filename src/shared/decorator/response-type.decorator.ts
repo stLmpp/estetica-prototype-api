@@ -1,4 +1,4 @@
-import { type ZodDto, ZodSerializerDto } from 'nestjs-zod';
+import { type ZodDto, ZodSerializerDto } from '@stlmpp/nestjs-zod';
 import { applyDecorators, HttpCode } from '@nestjs/common';
 import { ApiResponse } from '@nestjs/swagger';
 

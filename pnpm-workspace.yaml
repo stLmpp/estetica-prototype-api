@@ -9,6 +9,4 @@ allowBuilds:
 
 minimumReleaseAgeExclude:
   - '@thallesp/nestjs-better-auth@2.7.0'
-
-patchedDependencies:
-  nestjs-zod: patches/nestjs-zod.patch
+  - '@stlmpp/nestjs-zod@1.0.1'

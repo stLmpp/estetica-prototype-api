@@ -12,7 +12,7 @@ import {
   ZodSchemaDeclarationException,
   ZodSerializationException,
   ZodValidationException,
-} from 'nestjs-zod';
+} from '@stlmpp/nestjs-zod';
 import { DrizzleQueryError } from 'drizzle-orm';
 import { ThrottlerException } from '@nestjs/throttler';
 import { isAPIError } from 'better-auth/api';

@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { createZodDto } from 'nestjs-zod';
+import { createZodDto } from '@stlmpp/nestjs-zod';
 import { RequestPaginatedSchema } from '../../../../shared/model/request.model';
 
 export const FilterEmployeeServiceSchema = RequestPaginatedSchema.extend({

@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { createZodDto } from 'nestjs-zod';
+import { createZodDto } from '@stlmpp/nestjs-zod';
 import { createPaginatedResponseSchema } from '../../../../shared/model/response.model';
 
 export const EmployeeServiceSchema = z.object({

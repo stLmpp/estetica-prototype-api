@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { createZodDto } from 'nestjs-zod';
+import { createZodDto } from '@stlmpp/nestjs-zod';
 import { SaleTransactionInputSchema } from '../../model/sale.model';
 
 export class AddSaleTransactionDto extends createZodDto(

@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { createZodDto } from 'nestjs-zod';
+import { createZodDto } from '@stlmpp/nestjs-zod';
 import { RequestPaginatedSchema } from '../../../../shared/model/request.model';
 import { BooleanParamSchema } from '../../../../shared/model/common.model';
 import { CatalogItemType } from '../../../../shared/domain/catalog-item-type.enum';

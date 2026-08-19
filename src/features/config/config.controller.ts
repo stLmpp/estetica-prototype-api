@@ -14,7 +14,7 @@ import {
 import { GetConfigResponse } from './dto/output/get-config.response';
 import { GetConfigRequest } from './dto/input/get-config.request';
 import { GetGroupRequest } from './dto/input/get-group.request';
-import { ZodValidationPipe } from 'nestjs-zod';
+import { ZodValidationPipe } from '@stlmpp/nestjs-zod';
 import { BodyType } from '../../shared/decorator/body-type.decorator';
 import { HasPermission } from '../../core/auth/has-permission.decorator';
 

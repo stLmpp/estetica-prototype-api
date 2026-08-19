@@ -1,6 +1,6 @@
 import { RequestPaginatedSchema } from '../../../../shared/model/request.model';
 import { BooleanParamSchema } from '../../../../shared/model/common.model';
-import { createZodDto } from 'nestjs-zod';
+import { createZodDto } from '@stlmpp/nestjs-zod';
 import { z } from 'zod';
 import { CONFIG_GROUP_GLOBAL } from '../../config.constants';
 import { GLOBAL_TENANT, GLOBAL_USER } from '../../../../core/auth/constants';

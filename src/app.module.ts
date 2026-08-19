@@ -32,7 +32,7 @@ import { ErrorAfterHook } from './core/auth/error-after-hook';
 import { Environment } from './shared/environment.enum';
 import { ConfigModule } from './features/config/config.module';
 import { ResponseErrorModel } from './shared/model/response-error.model';
-import { ZodValidationPipe } from 'nestjs-zod';
+import { ZodValidationPipe } from '@stlmpp/nestjs-zod';
 import { CatalogItemModule } from './features/catalog-item/catalog-item.module';
 import { EmployeeModule } from './features/employee/employee.module';
 import { EmployeeServiceModule } from './features/employee-service/employee-service.module';

@@ -1,4 +1,4 @@
-import { createZodDto } from 'nestjs-zod';
+import { createZodDto } from '@stlmpp/nestjs-zod';
 import { createPaginatedResponseSchema } from '../../../../shared/model/response.model';
 import { CustomerAnamnesisModelSchema } from '../../model/customer-anamnesis.model';
 

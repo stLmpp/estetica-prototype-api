@@ -1,6 +1,6 @@
 import { generateSchema, type OpenAPIObject } from '@nestjs/swagger';
 import { type Class } from 'type-fest';
-import { cleanupOpenApiDoc } from 'nestjs-zod';
+import { cleanupOpenApiDoc } from '@stlmpp/nestjs-zod';
 import {
   ErrorDetailModel,
   ErrorModel,
