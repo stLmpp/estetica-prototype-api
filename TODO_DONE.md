@@ -123,6 +123,27 @@ outright.
       `patches/nestjs-zod.patch` along with its `patchedDependencies` entry
       in `pnpm-workspace.yaml` — `pnpm patch` is no longer part of this
       project's dependency story for this package.
+- [x] **BE-6** (2026-08-19) `src/database/main/main-entities.ts` (602 lines)
+      defined every table across every domain in one file. Split into
+      `src/database/main/entities/` — one file per domain
+      (`person.entities.ts` for person/employee/customer/personPhone,
+      `catalog-item.entities.ts`, `employee-service.entities.ts`,
+      `customer-followup.entities.ts`, `appointment.entities.ts`,
+      `anamnesis-field.entities.ts`, `customer-anamnesis.entities.ts`,
+      `sale.entities.ts`, `config.entities.ts`) plus `entities/base.ts` for
+      the shared helpers (`baseEntity`, `addAuthenticatedPolicy`,
+      `addDeletedAtPolicies`). `main-entities.ts` is now a barrel
+      re-exporting every entity file and assembling `mainEntities`, so
+      existing imports (`main-relations.ts`, every repository, several
+      feature services) needed no changes. Confirmed via `pnpm dlx madge
+      --circular --extensions ts src/app.module.ts` that the split
+      introduced no circular imports (cross-domain foreign keys form a DAG:
+      `person`/`catalog-item` have no outgoing domain deps, everything else
+      only imports "down" from those), and via `pnpm migrations:generate:main`
+      that the generated drizzle schema is byte-for-byte unchanged ("No
+      schema changes, nothing to migrate"). Updated **Database schema
+      (drizzle entities)** in `docs/CONVENTIONS.md` and the project-layout
+      snapshot in `AGENTS.md` to describe the new layout.
 
 Remaining items live under **CI/CD dependencies** in `TODO.md`, parked until
 that infrastructure exists, plus whatever's currently in the main list

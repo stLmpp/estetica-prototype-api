@@ -110,18 +110,20 @@ export class SaleRepository extends Repository {
     if (!appointmentIds.length) {
       return Promise.resolve([]);
     }
-    return this.db
-      .select({
-        id: this.db.e.sale.id,
-        appointmentId: this.db.e.sale.appointmentId,
-      })
-      .from(this.db.e.sale)
-      .where(inArray(this.db.e.sale.appointmentId, appointmentIds))
-      // Ascending so building a Map keyed by appointmentId below keeps the
-      // most recent sale per appointment (last write wins) — appointmentId
-      // isn't DB-unique, so more than one sale can exist for one appointment.
-      .orderBy(this.db.e.sale.createdAt)
-      .execute();
+    return (
+      this.db
+        .select({
+          id: this.db.e.sale.id,
+          appointmentId: this.db.e.sale.appointmentId,
+        })
+        .from(this.db.e.sale)
+        .where(inArray(this.db.e.sale.appointmentId, appointmentIds))
+        // Ascending so building a Map keyed by appointmentId below keeps the
+        // most recent sale per appointment (last write wins) — appointmentId
+        // isn't DB-unique, so more than one sale can exist for one appointment.
+        .orderBy(this.db.e.sale.createdAt)
+        .execute()
+    );
   }
 
   findFirstByIdWithDetails(id: string) {

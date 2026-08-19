@@ -15,7 +15,8 @@ export class SaleReadService {
   async findAppointmentIdToSaleIdMap(
     appointmentIds: string[],
   ): Promise<Map<string, string>> {
-    const sales = await this.saleRepository.findByAppointmentIds(appointmentIds);
+    const sales =
+      await this.saleRepository.findByAppointmentIds(appointmentIds);
     return new Map(
       sales.map((sale) => [sale.appointmentId!, sale.id] as const),
     );

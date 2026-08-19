@@ -44,7 +44,8 @@ src/
     openapi/             swagger/openapi generation helpers
     redis/                RedisModule + better-auth secondary storage adapter
   database/main/         drizzle schema + data access
-    main-entities.ts     table definitions
+    entities/             table definitions, one file per domain
+    main-entities.ts     barrel re-exporting entities/* + mainEntities
     main-relations.ts    drizzle relations
     main-database-connection.ts   pool, drizzle client, @MainTransactional()
     main-database.module.ts       registers all repositories

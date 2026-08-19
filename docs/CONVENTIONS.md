@@ -475,8 +475,26 @@ safely, depends on the shape of the relationship:
 
 ## Database schema (drizzle entities)
 
-- All tables are defined in `src/database/main/main-entities.ts`, relations
-  in `main-relations.ts`.
+- Tables are defined per-domain in `src/database/main/entities/` (e.g.
+  `person.entities.ts` for person/employee/customer/personPhone,
+  `catalog-item.entities.ts`, `employee-service.entities.ts`,
+  `customer-followup.entities.ts`, `appointment.entities.ts`,
+  `anamnesis-field.entities.ts`, `customer-anamnesis.entities.ts`,
+  `sale.entities.ts`, `config.entities.ts`), plus `entities/base.ts` for the
+  shared helpers (`baseEntity`, `addAuthenticatedPolicy`,
+  `addDeletedAtPolicies`). `src/database/main/main-entities.ts` is a barrel
+  that re-exports every entity file and assembles the `mainEntities` object
+  drizzle-kit and the repositories consume — import from that barrel (or
+  `mainEntities`), not from an individual `entities/*.ts` file, so callers
+  don't need to know which domain file a table lives in. Relations are still
+  all defined in `main-relations.ts`, which imports the `mainEntities`
+  barrel.
+- A domain file may only import another domain file for a table it holds a
+  foreign key to (e.g. `sale.entities.ts` imports `customerEntity` from
+  `person.entities.ts`) — never the other way round for the same pair, or
+  it creates a circular import. Run `pnpm dlx madge --circular --extensions
+  ts src/app.module.ts` after adding a new cross-domain reference (see the
+  `madge` CI/CD TODO for making this an actual project check).
 - New tables should spread `...baseEntity('xyz')` (a 3–5 character id
   prefix) to get a prefixed-UUID `id`, `createdAt`/`updatedAt`/`deletedAt`,
   `createdBy`/`lastUpdatedBy` and `tenantId` — all auto-populated from the

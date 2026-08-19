@@ -64,20 +64,6 @@ item moves to `TODO_DONE.md`, and give any new item the next unused number
       "UseCase" services (one class per operation: create, addTransaction,
       refund, etc.), with `SaleService`/`SaleController` delegating to them,
       instead of one large service handling every route's rules.
-- [ ] **BE-6** `src/database/main/main-entities.ts` (602 lines) defines every table
-      across every domain in one file — split it into one file per domain
-      (person/employee/customer, catalog-item, appointment, sale, config,
-      etc.) inside `src/database/main/`. Two things to sort out before
-      doing this: (1) `docs/CONVENTIONS.md`'s **Database schema (drizzle
-      entities)** section says flatly "all tables are defined in
-      `main-entities.ts`" — update that doc to describe the new layout;
-      (2) cross-domain relations in `main-relations.ts` (e.g. sale →
-      appointment → employee) could introduce circular imports between the
-      new per-domain files — run the `madge --circular` check (see the
-      CI/CD item below) after splitting. Keep a barrel `main-entities.ts`
-      re-exporting everything so existing imports elsewhere don't need to
-      change.
-
 - [ ] **BE-7** `customer_followup`/`followup_item` (`database/main/main-entities.ts`)
       have a full DB schema — a follow-up is a dated note (`text`, `date`)
       tied to a customer, with `followupItem`s underneath (`description`,
