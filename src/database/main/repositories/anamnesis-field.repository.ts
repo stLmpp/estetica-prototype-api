@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { and, asc, eq, inArray, InferInsertModel } from 'drizzle-orm';
+import { asc, eq, inArray, InferInsertModel } from 'drizzle-orm';
 import { mainEntities } from '../main-entities';
 import { FilterAnamnesisFieldDto } from '../../../features/anamnesis-field/dto/input/list-anamnesis-field.request';
 import { Repository } from './repository';
@@ -79,23 +79,18 @@ export class AnamnesisFieldRepository extends Repository {
     anamnesisSectionId,
     active,
   }: FilterAnamnesisFieldDto) {
-    return this.db
-      .select()
-      .from(this.db.e.anamnesisField)
-      .where(
-        and(
-          eq(this.db.e.anamnesisField.anamnesisFormId, anamnesisFormId),
-          eq(
-            this.db.e.anamnesisField.anamnesisSectionId,
-            anamnesisSectionId!,
-          ).if(anamnesisSectionId),
-          eq(this.db.e.anamnesisField.active, active!).if(active !== undefined),
-        ),
-      )
-      .orderBy(
-        asc(this.db.e.anamnesisField.displayOrder),
-        asc(this.db.e.anamnesisField.id),
-      )
-      .execute();
+    return this.db.query.anamnesisField.findMany({
+      where: {
+        anamnesisFormId,
+        anamnesisSectionId,
+        active,
+      },
+      with: {
+        anamnesisFieldValidations: {
+          where: { active: true },
+        },
+      },
+      orderBy: (field) => [asc(field.displayOrder), asc(field.id)],
+    });
   }
 }

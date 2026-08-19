@@ -10,7 +10,10 @@ import { FilterAnamnesisFieldDto } from './dto/input/list-anamnesis-field.reques
 import { MainTransactional } from '../../database/main/main-database-connection';
 import { AnamnesisFieldExceptions } from './anamnesis-field-exceptions';
 import { AnamnesisFormService } from './anamnesis-form.service';
-import { AnamnesisFieldReadService } from './anamnesis-field-read.service';
+import {
+  AnamnesisFieldReadService,
+  mapAnamnesisFieldValidationEntityToDto,
+} from './anamnesis-field-read.service';
 import { type AnamnesisFieldValidationInput } from './model/anamnesis-field-validation.model';
 import { type AnamnesisFieldModel } from './model/anamnesis-field.model';
 
@@ -87,7 +90,12 @@ export class AnamnesisFieldService {
   async listByForm(dto: FilterAnamnesisFieldDto) {
     const anamnesisFields =
       await this.anamnesisFieldRepository.findByAnamnesisFormId(dto);
-    return anamnesisFields.map((entity) => this.mapEntityToDto(entity));
+    return anamnesisFields.map((entity) => ({
+      ...this.mapEntityToDto(entity),
+      validations: entity.anamnesisFieldValidations.map(
+        mapAnamnesisFieldValidationEntityToDto,
+      ),
+    }));
   }
 
   private async syncValidations(
