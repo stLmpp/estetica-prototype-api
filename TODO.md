@@ -184,6 +184,18 @@ item moves to `TODO_DONE.md`, and give any new item the next unused number
       speculatively; start once a concrete platform-admin endpoint is
       actually needed.
 
+- [ ] **BE-28** ESLint config (`eslint.config.mjs`) only has a handful of custom
+      rules on top of `@eslint/js` recommended + `typescript-eslint`
+      recommended-type-checked — no stricter code-style/consistency rules
+      (import ordering, naming conventions, member ordering, complexity
+      limits, etc.) beyond what's inherited. Decide and adopt a stricter
+      rule set once there's time to do it deliberately — exact scope TBD.
+      Paired with the frontend TODO of the same name
+      (`estetica-prototype-fe`'s `TODO.md`, FE-23) — worth deciding once
+      for rules that are language-agnostic (e.g. import ordering) and
+      applying consistently to both repos, though each stack (NestJS vs
+      Angular) will also need some rules of its own.
+
 ## CI/CD dependencies
 
 Items that need actual CI/CD infrastructure to exist before they can be
