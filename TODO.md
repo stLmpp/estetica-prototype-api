@@ -58,12 +58,6 @@ item moves to `TODO_DONE.md`, and give any new item the next unused number
       the status-code audit above is done, so the Swagger list matches
       whatever the final set of codes in active use turns out to be.
 
-- [ ] **BE-5** `src/features/sale/sale.service.ts` (467 lines) has accumulated too
-      much business logic in one place — most of it end-point-specific
-      rules rather than shared logic. Consider splitting into per-endpoint
-      "UseCase" services (one class per operation: create, addTransaction,
-      refund, etc.), with `SaleService`/`SaleController` delegating to them,
-      instead of one large service handling every route's rules.
 - [ ] **BE-7** `customer_followup`/`followup_item` (`database/main/main-entities.ts`)
       have a full DB schema — a follow-up is a dated note (`text`, `date`)
       tied to a customer, with `followupItem`s underneath (`description`,

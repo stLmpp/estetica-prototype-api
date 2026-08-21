@@ -144,6 +144,27 @@ outright.
       schema changes, nothing to migrate"). Updated **Database schema
       (drizzle entities)** in `docs/CONVENTIONS.md` and the project-layout
       snapshot in `AGENTS.md` to describe the new layout.
+- [x] **BE-5** (2026-08-21) `src/features/sale/sale.service.ts` (466 lines) had
+      accumulated too much endpoint-specific business logic in one place.
+      Split `create`/`addTransaction` — the two operations that actually
+      carried business rules — into their own `use-cases/` classes
+      (`CreateSaleUseCase`, `AddSaleTransactionUseCase`, each a single
+      `execute()` method carrying the `@MainTransactional()` boundary moved
+      from `SaleService`); `updateStatus`/`delete`/`listPaginated` stayed on
+      `SaleService` since they had no endpoint-specific rules to isolate.
+      Shared pure helpers (money math, transaction expansion/installments,
+      status derivation, entity→model mappers) moved to a new
+      `sale.util.ts` as plain exported functions — no DI needed, mirrors
+      `shared/utils/`. While scoping this, found `SaleService` was also the
+      one feature keeping its own `require`/`requireWithDetails` instead of
+      delegating to its `Read` service, unlike every other split feature
+      (`CustomerService`/`CustomerReadService`, etc.) — moved both onto
+      `SaleReadService` and updated `SaleController` to inject
+      `SaleReadService` directly for `getById`, matching the established
+      **Module structure** convention in `docs/CONVENTIONS.md`. Pure
+      structural move, no behavior change; verified with `pnpm exec tsc
+      --noEmit`, `pnpm build`, and `pnpm dlx madge --circular --extensions
+      ts src/app.module.ts` (still no circular imports).
 
 Remaining items live under **CI/CD dependencies** in `TODO.md`, parked until
 that infrastructure exists, plus whatever's currently in the main list

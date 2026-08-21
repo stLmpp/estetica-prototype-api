@@ -10,6 +10,7 @@ import {
 } from '@nestjs/common';
 import { RequireActiveOrg } from '@thallesp/nestjs-better-auth';
 import { SaleService } from './sale.service';
+import { SaleReadService } from './sale-read.service';
 import { CreateSaleRequest } from './dto/input/create-sale.request';
 import { CreateSaleResponseModel } from './dto/output/create-sale.response';
 import { AddSaleTransactionRequest } from './dto/input/add-sale-transaction.request';
@@ -27,7 +28,10 @@ import { HasPermission } from '../../core/auth/has-permission.decorator';
 })
 @RequireActiveOrg()
 export class SaleController {
-  constructor(private readonly saleService: SaleService) {}
+  constructor(
+    private readonly saleService: SaleService,
+    private readonly saleReadService: SaleReadService,
+  ) {}
 
   @ResponseType(CreateSaleResponseModel, 201)
   @Post()
@@ -103,7 +107,7 @@ export class SaleController {
   async getById(
     @Param('saleId') saleId: string,
   ): Promise<GetSaleResponseModel> {
-    const sale = await this.saleService.requireWithDetails(saleId);
+    const sale = await this.saleReadService.requireWithDetails(saleId);
     return { data: { sale } };
   }
 }

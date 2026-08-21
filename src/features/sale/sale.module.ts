@@ -4,8 +4,11 @@ import { CustomerReadModule } from '../customer/customer-read.module';
 import { EmployeeReadModule } from '../employee/employee-read.module';
 import { CatalogItemReadModule } from '../catalog-item/catalog-item-read.module';
 import { AppointmentReadModule } from '../appointment/appointment-read.module';
+import { SaleReadModule } from './sale-read.module';
 import { SaleController } from './sale.controller';
 import { SaleService } from './sale.service';
+import { CreateSaleUseCase } from './use-cases/create-sale.use-case';
+import { AddSaleTransactionUseCase } from './use-cases/add-sale-transaction.use-case';
 
 @Module({
   controllers: [SaleController],
@@ -15,7 +18,8 @@ import { SaleService } from './sale.service';
     EmployeeReadModule,
     CatalogItemReadModule,
     AppointmentReadModule,
+    SaleReadModule,
   ],
-  providers: [SaleService],
+  providers: [SaleService, CreateSaleUseCase, AddSaleTransactionUseCase],
 })
 export class SaleModule {}
