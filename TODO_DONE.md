@@ -144,6 +144,20 @@ outright.
       schema changes, nothing to migrate"). Updated **Database schema
       (drizzle entities)** in `docs/CONVENTIONS.md` and the project-layout
       snapshot in `AGENTS.md` to describe the new layout.
+- [x] **BE-7** (2026-08-21) `customer_followup`/`followup_item` (`database/main/main-entities.ts`)
+      have a full DB schema — a follow-up is a dated note (`text`, `date`)
+      tied to a customer, with `followupItem`s underneath (`description`,
+      `catalogItemId`, `priceApplied`, `quantity`, mirroring `sale_item`'s
+      shape) — but no backend feature module exists yet (no `src/features
+      /customer-followup` or similar; every other entity in
+      `main-entities.ts` has one). Build the `CustomerFollowup` feature
+      following the established pattern (module split into `Read`/full
+      per **Module structure** in `docs/CONVENTIONS.md`, DTOs, etc.) once
+      there's a concrete need — this looks aimed at post-procedure
+      follow-up tracking (e.g. "check healing in 2 weeks", with
+      recommended follow-up services/products priced in) but the actual
+      UX/workflow hasn't been designed, paired with the frontend TODO of
+      the same name.
 - [x] **BE-5** (2026-08-21) `src/features/sale/sale.service.ts` (466 lines) had
       accumulated too much endpoint-specific business logic in one place.
       Split `create`/`addTransaction` — the two operations that actually

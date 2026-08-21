@@ -58,20 +58,6 @@ item moves to `TODO_DONE.md`, and give any new item the next unused number
       the status-code audit above is done, so the Swagger list matches
       whatever the final set of codes in active use turns out to be.
 
-- [ ] **BE-7** `customer_followup`/`followup_item` (`database/main/main-entities.ts`)
-      have a full DB schema — a follow-up is a dated note (`text`, `date`)
-      tied to a customer, with `followupItem`s underneath (`description`,
-      `catalogItemId`, `priceApplied`, `quantity`, mirroring `sale_item`'s
-      shape) — but no backend feature module exists yet (no `src/features
-      /customer-followup` or similar; every other entity in
-      `main-entities.ts` has one). Build the `CustomerFollowup` feature
-      following the established pattern (module split into `Read`/full
-      per **Module structure** in `docs/CONVENTIONS.md`, DTOs, etc.) once
-      there's a concrete need — this looks aimed at post-procedure
-      follow-up tracking (e.g. "check healing in 2 weeks", with
-      recommended follow-up services/products priced in) but the actual
-      UX/workflow hasn't been designed, paired with the frontend TODO of
-      the same name.
 - [ ] **BE-8** `customer_followup`/`followup_item` (see the `CustomerFollowup`
       feature TODO above) needs before/after photo support — an employee
       should be able to attach and later view photos per follow-up. Photos
@@ -221,6 +207,21 @@ item moves to `TODO_DONE.md`, and give any new item the next unused number
       Needs deciding which routes this applies to (every mutating route by
       default vs. opt-in per-route via a decorator) and the exact window
       length before building either direction.
+
+- [ ] **BE-30** `CustomerFollowup` has no status (pending/done) and no
+      reminder/notification mechanism — `date` is just the date the note
+      was written, not a due date. Revisit once there's a concrete need;
+      see `docs/features/customer-followup/FUNCTIONAL.md`'s "Out of
+      scope" section.
+- [ ] **BE-31** Offer to create a `CustomerFollowup` immediately after an
+      appointment or a sale is marked completed, rather than only
+      supporting creation from the customer-followup tab directly.
+      Likely frontend-led (a prompt/shortcut in the appointment/sale
+      completion flow that pre-fills `appointmentId`/`saleId`) — no
+      backend change expected beyond what this feature already builds,
+      but confirm once the frontend side is designed. Paired with a
+      frontend TODO of the same name (`estetica-prototype-fe`'s
+      `TODO.md`).
 
 ## CI/CD dependencies
 
