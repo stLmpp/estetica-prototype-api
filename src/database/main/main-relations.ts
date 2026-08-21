@@ -63,6 +63,16 @@ export const mainRelations = defineRelations(mainEntities, (r) => ({
       to: r.customer.id,
       optional: false,
     }),
+    appointment: r.one.appointment({
+      from: r.customerFollowup.appointmentId,
+      to: r.appointment.id,
+      optional: true,
+    }),
+    sale: r.one.sale({
+      from: r.customerFollowup.saleId,
+      to: r.sale.id,
+      optional: true,
+    }),
     followupItems: r.many.followupItem(),
   },
 
@@ -75,7 +85,7 @@ export const mainRelations = defineRelations(mainEntities, (r) => ({
     catalogItem: r.one.catalogItem({
       from: r.followupItem.catalogItemId,
       to: r.catalogItem.id,
-      optional: false,
+      optional: true,
     }),
   },
 

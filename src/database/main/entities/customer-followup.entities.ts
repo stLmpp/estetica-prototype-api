@@ -15,6 +15,8 @@ import {
 } from './base';
 import { customerEntity } from './person.entities';
 import { catalogItemEntity } from './catalog-item.entities';
+import { appointmentEntity } from './appointment.entities';
+import { saleEntity } from './sale.entities';
 
 export const customerFollowupEntity = pgTable.withRLS(
   'customer_followup',
@@ -24,11 +26,21 @@ export const customerFollowupEntity = pgTable.withRLS(
     customerId: varchar('customer_id', { length: 38 })
       .notNull()
       .references(() => customerEntity.id),
+    appointmentId: varchar('appointment_id', { length: 38 }).references(
+      () => appointmentEntity.id,
+    ),
+    saleId: varchar('sale_id', { length: 38 }).references(() => saleEntity.id),
     date: timestamp('date').notNull(),
   },
   (t) => [
     index()
       .on(t.tenantId, t.customerId)
+      .where(sql`${t.isDeleted} = false`),
+    index()
+      .on(t.tenantId, t.appointmentId)
+      .where(sql`${t.isDeleted} = false`),
+    index()
+      .on(t.tenantId, t.saleId)
       .where(sql`${t.isDeleted} = false`),
     addAuthenticatedPolicy(t),
     ...addDeletedAtPolicies(t),
