@@ -9,6 +9,18 @@ the actual coding conventions it points to.
 
 - Constructor injection only, `private readonly` fields. No field injection,
   no service locators.
+- **Name variables, methods, and classes descriptively and objectively — no
+  acronyms, no single-letter identifiers.** A name should say what the value
+  *is* on its own, not force the reader to trace how it's used a few lines
+  down to figure that out.
+  ```ts
+  // Avoid — a/b say nothing; the reader has to trace the comparison itself
+  // to know these are dates.
+  dates.reduce((a, b) => (a < b ? a : b));
+
+  // Prefer — the name carries the meaning.
+  dates.reduce((earlierDate, laterDate) => (earlierDate < laterDate ? earlierDate : laterDate));
+  ```
 - Don't add speculative abstractions (a generic `BaseService`, repository
   interfaces/DI tokens beyond what already exists) — this codebase favors
   concrete classes until real repetition justifies an abstraction.
