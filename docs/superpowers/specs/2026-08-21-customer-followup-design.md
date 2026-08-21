@@ -57,8 +57,11 @@ New indexes to add alongside the columns (mirroring the existing
 ## API surface
 
 Flat top-level routes, filtered by a `customerId` query param on list —
-matches `customer-anamnesis`'s pattern, not nested under
-`/customer/:id/...`:
+matches `sale`/`appointment`'s pattern (`/sale`, `/appointment`), not
+nested under `/customer/:id/...` the way `customer-anamnesis` is
+(`/customer/:customerId/anamnesis`) — `followup_item` is structurally
+closest to `sale_item`, and the optional `appointmentId`/`saleId`
+cross-references read more naturally as a flat resource:
 
 ```
 POST   /customer-followup            create
