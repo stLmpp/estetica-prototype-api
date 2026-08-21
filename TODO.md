@@ -190,6 +190,38 @@ item moves to `TODO_DONE.md`, and give any new item the next unused number
       applying consistently to both repos, though each stack (NestJS vs
       Angular) will also need some rules of its own.
 
+- [ ] **BE-29** No protection against duplicate mutating requests (double-submit,
+      accidental client retry, a flaky connection resending the same
+      `POST`/`PATCH`/`DELETE` a moment later) — every request is processed
+      independently, so the exact same create/update can be executed twice.
+      `ThrottlerModule.forRootAsync` (`app.module.ts`, backed by Redis via
+      `RedisThrottlerStorage`) caps *volume* per key/window (see BE-3, key
+      still undecided) — that's a different concern from detecting the
+      *exact same* request repeated within a short window and short-
+      circuiting the second one. No interceptor/guard for this exists yet
+      (`src/core/interceptor/` currently has `logging`, `timeout`, and the
+      zod serializer only); the existing `Redis` client
+      (`src/core/redis/`, already used for the throttler's storage and
+      better-auth's secondary storage) is the natural place to hold a
+      short-TTL lock/fingerprint. Two directions, needs a decision:
+      - **Client-supplied idempotency key** — caller sends an
+        `Idempotency-Key` header (or similar) generated once per logical
+        action; the server stores `(tenantId, userId, key) -> response`
+        for a short TTL and replays the stored response instead of
+        re-executing on a repeat. Requires frontend cooperation — pair
+        with the frontend TODO of the same name
+        (`estetica-prototype-fe`'s `TODO.md`) if this direction is chosen.
+      - **Server-side fingerprint** — hash `(tenantId, userId, method,
+        path, body)` and reject/short-circuit an identical request seen
+        again within a short window (low hundreds of ms to a couple of
+        seconds), no client changes needed. Risks false positives on
+        legitimately-repeated actions (e.g. deliberately creating two
+        identical catalog items back to back) unless the window is kept
+        tight and scoped carefully.
+      Needs deciding which routes this applies to (every mutating route by
+      default vs. opt-in per-route via a decorator) and the exact window
+      length before building either direction.
+
 ## CI/CD dependencies
 
 Items that need actual CI/CD infrastructure to exist before they can be
