@@ -38,6 +38,7 @@ import { EmployeeModule } from './features/employee/employee.module';
 import { EmployeeServiceModule } from './features/employee-service/employee-service.module';
 import { AppointmentModule } from './features/appointment/appointment.module';
 import { SaleModule } from './features/sale/sale.module';
+import { CustomerFollowupModule } from './features/customer-followup/customer-followup.module';
 import { AuthGuard } from './core/auth/auth.guard';
 import { HasPermissionGuard } from './core/auth/has-permission.guard';
 import { RedisModule } from './core/redis/redis.module';
@@ -112,6 +113,7 @@ if (appEnv.environment === Environment.Production) {
     EmployeeServiceModule,
     AppointmentModule,
     SaleModule,
+    CustomerFollowupModule,
   ],
   providers: [
     ErrorAfterHook,
