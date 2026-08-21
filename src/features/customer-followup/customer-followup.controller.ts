@@ -1,10 +1,19 @@
-import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Patch,
+  Post,
+  Query,
+} from '@nestjs/common';
 import { RequireActiveOrg } from '@thallesp/nestjs-better-auth';
 import { CustomerFollowupService } from './customer-followup.service';
 import { CustomerFollowupReadService } from './customer-followup-read.service';
 import { CreateCustomerFollowupRequest } from './dto/input/create-customer-followup.request';
 import { CreateCustomerFollowupResponseModel } from './dto/output/create-customer-followup.response';
 import { FilterCustomerFollowupDto } from './dto/input/list-customer-followup.request';
+import { UpdateCustomerFollowupRequest } from './dto/input/update-customer-followup.request';
 import { ListCustomerFollowupResponseModel } from './dto/output/list-customer-followup.response';
 import { GetCustomerFollowupResponseModel } from './dto/output/get-customer-followup.response';
 import { ResponseType } from '../../shared/decorator/response-type.decorator';
@@ -58,5 +67,17 @@ export class CustomerFollowupController {
         customerFollowupId,
       );
     return { data: { customerFollowup } };
+  }
+
+  @Patch(':customerFollowupId')
+  @HasPermission({ orgPermissions: { customerFollowup: ['update'] } })
+  async update(
+    @Param('customerFollowupId') customerFollowupId: string,
+    @Body() body: UpdateCustomerFollowupRequest,
+  ): Promise<void> {
+    await this.customerFollowupService.update(
+      customerFollowupId,
+      body.customerFollowup,
+    );
   }
 }

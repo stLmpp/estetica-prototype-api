@@ -6,8 +6,10 @@ import { SaleReadService } from '../sale/sale-read.service';
 import { CatalogItemReadService } from '../catalog-item/catalog-item-read.service';
 import { MainTransactional } from '../../database/main/main-database-connection';
 import { CustomerFollowupExceptions } from './customer-followup-exceptions';
+import { CustomerFollowupReadService } from './customer-followup-read.service';
 import { type CreateCustomerFollowupDto } from './dto/input/create-customer-followup.request';
 import { type FilterCustomerFollowupDto } from './dto/input/list-customer-followup.request';
+import { type UpdateCustomerFollowupDto } from './dto/input/update-customer-followup.request';
 import { type CustomerFollowupResDto } from './dto/output/create-customer-followup.response';
 import { type CustomerFollowupItemInput } from './model/customer-followup.model';
 
@@ -19,6 +21,7 @@ export class CustomerFollowupService {
     private readonly appointmentReadService: AppointmentReadService,
     private readonly saleReadService: SaleReadService,
     private readonly catalogItemReadService: CatalogItemReadService,
+    private readonly customerFollowupReadService: CustomerFollowupReadService,
   ) {}
 
   @MainTransactional()
@@ -88,6 +91,59 @@ export class CustomerFollowupService {
       })),
       count,
     };
+  }
+
+  @MainTransactional()
+  async update(id: string, dto: UpdateCustomerFollowupDto): Promise<void> {
+    const record = await this.customerFollowupReadService.require(id);
+
+    const resolvedAppointmentId =
+      dto.appointmentId !== undefined
+        ? (dto.appointmentId ?? undefined)
+        : (record.appointmentId ?? undefined);
+    const resolvedSaleId =
+      dto.saleId !== undefined
+        ? (dto.saleId ?? undefined)
+        : (record.saleId ?? undefined);
+    await this.assertLinksValid(
+      record.customerId,
+      resolvedAppointmentId,
+      resolvedSaleId,
+    );
+
+    const patch: {
+      text?: string;
+      date?: Date;
+      appointmentId?: string | null;
+      saleId?: string | null;
+    } = {};
+    if (dto.text !== undefined) {
+      patch.text = dto.text;
+    }
+    if (dto.date !== undefined) {
+      patch.date = dto.date;
+    }
+    if (dto.appointmentId !== undefined) {
+      patch.appointmentId = dto.appointmentId;
+    }
+    if (dto.saleId !== undefined) {
+      patch.saleId = dto.saleId;
+    }
+    await this.customerFollowupRepository.update(id, patch);
+
+    if (dto.items !== undefined) {
+      const resolvedItems = await this.resolveItems(dto.items);
+      await this.customerFollowupRepository.deleteAllItemsByFollowupId(id);
+      await this.customerFollowupRepository.insertItems(
+        id,
+        resolvedItems.map((item) => ({
+          description: item.description,
+          catalogItemId: item.catalogItemId,
+          quantity: item.quantity,
+          priceApplied: item.priceApplied,
+        })),
+      );
+    }
   }
 
   private async assertLinksValid(
