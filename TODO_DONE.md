@@ -179,6 +179,26 @@ outright.
       structural move, no behavior change; verified with `pnpm exec tsc
       --noEmit`, `pnpm build`, and `pnpm dlx madge --circular --extensions
       ts src/app.module.ts` (still no circular imports).
+- [x] **BE-11** (2026-08-21) Added proper date-range validation for `DATE`
+      anamnesis fields instead of the previous gap (`MIN_VALUE`/`MAX_VALUE`
+      only work on `NUMBER`, via `Number(value)`). Six new
+      `AnamnesisFieldValidationType` values
+      (`src/shared/domain/anamnesis-field-validation.enum.ts`): `MIN_DATE`/
+      `MAX_DATE` (fixed bound, `{ date: string }` arg validated as
+      `z.iso.date()` in `anamnesis-field-validation.model.ts`) and
+      `DATE_IN_FUTURE`/`DATE_IN_PAST`/`DATE_TODAY_OR_LATER`/
+      `DATE_TODAY_OR_EARLIER` (relative-to-today, argless — went with
+      dedicated enum values over an `inclusive` flag to keep args simple
+      and match the argless `REQUIRED` precedent). All six compare the
+      answer as an ISO `YYYY-MM-DD` string rather than parsing dates,
+      consistent with how the value is stored; "today" is computed via
+      `dayjs().format('YYYY-MM-DD')` (server clock, UTC) at validation time
+      in `CustomerAnamnesisService.checkRule`
+      (`src/features/customer-anamnesis/customer-anamnesis.service.ts`).
+      Postgres enum migrated via `migrations/main/20260821200744_dark_banshee`
+      (pure `ALTER TYPE ... ADD VALUE`, no data changes). Updated the
+      field-type/validation-type compatibility table in
+      `docs/features/anamnesis-field/FUNCTIONAL.md`.
 
 Remaining items live under **CI/CD dependencies** in `TODO.md`, parked until
 that infrastructure exists, plus whatever's currently in the main list

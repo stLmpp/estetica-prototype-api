@@ -22,7 +22,8 @@ to do in place.
   `DATE`, `BOOLEAN` (single yes/no), `CHECKBOX` (multi-select checklist),
   `RADIO` (single choice, buttons), `SELECT` (single choice, dropdown).
 - **Validation rule** — one constraint attached to a field (required,
-  min/max length, min/max value, or a regex pattern). A field can have
+  min/max length, min/max value, a regex pattern, or a date bound/relative-
+  to-today check). A field can have
   several active rules at once.
 
 ## Business rules
@@ -42,15 +43,22 @@ to do in place.
   |--------------------|---------------------------------------------------|
   | `TEXT`             | `REQUIRED`, `MIN_LENGTH`, `MAX_LENGTH`, `PATTERN` |
   | `NUMBER`           | `REQUIRED`, `MIN_VALUE`, `MAX_VALUE`              |
-  | `DATE`             | `REQUIRED`                                        |
+  | `DATE`             | `REQUIRED`, `MIN_DATE`, `MAX_DATE`, `DATE_IN_FUTURE`, `DATE_IN_PAST`, `DATE_TODAY_OR_LATER`, `DATE_TODAY_OR_EARLIER` |
   | `BOOLEAN`          | `REQUIRED`                                        |
   | `RADIO` / `SELECT` | `REQUIRED`                                        |
   | `CHECKBOX`         | `REQUIRED`                                        |
 
-  `DATE` has no range validation yet — `MIN_VALUE`/`MAX_VALUE` compare
-  `Number(value)`, which doesn't apply to a date string. A date range needs
-  its own validation types (e.g. `MIN_DATE`/`MAX_DATE` with a date-typed
-  arg), not a reuse of the numeric ones. See `TODO.md`.
+  `DATE` has two shapes of range validation, both compared against the
+  answer as an ISO (`YYYY-MM-DD`) string rather than `Number(value)` (which
+  `MIN_VALUE`/`MAX_VALUE` use and doesn't apply to a date):
+  - **Fixed bounds** — `MIN_DATE`/`MAX_DATE`, each with a `{ date: string }`
+    arg (also ISO `YYYY-MM-DD`) compared directly against the answer, e.g.
+    a hard cutoff birth date.
+  - **Relative to today** — `DATE_IN_FUTURE`, `DATE_IN_PAST`,
+    `DATE_TODAY_OR_LATER`, `DATE_TODAY_OR_EARLIER`. No args; evaluated
+    against the current date (server clock, UTC) at validation time rather
+    than a stored value — e.g. "birth date must be in the past" or
+    "appointment date must not be in the past".
 
 - **Forms, sections, and fields are edited in place** — a `PATCH` updates
   the row directly, no new id, no history kept here. This is safe because

@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import dayjs from 'dayjs';
 import { CustomerAnamnesisRepository } from '../../database/main/repositories/customer-anamnesis.repository';
 import { CustomerAnamnesisFieldRepository } from '../../database/main/repositories/customer-anamnesis-field.repository';
 import { CustomerReadService } from '../customer/customer-read.service';
@@ -355,10 +356,46 @@ export class CustomerAnamnesisService {
           ? `does not match the required pattern`
           : null;
       }
+      case AnamnesisFieldValidationType.MIN_DATE: {
+        const date = (rule.validationArgs as { date: string } | null)?.date;
+        return date && answer.value !== '' && answer.value < date
+          ? `must be on or after ${date}`
+          : null;
+      }
+      case AnamnesisFieldValidationType.MAX_DATE: {
+        const date = (rule.validationArgs as { date: string } | null)?.date;
+        return date && answer.value !== '' && answer.value > date
+          ? `must be on or before ${date}`
+          : null;
+      }
+      case AnamnesisFieldValidationType.DATE_IN_FUTURE: {
+        return answer.value !== '' && answer.value <= this.getTodayIsoDate()
+          ? 'must be in the future'
+          : null;
+      }
+      case AnamnesisFieldValidationType.DATE_IN_PAST: {
+        return answer.value !== '' && answer.value >= this.getTodayIsoDate()
+          ? 'must be in the past'
+          : null;
+      }
+      case AnamnesisFieldValidationType.DATE_TODAY_OR_LATER: {
+        return answer.value !== '' && answer.value < this.getTodayIsoDate()
+          ? 'must be today or later'
+          : null;
+      }
+      case AnamnesisFieldValidationType.DATE_TODAY_OR_EARLIER: {
+        return answer.value !== '' && answer.value > this.getTodayIsoDate()
+          ? 'must be today or earlier'
+          : null;
+      }
       default: {
         return null;
       }
     }
+  }
+
+  private getTodayIsoDate(): string {
+    return dayjs().format('YYYY-MM-DD');
   }
 
   private mapEntityToDto(
