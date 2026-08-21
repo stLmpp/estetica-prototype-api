@@ -7,6 +7,7 @@ import { CatalogItemReadService } from '../catalog-item/catalog-item-read.servic
 import { MainTransactional } from '../../database/main/main-database-connection';
 import { CustomerFollowupExceptions } from './customer-followup-exceptions';
 import { type CreateCustomerFollowupDto } from './dto/input/create-customer-followup.request';
+import { type FilterCustomerFollowupDto } from './dto/input/list-customer-followup.request';
 import { type CustomerFollowupResDto } from './dto/output/create-customer-followup.response';
 import { type CustomerFollowupItemInput } from './model/customer-followup.model';
 
@@ -69,6 +70,23 @@ export class CustomerFollowupService {
         quantity: item.quantity,
         priceApplied: item.priceApplied,
       })),
+    };
+  }
+
+  @MainTransactional()
+  async listPaginated(dto: FilterCustomerFollowupDto) {
+    const { customerFollowups, count } =
+      await this.customerFollowupRepository.findPaginated(dto.customerId, dto);
+    return {
+      items: customerFollowups.map((record) => ({
+        id: record.id,
+        customerId: record.customerId,
+        text: record.text,
+        date: record.date,
+        appointmentId: record.appointmentId ?? undefined,
+        saleId: record.saleId ?? undefined,
+      })),
+      count,
     };
   }
 
