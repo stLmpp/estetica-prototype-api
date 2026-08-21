@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   Patch,
@@ -79,5 +80,13 @@ export class CustomerFollowupController {
       customerFollowupId,
       body.customerFollowup,
     );
+  }
+
+  @Delete(':customerFollowupId')
+  @HasPermission({ orgPermissions: { customerFollowup: ['delete'] } })
+  async delete(
+    @Param('customerFollowupId') customerFollowupId: string,
+  ): Promise<void> {
+    await this.customerFollowupService.delete(customerFollowupId);
   }
 }

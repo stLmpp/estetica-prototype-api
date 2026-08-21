@@ -146,6 +146,12 @@ export class CustomerFollowupService {
     }
   }
 
+  @MainTransactional()
+  async delete(id: string): Promise<void> {
+    await this.customerFollowupReadService.require(id);
+    await this.customerFollowupRepository.delete(id);
+  }
+
   private async assertLinksValid(
     customerId: string,
     appointmentId: string | undefined,
