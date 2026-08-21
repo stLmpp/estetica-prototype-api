@@ -105,11 +105,13 @@ export class CustomerFollowupService {
       dto.saleId !== undefined
         ? (dto.saleId ?? undefined)
         : (record.saleId ?? undefined);
-    await this.assertLinksValid(
-      record.customerId,
-      resolvedAppointmentId,
-      resolvedSaleId,
-    );
+    if (dto.appointmentId !== undefined || dto.saleId !== undefined) {
+      await this.assertLinksValid(
+        record.customerId,
+        resolvedAppointmentId,
+        resolvedSaleId,
+      );
+    }
 
     const patch: {
       text?: string;

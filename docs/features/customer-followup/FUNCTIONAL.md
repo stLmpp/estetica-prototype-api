@@ -74,8 +74,9 @@ None — a follow-up has no status/state machine in this version.
 - **Delete is soft**
   - Given an existing follow-up
   - When it's deleted
-  - Then it and its items are marked deleted and no longer returned by
-    `GET`, but the rows still exist
+  - Then it is marked deleted and no longer returned by `GET`; its items
+    remain in the database but are only reachable through the parent, so
+    they become unreachable too
 
 ## Out of scope
 

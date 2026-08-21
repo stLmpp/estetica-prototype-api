@@ -58,8 +58,9 @@ item moves to `TODO_DONE.md`, and give any new item the next unused number
       the status-code audit above is done, so the Swagger list matches
       whatever the final set of codes in active use turns out to be.
 
-- [ ] **BE-8** `customer_followup`/`followup_item` (see the `CustomerFollowup`
-      feature TODO above) needs before/after photo support — an employee
+- [ ] **BE-8** `customer_followup`/`followup_item` (see BE-7 in
+      `TODO_DONE.md` and `docs/features/customer-followup/`) needs
+      before/after photo support — an employee
       should be able to attach and later view photos per follow-up. Photos
       shouldn't live in Postgres or on the API's own disk; needs an
       external object storage bucket (S3-compatible — AWS S3, Cloudflare
