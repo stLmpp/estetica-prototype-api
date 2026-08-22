@@ -200,6 +200,13 @@ item moves to `TODO_DONE.md`, and give any new item the next unused number
       but confirm once the frontend side is designed. Paired with a
       frontend TODO of the same name (`estetica-prototype-fe`'s
       `TODO.md`).
+- [ ] **BE-32** `GET /v1/customer-followup`'s list rows have no items/total —
+      only the detail endpoint (`GET /v1/customer-followup/:id`) returns
+      `items`. The frontend's follow-up list can't show an item count/total
+      per row without an N+1 fetch (see `FE-26` in
+      `estetica-prototype-fe`'s `TODO.md`). Revisit whether a cheap
+      items-count/total is worth adding to the list row if this becomes a
+      real usability gap in practice; low priority.
 
 ## CI/CD dependencies
 
