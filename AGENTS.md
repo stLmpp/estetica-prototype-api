@@ -117,3 +117,7 @@ test/                     e2e tests (jest-e2e.json)
   doc update.
 - **When a `TODO.md` item is done, move it to `TODO_DONE.md` — do not delete
   it outright.** Same rule on the frontend's `TODO.md`/`TODO_DONE.md`.
+- **Never commit directly to `main`.** Every change, however small, happens
+  on a new branch or worktree cut from an up-to-date `main` and ends as a PR
+  for the user to review — never push straight to `main`. Same rule on the
+  frontend repo.
